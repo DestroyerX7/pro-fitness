@@ -1,3 +1,4 @@
+import { colors } from "@/lib/colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -29,70 +30,98 @@ export default function Index() {
 
   const loggedCalories = calorieLogs.reduce((a, b) => a + b.calories, 0);
 
+  const loggedWorkoutTime = 30;
+
   return (
-    <SafeAreaView style={{ padding: 16 }}>
-      <View>
-        <Text>Today's Calories</Text>
+    <SafeAreaView className="p-4 gap-4">
+      <Text className="text-4xl font-bold text-foreground">Home</Text>
 
-        <Text>{loggedCalories} / 2600</Text>
+      <View className="bg-white p-4 border rounded-xl border-border gap-4">
+        <Text className="text-2xl font-bold text-foreground">
+          Today's Calories
+        </Text>
 
-        <View style={{ height: 32, backgroundColor: "lightgray" }}>
+        <Text className="text-foreground">
+          <Text className="text-4xl font-bold">{loggedCalories}</Text> / 2600
+        </Text>
+
+        <View className="h-8 bg-secondary rounded-full">
           <View
+            className="h-full bg-[#30d030] rounded-full"
             style={{
-              height: "100%",
-              backgroundColor: "forestgreen",
               width: `${(loggedCalories / 2600) * 100}%`,
             }}
           />
         </View>
 
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text>{2600 - loggedCalories} calories remaining</Text>
+        <View className="flex-row justify-between">
+          <Text className="text-secondaryForeground">
+            {2600 - loggedCalories} calories remaining
+          </Text>
 
-          <Text>{((loggedCalories / 2600) * 100).toFixed(2)}%</Text>
+          <Text className="text-secondaryForeground">
+            {((loggedCalories / 2600) * 100).toFixed(2)}%
+          </Text>
+        </View>
+      </View>
+
+      <View className="bg-white p-4 border rounded-xl border-border gap-4">
+        <Text className="text-2xl font-bold text-foreground">Workout Time</Text>
+
+        <Text className="text-foreground">
+          <Text className="text-4xl font-bold">{loggedWorkoutTime}</Text> / 90
+        </Text>
+
+        <View className="h-8 bg-secondary rounded-full">
+          <View
+            className="h-full bg-primary rounded-full"
+            style={{
+              width: `${(loggedWorkoutTime / 90) * 100}%`,
+            }}
+          />
+        </View>
+
+        <View className="flex-row justify-between">
+          <Text className="text-secondaryForeground">
+            {90 - loggedWorkoutTime} mins remaining
+          </Text>
+
+          <Text className="text-secondaryForeground">
+            {((loggedWorkoutTime / 90) * 100).toFixed(2)}%
+          </Text>
         </View>
       </View>
 
       {calorieLogs.map(({ id, imageUrl, name, calories }) => (
         <View
-          style={{
-            flexDirection: "row",
-            gap: 16,
-            borderWidth: 1,
-            borderRadius: 16,
-            padding: 16,
-            backgroundColor: "white",
-            borderColor: "lightgray",
-          }}
+          className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
           key={id}
         >
           {imageUrl !== null ? (
             <Image
-              style={{ width: 48, height: 48, borderRadius: 8 }}
+              className="w-16 h-16 rounded-md"
               source={{ uri: imageUrl }}
             />
           ) : (
-            <View
-              style={{
-                width: 48,
-                height: 48,
-                borderWidth: 1,
-                borderRadius: 8,
-                borderColor: "lightgray",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <MaterialCommunityIcons name="food" size={32} />
+            <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
+              <MaterialCommunityIcons
+                name="food"
+                size={32}
+                color={colors.foreground}
+              />
             </View>
           )}
 
-          <View style={{ flex: 1, gap: 8 }}>
-            <Text style={{ fontSize: 16, fontWeight: "700" }}>{name}</Text>
-            <Text style={{ color: "gray" }}>{calories}</Text>
+          <View className="flex-1 gap-2">
+            <Text className="text-lg font-bold text-foreground">{name}</Text>
+            <Text className="text-secondaryForeground">{calories}</Text>
           </View>
 
-          <Ionicons name="ellipsis-horizontal" size={24} color="black" />
+          <Ionicons
+            name="ellipsis-horizontal"
+            size={24}
+            color={colors.foreground}
+          />
         </View>
       ))}
     </SafeAreaView>
