@@ -13,6 +13,13 @@ export default function Calories() {
   const [image, setImage] = useState<string | null>(null);
 
   const logCalories = async () => {
+    const trimmedName = name.trim();
+    const caloriesNum = Number(calories);
+
+    if (trimmedName.length < 1 || caloriesNum < 1) {
+      return;
+    }
+
     let imageUrl = null;
 
     if (image !== null) {
@@ -33,8 +40,8 @@ export default function Calories() {
 
     await axios.post("http://10.0.0.53:8081/api/log-calories", {
       userId: "htsrttp8sXmTrqo89LzklkHgOFtxXiSY",
-      name,
-      calories: Number(calories),
+      name: trimmedName,
+      calories: caloriesNum,
       imageUrl,
     });
 

@@ -33,7 +33,7 @@ export default function Layout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Home",
+          title: "Profile",
           tabBarIcon: ({ size, color }) => (
             <Ionicons name="person-circle" size={size} color={color} />
           ),

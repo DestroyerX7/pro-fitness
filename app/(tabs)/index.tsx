@@ -38,9 +38,18 @@ type CalorieLog = {
   imageUrl: string | null;
 };
 
+type WorkoutLog = {
+  id: string;
+  name: string;
+  duration: number;
+  date: string;
+  iconName: string;
+};
+
 export default function Index() {
   const [user, setUser] = useState<User | null>(null);
   const [calorieLogs, setCalorieLogs] = useState<CalorieLog[]>([]);
+  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
   const [editingCalorieLog, setEditingCalorieLog] = useState<CalorieLog | null>(
     null
   );
@@ -67,8 +76,22 @@ export default function Index() {
       );
     };
 
+    const getWorkoutLogs = async () => {
+      const response: { data: { workoutLogs: WorkoutLog[] } } = await axios.get(
+        "http://10.0.0.53:8081/api/get-workout-logs/htsrttp8sXmTrqo89LzklkHgOFtxXiSY"
+      );
+
+      setWorkoutLogs(
+        response.data.workoutLogs /*.filter(
+          (log) =>
+            new Date(log.date).toDateString() === new Date().toDateString()
+        )*/
+      );
+    };
+
     getUser();
     getCalorieLogs();
+    getWorkoutLogs();
   }, []);
 
   const editCalorieLog = async (calorieLog: CalorieLog) => {
@@ -112,7 +135,7 @@ export default function Index() {
   }
 
   const loggedCalories = calorieLogs.reduce((a, b) => a + b.calories, 0);
-  const loggedWorkoutTime = 30;
+  const loggedWorkoutTime = workoutLogs.reduce((a, b) => a + b.duration, 0);
 
   return (
     <SafeAreaView className="p-4 gap-4">
@@ -175,16 +198,19 @@ export default function Index() {
                 <Pressable
                   onPress={async () => {
                     Alert.prompt(
-                      "Set calorie goal",
-                      "",
+                      "Edit calorie goal",
+                      "Update your daily calorie goal",
                       async (text) => {
-                        const response = await axios.patch(
-                          "http://10.0.0.53:8081/api/update-daily-calorie-goal",
-                          {
-                            userId: user.id,
-                            dailyCalorieGoal: Number(text),
-                          }
-                        );
+                        const response: { data: { user: User } } =
+                          await axios.patch(
+                            "http://10.0.0.53:8081/api/update-daily-calorie-goal",
+                            {
+                              userId: user.id,
+                              dailyCalorieGoal: Number(text),
+                            }
+                          );
+
+                        setUser(response.data.user);
                       },
                       "plain-text",
                       user.dailyCalorieGoal.toString(),
@@ -203,7 +229,7 @@ export default function Index() {
               </View>
 
               <Text className="text-foreground">
-                <Text className="text-4xl font-bold">{loggedCalories}</Text> /
+                <Text className="text-4xl font-bold">{loggedCalories}</Text> /{" "}
                 {user.dailyCalorieGoal}
               </Text>
 

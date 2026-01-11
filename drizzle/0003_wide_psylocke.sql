@@ -1,0 +1,1 @@
+ALTER TABLE "workout_log" ADD COLUMN "icon_library" text NOT NULL;

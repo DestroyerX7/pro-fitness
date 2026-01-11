@@ -132,6 +132,7 @@ export const workoutLog = pgTable(
     name: text("name").notNull(),
     duration: integer("duration").notNull(),
     date: date("date").defaultNow().notNull(),
+    iconLibrary: text("icon_library").notNull(),
     iconName: text("icon_name").notNull(),
     userId: text("user_id")
       .notNull()

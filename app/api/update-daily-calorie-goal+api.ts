@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 export async function PATCH(request: Request) {
   const { userId, dailyCalorieGoal } = await request.json();
 
-  const updatedUser = await db
+  const [updatedUser] = await db
     .update(user)
     .set({ dailyCalorieGoal })
     .where(eq(user.id, userId))
