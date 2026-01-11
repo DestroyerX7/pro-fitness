@@ -1,9 +1,11 @@
+import { colors } from "@/lib/colors";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
-import { Button, Image, Pressable, Text, TextInput, View } from "react-native";
+import { Image, Pressable, Text, TextInput, View } from "react-native";
 
 export default function Calories() {
   const [name, setName] = useState("");
@@ -60,33 +62,57 @@ export default function Calories() {
   };
 
   return (
-    <View style={{ padding: 16 }}>
+    <View className="p-4 gap-4">
       <TextInput
+        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
         placeholder="Name"
-        placeholderTextColor="gray"
         value={name}
         onChangeText={(text) => setName(text)}
       />
 
       <TextInput
+        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
         placeholder="Calories"
-        placeholderTextColor="gray"
         value={calories}
         onChangeText={(text) => setCalories(text)}
       />
 
-      <Button title="Log Calories" onPress={logCalories} />
+      <TextInput
+        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+        placeholder="Date"
+        value={new Date().toLocaleDateString()}
+      />
 
-      <Pressable onPress={takePicture}>
-        <Text>Take Picture</Text>
+      <Pressable className="w-full aspect-square" onPress={takePicture}>
+        {image !== null ? (
+          <Image
+            source={{ uri: image }}
+            style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
+          />
+        ) : (
+          <View className="border border-border rounded-lg h-full items-center justify-center">
+            <MaterialCommunityIcons
+              name="camera"
+              size={128}
+              color={colors.secondaryForeground}
+            />
+
+            <Text className="text-2xl font-bold text-foregrounds">
+              No picture taken
+            </Text>
+
+            <Text className="text-secondaryForeground">
+              Tap to take a picture
+            </Text>
+          </View>
+        )}
       </Pressable>
 
-      {image !== null && (
-        <Image
-          source={{ uri: image }}
-          style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
-        />
-      )}
+      <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
+        <Text className="text-primaryForeground text-center text-lg font-bold">
+          Log Calories
+        </Text>
+      </Pressable>
     </View>
   );
 }

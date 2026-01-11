@@ -3,9 +3,9 @@ import { Stack } from "expo-router";
 export default function Layout() {
   return (
     <Stack screenOptions={{ headerBackButtonDisplayMode: "minimal" }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="calories" />
-      <Stack.Screen name="workout" />
+      <Stack.Screen name="index" options={{ title: "Log Item" }} />
+      <Stack.Screen name="calories" options={{ title: "Log Calories" }} />
+      <Stack.Screen name="workout" options={{ title: "Log Workout" }} />
     </Stack>
   );
 }
