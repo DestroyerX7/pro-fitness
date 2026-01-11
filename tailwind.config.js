@@ -18,6 +18,7 @@ module.exports = {
         foreground: "#333333",
         background: "#ffffff",
         input: "#e5e7eb",
+        destructive: "#ef4444",
       },
     },
   },
