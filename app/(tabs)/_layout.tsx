@@ -1,8 +1,22 @@
+import { useYo } from "@/components/AuthProvider";
 import { colors } from "@/lib/colors";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
+import { Text } from "react-native";
 
 export default function Layout() {
+  const { data, isPending } = useYo();
+
+  if (isPending) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (!data?.session) {
+    // On web, static rendering will stop here as the user is not authenticated
+    // in the headless Node process that the pages are rendered in.
+    return <Redirect href="/(auth)/sign-up" />;
+  }
+
   return (
     <Tabs
       screenOptions={{

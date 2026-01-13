@@ -1,16 +1,20 @@
+import { AuthContext } from "@/components/AuthProvider";
+import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Image, Pressable, Text, TextInput, View } from "react-native";
 
 export default function Calories() {
   const [name, setName] = useState("");
   const [calories, setCalories] = useState("");
   const [image, setImage] = useState<string | null>(null);
+
+  const { data } = useContext(AuthContext);
 
   const logCalories = async () => {
     const trimmedName = name.trim();
@@ -28,18 +32,15 @@ export default function Calories() {
       });
       const fileData = `data:image/jpeg;base64,${base64}`;
 
-      const response = await axios.post(
-        "http://10.0.0.53:8081/api/upload-image",
-        {
-          file: fileData,
-        }
-      );
+      const response = await axios.post(`${baseUrl}/api/upload-image`, {
+        file: fileData,
+      });
 
       imageUrl = response.data.url;
     }
 
-    await axios.post("http://10.0.0.53:8081/api/log-calories", {
-      userId: "htsrttp8sXmTrqo89LzklkHgOFtxXiSY",
+    await axios.post(`${baseUrl}/api/log-calories`, {
+      userId: data?.user.id,
       name: trimmedName,
       calories: caloriesNum,
       imageUrl,

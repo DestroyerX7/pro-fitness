@@ -1,30 +1,30 @@
+import { AuthContext } from "@/components/AuthProvider";
+import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
-import {
-  Ionicons,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
-type Icon =
+export type Icon =
   | { library: "MaterialIcons"; name: keyof typeof MaterialIcons.glyphMap }
   | {
       library: "MaterialCommunityIcons";
       name: keyof typeof MaterialCommunityIcons.glyphMap;
-    }
-  | { library: "Ionicons"; name: keyof typeof Ionicons.glyphMap };
+    };
 
 const icons: Icon[] = [
   { library: "MaterialCommunityIcons", name: "run" },
+  { library: "MaterialCommunityIcons", name: "dumbbell" },
   { library: "MaterialCommunityIcons", name: "weight-lifter" },
+  { library: "MaterialCommunityIcons", name: "arm-flex" },
   { library: "MaterialCommunityIcons", name: "bike" },
   { library: "MaterialCommunityIcons", name: "swim" },
   { library: "MaterialCommunityIcons", name: "gymnastics" },
   { library: "MaterialCommunityIcons", name: "football" },
   { library: "MaterialCommunityIcons", name: "soccer" },
+  { library: "MaterialCommunityIcons", name: "basketball" },
   { library: "MaterialCommunityIcons", name: "tennis" },
   { library: "MaterialCommunityIcons", name: "table-tennis" },
   { library: "MaterialCommunityIcons", name: "golf" },
@@ -35,11 +35,10 @@ const icons: Icon[] = [
   { library: "MaterialCommunityIcons", name: "bow-arrow" },
 ];
 
-const iconLibraries = {
+export const iconLibraries = {
   MaterialIcons,
   MaterialCommunityIcons,
-  Ionicons,
-} as const;
+};
 
 export default function Workout() {
   const [name, setName] = useState("");
@@ -49,6 +48,8 @@ export default function Workout() {
     name: "run",
   });
 
+  const { data } = useContext(AuthContext);
+
   const logWorkout = async () => {
     const trimmedName = name.trim();
     const durationNum = Number(duration);
@@ -57,8 +58,8 @@ export default function Workout() {
       return;
     }
 
-    await axios.post("http://10.0.0.53:8081/api/log-workout", {
-      userId: "htsrttp8sXmTrqo89LzklkHgOFtxXiSY",
+    await axios.post(`${baseUrl}/api/log-workout`, {
+      userId: data?.user.id,
       name: trimmedName,
       duration: durationNum,
       iconLibrary: selectedIcon.library,

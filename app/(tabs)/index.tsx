@@ -1,3 +1,5 @@
+import { AuthContext } from "@/components/AuthProvider";
+import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import {
   Ionicons,
@@ -6,7 +8,7 @@ import {
 } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -20,14 +22,16 @@ import {
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { iconLibraries } from "./log/workout";
 
-type User = {
+export type User = {
   id: string;
   name: string;
   email: string;
   image: string | null;
   dailyCalorieGoal: number;
   dailyWorkoutGoal: number;
+  createdAt: Date;
 };
 
 type CalorieLog = {
@@ -44,6 +48,7 @@ type WorkoutLog = {
   duration: number;
   date: string;
   iconName: string;
+  iconLibrary: "MaterialIcons" | "MaterialCommunityIcons";
 };
 
 export default function Index() {
@@ -54,10 +59,12 @@ export default function Index() {
     null
   );
 
+  const { data } = useContext(AuthContext);
+
   useEffect(() => {
     const getUser = async () => {
       const response: { data: { user: User } } = await axios.get(
-        "http://10.0.0.53:8081/api/get-user/htsrttp8sXmTrqo89LzklkHgOFtxXiSY"
+        `${baseUrl}/api/get-user/${data?.user.id}`
       );
 
       setUser(response.data.user);
@@ -65,7 +72,7 @@ export default function Index() {
 
     const getCalorieLogs = async () => {
       const response: { data: { calorieLogs: CalorieLog[] } } = await axios.get(
-        "http://10.0.0.53:8081/api/get-calorie-logs/htsrttp8sXmTrqo89LzklkHgOFtxXiSY"
+        `${baseUrl}/api/get-calorie-logs/${data?.user.id}`
       );
 
       setCalorieLogs(
@@ -78,7 +85,7 @@ export default function Index() {
 
     const getWorkoutLogs = async () => {
       const response: { data: { workoutLogs: WorkoutLog[] } } = await axios.get(
-        "http://10.0.0.53:8081/api/get-workout-logs/htsrttp8sXmTrqo89LzklkHgOFtxXiSY"
+        `${baseUrl}/api/get-workout-logs/${data?.user.id}`
       );
 
       setWorkoutLogs(
@@ -183,6 +190,40 @@ export default function Index() {
 
       <Text className="text-4xl font-bold text-foreground">Home</Text>
 
+      {workoutLogs.map((workoutLog) => {
+        const IconComponent = iconLibraries[workoutLog.iconLibrary];
+
+        return (
+          <View
+            className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
+            key={workoutLog.id}
+          >
+            <IconComponent
+              name={workoutLog.iconName as any}
+              size={48}
+              color={colors.foreground}
+            />
+
+            <View className="flex-1 gap-2">
+              <Text className="text-lg font-bold text-foreground">
+                {workoutLog.name}
+              </Text>
+              <Text className="text-secondaryForeground">
+                {workoutLog.duration} minutes
+              </Text>
+            </View>
+
+            <Pressable>
+              <Ionicons
+                name="ellipsis-horizontal"
+                size={24}
+                color={colors.foreground}
+              />
+            </Pressable>
+          </View>
+        );
+      })}
+
       <FlatList
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ gap: 16, paddingBottom: 16 }}
@@ -276,14 +317,15 @@ export default function Index() {
                 <View
                   className="h-full bg-primary rounded-full"
                   style={{
-                    width: `${(loggedWorkoutTime / user.dailyWorkoutGoal) * 100}%`,
+                    width: `${Math.min((loggedWorkoutTime / user.dailyWorkoutGoal) * 100, 100)}%`,
                   }}
                 />
               </View>
 
               <View className="flex-row justify-between">
                 <Text className="text-secondaryForeground">
-                  {user.dailyWorkoutGoal - loggedWorkoutTime} mins remaining
+                  {Math.max(user.dailyWorkoutGoal - loggedWorkoutTime, 0)} mins
+                  remaining
                 </Text>
 
                 <Text className="text-secondaryForeground">

@@ -1,34 +1,33 @@
 import { authClient } from "@/lib/auth-client";
-import { Link } from "expo-router";
+import { router } from "expo-router";
 import { useState } from "react";
-import { Button, Text, TextInput, View } from "react-native";
+import { Button, TextInput, View } from "react-native";
 
-export default function SignUp() {
+export default function Login() {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    await authClient.signUp.email({
+    await authClient.signIn.email({
       email,
       password,
-      name,
+      fetchOptions: {
+        onSuccess: () => {
+          router.replace("/(tabs)");
+        },
+      },
     });
   };
 
   return (
     <View>
-      <TextInput placeholder="Name" value={name} onChangeText={setName} />
       <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
       <TextInput
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Sign Up" onPress={handleLogin} />
-      <Link href="/(auth)/login">
-        <Text>Login</Text>
-      </Link>
+      <Button title="Login" onPress={handleLogin} />
     </View>
   );
 }
