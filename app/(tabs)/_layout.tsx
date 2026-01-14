@@ -1,11 +1,11 @@
-import { useYo } from "@/components/AuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { colors } from "@/lib/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import { Text } from "react-native";
 
 export default function Layout() {
-  const { data, isPending } = useYo();
+  const { data, isPending } = useAuth();
 
   if (isPending) {
     return <Text>Loading...</Text>;

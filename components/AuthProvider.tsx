@@ -1,84 +1,61 @@
 import { authClient } from "@/lib/auth-client";
+import { BetterFetchError, SessionQueryParams } from "better-auth/client";
 import { createContext, PropsWithChildren, useContext } from "react";
 
-export const AuthContext = createContext<{
+type AuthState = {
   data: {
     user: {
       id: string;
-      // createdAt: Date;
-      // updatedAt: Date;
+      createdAt: Date;
+      updatedAt: Date;
       email: string;
-      // emailVerified: boolean;
+      emailVerified: boolean;
       name: string;
       image?: string | null | undefined;
     };
     session: {
       id: string;
-      // createdAt: Date;
-      // updatedAt: Date;
+      createdAt: Date;
+      updatedAt: Date;
       userId: string;
       expiresAt: Date;
       token: string;
-      // ipAddress?: string | null | undefined;
-      // userAgent?: string | null | undefined;
+      ipAddress?: string | null | undefined;
+      userAgent?: string | null | undefined;
     };
   } | null;
   isPending: boolean;
-}>({ data: null, isPending: false });
+  isRefetching: boolean;
+  error: BetterFetchError | null;
+  refetch: (
+    queryParams?:
+      | {
+          query?: SessionQueryParams;
+        }
+      | undefined
+  ) => Promise<void>;
+};
 
-export function useYo() {
+export const AuthContext = createContext<AuthState>({
+  data: null,
+  isPending: false,
+  isRefetching: false,
+  error: null,
+  refetch: async () => {},
+});
+
+export function useAuth() {
   const value = useContext(AuthContext);
 
   if (!value) {
-    throw new Error("useYo must be wrapped in a <AuthProvider />");
+    throw new Error("useAuth must be wrapped in a <AuthProvider />");
   }
 
   return value;
 }
 
 export default function AuthProvider({ children }: PropsWithChildren) {
-  const val = authClient.useSession();
+  const value = authClient.useSession();
 
-  return <AuthContext.Provider value={val}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-// (property) useSession: () => {
-//     data: {
-//         user: {
-//             id: string;
-//             createdAt: Date;
-//             updatedAt: Date;
-//             email: string;
-//             emailVerified: boolean;
-//             name: string;
-//             image?: string | null | undefined;
-//         };
-//         session: {
-//             id: string;
-//             createdAt: Date;
-//             updatedAt: Date;
-//             userId: string;
-//             expiresAt: Date;
-//             token: string;
-//             ipAddress?: string | null | undefined;
-//             userAgent?: string | null | undefined;
-//         };
-//     } | null;
-//     isPending: boolean;
-//     isRefetching: boolean;
-//     error: {
-//         status: number;
-//         statusText: string;
-//         error: any;
-//         name: string;
-//         message: string;
-//         stack?: string | undefined;
-//         cause?: unknown;
-//     } | null;
-//     refetch: (queryParams?: {
-//         query?: {
-//             disableCookieCache?: boolean | undefined;
-//             disableRefresh?: boolean | undefined;
-//         } | undefined;
-//     } | undefined) => Promise<...>;
-// }

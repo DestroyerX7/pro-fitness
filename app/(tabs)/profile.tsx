@@ -1,8 +1,8 @@
-import { AuthContext } from "@/components/AuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { authClient } from "@/lib/auth-client";
 import { baseUrl } from "@/lib/backend";
 import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { User } from ".";
@@ -10,7 +10,7 @@ import { User } from ".";
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
 
-  const { data } = useContext(AuthContext);
+  const { data } = useAuth();
 
   useEffect(() => {
     const getUser = async () => {

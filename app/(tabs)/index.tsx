@@ -1,4 +1,4 @@
-import { AuthContext } from "@/components/AuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import {
@@ -8,15 +8,15 @@ import {
 } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
-  FlatList,
   Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -59,7 +59,7 @@ export default function Index() {
     null
   );
 
-  const { data } = useContext(AuthContext);
+  const { data } = useAuth();
 
   useEffect(() => {
     const getUser = async () => {
@@ -76,10 +76,11 @@ export default function Index() {
       );
 
       setCalorieLogs(
-        response.data.calorieLogs /*.filter(
-          (log) =>
-            new Date(log.date).toDateString() === new Date().toDateString()
-        )*/
+        response.data.calorieLogs
+          .slice()
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
       );
     };
 
@@ -89,10 +90,11 @@ export default function Index() {
       );
 
       setWorkoutLogs(
-        response.data.workoutLogs /*.filter(
-          (log) =>
-            new Date(log.date).toDateString() === new Date().toDateString()
-        )*/
+        response.data.workoutLogs
+          .slice()
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
       );
     };
 
@@ -190,194 +192,195 @@ export default function Index() {
 
       <Text className="text-4xl font-bold text-foreground">Home</Text>
 
-      {workoutLogs.map((workoutLog) => {
-        const IconComponent = iconLibraries[workoutLog.iconLibrary];
-
-        return (
-          <View
-            className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
-            key={workoutLog.id}
-          >
-            <IconComponent
-              name={workoutLog.iconName as any}
-              size={48}
-              color={colors.foreground}
-            />
-
-            <View className="flex-1 gap-2">
-              <Text className="text-lg font-bold text-foreground">
-                {workoutLog.name}
-              </Text>
-              <Text className="text-secondaryForeground">
-                {workoutLog.duration} minutes
-              </Text>
-            </View>
-
-            <Pressable>
-              <Ionicons
-                name="ellipsis-horizontal"
-                size={24}
-                color={colors.foreground}
-              />
-            </Pressable>
-          </View>
-        );
-      })}
-
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ gap: 16, paddingBottom: 16 }}
-        data={calorieLogs}
-        ListHeaderComponent={
-          <View className="gap-4">
-            <View className="bg-white p-4 border rounded-xl border-border gap-4">
-              <View className="flex-row justify-between">
-                <Text className="text-2xl font-bold text-foreground">
-                  Today's Calories
-                </Text>
-
-                <Pressable
-                  onPress={async () => {
-                    Alert.prompt(
-                      "Edit calorie goal",
-                      "Update your daily calorie goal",
-                      async (text) => {
-                        const response: { data: { user: User } } =
-                          await axios.patch(
-                            "http://10.0.0.53:8081/api/update-daily-calorie-goal",
-                            {
-                              userId: user.id,
-                              dailyCalorieGoal: Number(text),
-                            }
-                          );
-
-                        setUser(response.data.user);
-                      },
-                      "plain-text",
-                      user.dailyCalorieGoal.toString(),
-                      "number-pad"
-                    );
-
-                    await Haptics.selectionAsync();
-                  }}
-                >
-                  <MaterialIcons
-                    name="mode-edit"
-                    size={24}
-                    color={colors.foreground}
-                  />
-                </Pressable>
-              </View>
-
-              <Text className="text-foreground">
-                <Text className="text-4xl font-bold">{loggedCalories}</Text> /{" "}
-                {user.dailyCalorieGoal}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View className="gap-4">
+          <View className="bg-white p-4 border rounded-xl border-border gap-4">
+            <View className="flex-row justify-between">
+              <Text className="text-2xl font-bold text-foreground">
+                Today's Calories
               </Text>
 
-              <View className="h-8 bg-secondary rounded-full">
-                <View
-                  className="h-full bg-[#30d030] rounded-full"
-                  style={{
-                    width: `${Math.min((loggedCalories / user.dailyCalorieGoal) * 100, 100)}%`,
-                  }}
-                />
-              </View>
+              <Pressable
+                onPress={async () => {
+                  Alert.prompt(
+                    "Edit calorie goal",
+                    "Update your daily calorie goal",
+                    async (text) => {
+                      const response: { data: { user: User } } =
+                        await axios.patch(
+                          "http://10.0.0.53:8081/api/update-daily-calorie-goal",
+                          {
+                            userId: user.id,
+                            dailyCalorieGoal: Number(text),
+                          }
+                        );
 
-              <View className="flex-row justify-between">
-                <Text className="text-secondaryForeground">
-                  {Math.max(user.dailyCalorieGoal - loggedCalories, 0)} calories
-                  remaining
-                </Text>
+                      setUser(response.data.user);
+                    },
+                    "plain-text",
+                    user.dailyCalorieGoal.toString(),
+                    "number-pad"
+                  );
 
-                <Text className="text-secondaryForeground">
-                  {((loggedCalories / user.dailyCalorieGoal) * 100).toFixed(2)}%
-                </Text>
-              </View>
-            </View>
-
-            <View className="bg-white p-4 border rounded-xl border-border gap-4">
-              <View className="flex-row justify-between">
-                <Text className="text-2xl font-bold text-foreground">
-                  Workout Time
-                </Text>
-
+                  await Haptics.selectionAsync();
+                }}
+              >
                 <MaterialIcons
                   name="mode-edit"
                   size={24}
                   color={colors.foreground}
                 />
-              </View>
-
-              <Text className="text-foreground">
-                <Text className="text-4xl font-bold">{loggedWorkoutTime}</Text>{" "}
-                / {user.dailyWorkoutGoal}
-              </Text>
-
-              <View className="h-8 bg-secondary rounded-full">
-                <View
-                  className="h-full bg-primary rounded-full"
-                  style={{
-                    width: `${Math.min((loggedWorkoutTime / user.dailyWorkoutGoal) * 100, 100)}%`,
-                  }}
-                />
-              </View>
-
-              <View className="flex-row justify-between">
-                <Text className="text-secondaryForeground">
-                  {Math.max(user.dailyWorkoutGoal - loggedWorkoutTime, 0)} mins
-                  remaining
-                </Text>
-
-                <Text className="text-secondaryForeground">
-                  {((loggedWorkoutTime / user.dailyWorkoutGoal) * 100).toFixed(
-                    2
-                  )}
-                  %
-                </Text>
-              </View>
+              </Pressable>
             </View>
 
-            <View>
-              <Text className="text-2xl font-bold text-foreground">
-                Calories
+            <Text className="text-foreground">
+              <Text className="text-4xl font-bold">{loggedCalories}</Text> /{" "}
+              {user.dailyCalorieGoal}
+            </Text>
+
+            <View className="h-8 bg-secondary rounded-full">
+              <View
+                className="h-full bg-[#30d030] rounded-full"
+                style={{
+                  width: `${Math.min((loggedCalories / user.dailyCalorieGoal) * 100, 100)}%`,
+                }}
+              />
+            </View>
+
+            <View className="flex-row justify-between">
+              <Text className="text-secondaryForeground">
+                {Math.max(user.dailyCalorieGoal - loggedCalories, 0)} calories
+                remaining
+              </Text>
+
+              <Text className="text-secondaryForeground">
+                {((loggedCalories / user.dailyCalorieGoal) * 100).toFixed(2)}%
               </Text>
             </View>
           </View>
-        }
-        renderItem={({ item }) => (
-          <View className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border">
-            {item.imageUrl !== null ? (
-              <Image
-                className="w-16 h-16 rounded-md"
-                source={{ uri: item.imageUrl }}
-              />
-            ) : (
-              <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
-                <MaterialCommunityIcons
-                  name="food"
-                  size={32}
-                  color={colors.foreground}
-                />
-              </View>
-            )}
 
-            <View className="flex-1 gap-2">
-              <Text className="text-lg font-bold text-foreground">
-                {item.name}
+          <View className="bg-white p-4 border rounded-xl border-border gap-4">
+            <View className="flex-row justify-between">
+              <Text className="text-2xl font-bold text-foreground">
+                Workout Time
               </Text>
-              <Text className="text-secondaryForeground">{item.calories}</Text>
-            </View>
 
-            <Pressable onPress={() => editCalorieLog(item)}>
-              <Ionicons
-                name="ellipsis-horizontal"
+              <MaterialIcons
+                name="mode-edit"
                 size={24}
                 color={colors.foreground}
               />
-            </Pressable>
+            </View>
+
+            <Text className="text-foreground">
+              <Text className="text-4xl font-bold">{loggedWorkoutTime}</Text> /{" "}
+              {user.dailyWorkoutGoal}
+            </Text>
+
+            <View className="h-8 bg-secondary rounded-full">
+              <View
+                className="h-full bg-primary rounded-full"
+                style={{
+                  width: `${Math.min((loggedWorkoutTime / user.dailyWorkoutGoal) * 100, 100)}%`,
+                }}
+              />
+            </View>
+
+            <View className="flex-row justify-between">
+              <Text className="text-secondaryForeground">
+                {Math.max(user.dailyWorkoutGoal - loggedWorkoutTime, 0)} mins
+                remaining
+              </Text>
+
+              <Text className="text-secondaryForeground">
+                {((loggedWorkoutTime / user.dailyWorkoutGoal) * 100).toFixed(2)}
+                %
+              </Text>
+            </View>
           </View>
-        )}
-      />
+
+          <View>
+            <Text className="text-2xl font-bold text-foreground">Calories</Text>
+          </View>
+
+          {calorieLogs.map((calorieLog) => (
+            <View
+              className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
+              key={calorieLog.id}
+            >
+              {calorieLog.imageUrl !== null ? (
+                <Image
+                  className="w-16 h-16 rounded-md"
+                  source={{ uri: calorieLog.imageUrl }}
+                />
+              ) : (
+                <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
+                  <MaterialCommunityIcons
+                    name="food"
+                    size={32}
+                    color={colors.foreground}
+                  />
+                </View>
+              )}
+
+              <View className="flex-1 gap-2">
+                <Text className="text-lg font-bold text-foreground">
+                  {calorieLog.name}
+                </Text>
+                <Text className="text-secondaryForeground">
+                  {calorieLog.calories}
+                </Text>
+              </View>
+
+              <Pressable onPress={() => editCalorieLog(calorieLog)}>
+                <Ionicons
+                  name="ellipsis-horizontal"
+                  size={24}
+                  color={colors.foreground}
+                />
+              </Pressable>
+            </View>
+          ))}
+
+          <View>
+            <Text className="text-2xl font-bold text-foreground">Workouts</Text>
+          </View>
+
+          {workoutLogs.map((workoutLog) => {
+            const IconComponent = iconLibraries[workoutLog.iconLibrary];
+
+            return (
+              <View
+                className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
+                key={workoutLog.id}
+              >
+                <IconComponent
+                  name={workoutLog.iconName as any}
+                  size={48}
+                  color={colors.foreground}
+                />
+
+                <View className="flex-1 gap-2">
+                  <Text className="text-lg font-bold text-foreground">
+                    {workoutLog.name}
+                  </Text>
+                  <Text className="text-secondaryForeground">
+                    {workoutLog.duration} minutes
+                  </Text>
+                </View>
+
+                <Pressable>
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={24}
+                    color={colors.foreground}
+                  />
+                </Pressable>
+              </View>
+            );
+          })}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

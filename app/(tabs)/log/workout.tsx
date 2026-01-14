@@ -1,10 +1,10 @@
-import { AuthContext } from "@/components/AuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 export type Icon =
@@ -48,7 +48,7 @@ export default function Workout() {
     name: "run",
   });
 
-  const { data } = useContext(AuthContext);
+  const { data } = useAuth();
 
   const logWorkout = async () => {
     const trimmedName = name.trim();

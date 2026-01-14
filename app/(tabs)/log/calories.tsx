@@ -1,4 +1,4 @@
-import { AuthContext } from "@/components/AuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -6,7 +6,7 @@ import axios from "axios";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Image, Pressable, Text, TextInput, View } from "react-native";
 
 export default function Calories() {
@@ -14,7 +14,7 @@ export default function Calories() {
   const [calories, setCalories] = useState("");
   const [image, setImage] = useState<string | null>(null);
 
-  const { data } = useContext(AuthContext);
+  const { data } = useAuth();
 
   const logCalories = async () => {
     const trimmedName = name.trim();

@@ -1,5 +1,5 @@
 import { colors } from "@/lib/colors";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
@@ -45,6 +45,42 @@ export default function Index() {
 
           <Text className="text-secondaryForeground">
             Enter a workout to log its duration
+          </Text>
+        </View>
+      </Pressable>
+
+      <Pressable
+        className="p-4 rounded-xl flex-row gap-4 border border-border bg-primaryForeground"
+        onPress={() => router.push("/(tabs)/log/scan")}
+      >
+        <MaterialCommunityIcons
+          name="barcode-scan"
+          size={64}
+          color={colors.foreground}
+        />
+
+        <View className="gap-1 flex-1">
+          <Text className="text-2xl text-foreground font-bold">
+            Scan Barcode
+          </Text>
+
+          <Text className="text-secondaryForeground">
+            Use your camera to scan a barcode and log its calories
+          </Text>
+        </View>
+      </Pressable>
+
+      <Pressable
+        className="p-4 rounded-xl flex-row gap-4 border border-border bg-primaryForeground"
+        onPress={() => router.push("/(tabs)/log/favorites")}
+      >
+        <Ionicons name="star" size={64} color={colors.foreground} />
+
+        <View className="gap-1 flex-1">
+          <Text className="text-2xl text-foreground font-bold">Favorites</Text>
+
+          <Text className="text-secondaryForeground">
+            Log one of your saved favorites
           </Text>
         </View>
       </Pressable>
