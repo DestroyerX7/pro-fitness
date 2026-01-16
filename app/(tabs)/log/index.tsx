@@ -1,5 +1,5 @@
 import { colors } from "@/lib/colors";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
@@ -72,15 +72,19 @@ export default function Index() {
 
       <Pressable
         className="p-4 rounded-xl flex-row gap-4 border border-border bg-primaryForeground"
-        onPress={() => router.push("/(tabs)/log/favorites")}
+        onPress={() => router.push("/(tabs)/log/presets")}
       >
-        <Ionicons name="star" size={64} color={colors.foreground} />
+        <MaterialCommunityIcons
+          name="tune"
+          size={64}
+          color={colors.foreground}
+        />
 
         <View className="gap-1 flex-1">
-          <Text className="text-2xl text-foreground font-bold">Favorites</Text>
+          <Text className="text-2xl text-foreground font-bold">Presets</Text>
 
           <Text className="text-secondaryForeground">
-            Log one of your saved favorites
+            Quickly log calories or workouts by using one of your saved presets
           </Text>
         </View>
       </Pressable>

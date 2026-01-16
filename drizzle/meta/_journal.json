@@ -29,6 +29,13 @@
       "when": 1768170129961,
       "tag": "0003_wide_psylocke",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1768590119629,
+      "tag": "0004_next_mandarin",
+      "breakpoints": true
     }
   ]
 }

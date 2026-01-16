@@ -89,6 +89,8 @@ export const userRelations = relations(user, ({ many }) => ({
   accounts: many(account),
   calorieLogs: many(calorieLog),
   workoutLogs: many(workoutLog),
+  calorieLogPresets: many(calorieLogPreset),
+  workoutLogPresets: many(workoutLogPreset),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -159,3 +161,62 @@ export const workoutLogRelations = relations(workoutLog, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const calorieLogPreset = pgTable(
+  "calorie_log_preset",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    calories: integer("calories").notNull(),
+    imageUrl: text("image_url"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index("calorie_log_preset_userId_idx").on(table.userId)]
+);
+
+export const workoutLogPreset = pgTable(
+  "workout_log_preset",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    duration: integer("duration").notNull(),
+    iconLibrary: text("icon_library").notNull(),
+    iconName: text("icon_name").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index("workout_log_preset_userId_idx").on(table.userId)]
+);
+
+export const calorieLogPresetRelations = relations(
+  calorieLogPreset,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [calorieLogPreset.userId],
+      references: [user.id],
+    }),
+  })
+);
+
+export const workoutLogPresetRelations = relations(
+  workoutLogPreset,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [workoutLogPreset.userId],
+      references: [user.id],
+    }),
+  })
+);

@@ -98,14 +98,14 @@ export default function Calories() {
             style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
           />
         ) : (
-          <View className="border border-border rounded-lg h-full items-center justify-center">
+          <View className="border border-border rounded-2xl h-full items-center justify-center">
             <MaterialCommunityIcons
               name="camera"
               size={128}
-              color={colors.secondaryForeground}
+              color={colors.secondary}
             />
 
-            <Text className="text-2xl font-bold text-foregrounds">
+            <Text className="text-2xl font-bold text-foreground">
               No picture taken
             </Text>
 

@@ -1,7 +1,11 @@
 import { useAuth } from "@/components/AuthProvider";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import axios from "axios";
 import { BarcodeScanningResult, CameraView } from "expo-camera";
 import * as Haptics from "expo-haptics";
@@ -15,69 +19,92 @@ type GetProductByBarcodeResponse = {
 type Product = {
   code: string;
   product_name: string;
-  serving_size: string;
+  serving_size?: string;
   nutriments: {
-    "energy-kcal_100g": number;
-    "energy-kcal_serving": number;
+    "energy-kcal_100g"?: number;
+    "energy-kcal_serving"?: number;
   };
-  image_url: string;
+  image_url?: string;
 };
 
 export default function Scan() {
   const [product, setProduct] = useState<Product | null>(null);
-  const isLoading = useRef(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const isLoadingRef = useRef(false);
 
+  const [name, setName] = useState("");
+  const [caloriesPerServing, setCaloriesPerServing] = useState("");
   const [numberOfServings, setNumberOfServings] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const { data } = useAuth();
 
   const handleBarcodeScanned = (scanningResult: BarcodeScanningResult) => {
-    if (isLoading.current || product !== null) {
+    if (isLoadingRef.current || product !== null) {
       return;
     }
-
-    console.log("Barcode scanned");
 
     lookupBarcode(scanningResult.data);
   };
 
   const lookupBarcode = async (barcode: string) => {
-    if (isLoading.current || product !== null) {
-      return;
-    }
-
-    isLoading.current = true;
-    console.log("Loading...");
-
     try {
+      if (isLoadingRef.current || product !== null) {
+        return;
+      }
+
+      isLoadingRef.current = true;
+      setIsLoading(true);
+
       const response: { data: GetProductByBarcodeResponse } = await axios.get(
-        `https://world.openfoodfacts.org/api/v2/product/${barcode}`
+        `https://world.openfoodfacts.org/api/v2/product/${barcode}`,
       );
 
-      console.log(response.data.product.product_name);
+      const { code, product_name, nutriments, serving_size, image_url } =
+        response.data.product;
+
+      console.log({
+        code,
+        product_name,
+        energy_kcal_per_serving: nutriments["energy-kcal_serving"],
+        energy_kcal_100g: nutriments["energy-kcal_100g"],
+        serving_size,
+        image_url,
+      });
 
       setProduct(response.data.product);
+      setName(product_name);
+      setCaloriesPerServing(
+        Math.round(nutriments["energy-kcal_serving"] || 0).toString(),
+      );
+      setImageUrl(image_url || null);
     } catch (error) {
       setError("Product not found, try again.");
     } finally {
-      // isLoading.current = false;
-      console.log("Done loading");
+      isLoadingRef.current = false;
+      setIsLoading(false);
     }
   };
 
   const logCalories = async () => {
+    const trimmedName = name.trim();
+    const caloriesPerServingNum = Number(caloriesPerServing);
     const numberOfServingsNum = Number(numberOfServings);
 
-    if (product === null || data === null || numberOfServingsNum < 0) {
+    if (
+      trimmedName.length < 1 ||
+      caloriesPerServingNum < 1 ||
+      numberOfServingsNum < 1
+    ) {
       return;
     }
 
     await axios.post(`${baseUrl}/api/log-calories`, {
-      userId: data.user.id,
-      name: product.product_name,
-      calories: product.nutriments["energy-kcal_serving"] * numberOfServingsNum,
-      imageUrl: product.image_url,
+      userId: data?.user.id,
+      name: trimmedName,
+      calories: caloriesPerServingNum * numberOfServingsNum,
+      imageUrl,
     });
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -86,7 +113,10 @@ export default function Scan() {
   const rescan = () => {
     setProduct(null);
     setError(null);
-    isLoading.current = false;
+    setIsLoading(false);
+    isLoadingRef.current = false;
+
+    setNumberOfServings("");
   };
 
   if (error !== null) {
@@ -115,6 +145,21 @@ export default function Scan() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center gap-4">
+        <AntDesign
+          className="animate-spin"
+          name="loading-3-quarters"
+          size={64}
+          color={colors.foreground}
+        />
+
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   if (product === null) {
     return (
       <CameraView
@@ -133,84 +178,81 @@ export default function Scan() {
     );
   }
 
-  if (product !== null) {
-    return (
-      <View className="p-4 gap-4">
-        <Pressable
-          className="bg-secondaryForeground p-4 rounded-full flex-row items-center justify-center gap-2"
-          onPress={rescan}
-        >
-          <MaterialCommunityIcons
-            name="refresh"
-            size={24}
-            color={colors.primaryForeground}
-          />
-
-          <Text className="text-primaryForeground text-center text-lg font-bold">
-            Rescan
-          </Text>
-        </Pressable>
-
-        <Image
-          className="h-64"
-          style={{ objectFit: "contain" }}
-          source={{
-            uri: product.image_url,
-          }}
+  return (
+    <View className="p-4 gap-4">
+      <Pressable
+        className="bg-secondaryForeground p-4 rounded-full flex-row items-center justify-center gap-2"
+        onPress={rescan}
+      >
+        <MaterialCommunityIcons
+          name="refresh"
+          size={24}
+          color={colors.primaryForeground}
         />
 
-        <View className="gap-1">
-          <Text className="font-bold">Name</Text>
+        <Text className="text-primaryForeground text-center text-lg font-bold">
+          Rescan
+        </Text>
+      </Pressable>
 
-          <TextInput
-            className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
-            placeholder="Name"
-            value={product.product_name}
-          />
-        </View>
+      <Image
+        className="h-64"
+        style={{ objectFit: "contain" }}
+        source={{
+          uri: product.image_url,
+        }}
+      />
 
-        <View className="gap-1">
-          <Text className="font-bold">Date</Text>
+      <View className="gap-1">
+        <Text className="font-bold">Name</Text>
 
-          <TextInput
-            className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
-            placeholder="Date"
-            value={new Date().toLocaleDateString()}
-          />
-        </View>
-
-        <View className="gap-1">
-          <Text className="font-bold">Calories per serving</Text>
-
-          <TextInput
-            className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
-            placeholder="Calories per serving"
-            value={product.nutriments["energy-kcal_serving"].toString()}
-          />
-        </View>
-
-        <View className="gap-1">
-          <Text className="font-bold">Number of servings</Text>
-
-          <TextInput
-            className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
-            placeholder="Number of servings"
-            value={numberOfServings}
-            onChangeText={(text) => setNumberOfServings(text)}
-          />
-        </View>
-
-        <Pressable
-          className="bg-primary p-4 rounded-full"
-          onPress={logCalories}
-        >
-          <Text className="text-primaryForeground text-center text-lg font-bold">
-            Log Calories
-          </Text>
-        </Pressable>
+        <TextInput
+          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          placeholder="Name"
+          value={name}
+          onChangeText={(text) => setName(text)}
+        />
       </View>
-    );
-  }
 
-  return <Text>Hello</Text>;
+      <View className="gap-1">
+        <Text className="font-bold">Date</Text>
+
+        <TextInput
+          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          placeholder="Date"
+          value={new Date().toLocaleDateString()}
+        />
+      </View>
+
+      <View className="gap-1">
+        <Text className="font-bold">Calories per serving</Text>
+
+        <TextInput
+          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          placeholder="Calories per serving"
+          keyboardType="number-pad"
+          value={caloriesPerServing}
+          onChangeText={(text) => setCaloriesPerServing(text)}
+        />
+      </View>
+
+      <View className="gap-1">
+        <Text className="font-bold">Number of servings</Text>
+
+        <TextInput
+          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          placeholder="Number of servings"
+          keyboardType="number-pad"
+          value={numberOfServings}
+          onChangeText={(text) => setNumberOfServings(text)}
+        />
+      </View>
+
+      <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
+        <Text className="text-primaryForeground text-center text-lg font-bold">
+          Log Calories
+        </Text>
+      </Pressable>
+    </View>
+  );
 }
