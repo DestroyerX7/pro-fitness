@@ -9,7 +9,8 @@ import {
 } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { iconLibraries } from "./log/workout";
@@ -50,62 +51,118 @@ export default function Index() {
   const [calorieLogs, setCalorieLogs] = useState<CalorieLog[]>([]);
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
   const [editingCalorieLog, setEditingCalorieLog] = useState<CalorieLog | null>(
-    null
+    null,
   );
 
   const { data } = useAuth();
 
-  useEffect(() => {
-    const getUser = async () => {
-      const response: { data: { user: User } } = await axios.get(
-        `${baseUrl}/api/get-user/${data?.user.id}`
-      );
+  useFocusEffect(
+    useCallback(() => {
+      const getUser = async () => {
+        const response: { data: { user: User } } = await axios.get(
+          `${baseUrl}/api/get-user/${data?.user.id}`,
+        );
 
-      setUser(response.data.user);
-    };
+        setUser(response.data.user);
+      };
 
-    const getCalorieLogs = async () => {
-      const response: { data: { calorieLogs: CalorieLog[] } } = await axios.get(
-        `${baseUrl}/api/get-calorie-logs/${data?.user.id}`
-      );
+      const getCalorieLogs = async () => {
+        const response: { data: { calorieLogs: CalorieLog[] } } =
+          await axios.get(`${baseUrl}/api/get-calorie-logs/${data?.user.id}`);
 
-      setCalorieLogs(
-        response.data.calorieLogs
-          .filter(
-            (c) =>
-              new Date(c.createdAt).toDateString() == new Date().toDateString()
-          )
-          .slice()
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
-      );
-    };
+        setCalorieLogs(
+          response.data.calorieLogs
+            .filter(
+              (c) =>
+                new Date(c.createdAt).toDateString() ==
+                new Date().toDateString(),
+            )
+            .slice()
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime(),
+            ),
+        );
+      };
 
-    const getWorkoutLogs = async () => {
-      const response: { data: { workoutLogs: WorkoutLog[] } } = await axios.get(
-        `${baseUrl}/api/get-workout-logs/${data?.user.id}`
-      );
+      const getWorkoutLogs = async () => {
+        const response: { data: { workoutLogs: WorkoutLog[] } } =
+          await axios.get(`${baseUrl}/api/get-workout-logs/${data?.user.id}`);
 
-      setWorkoutLogs(
-        response.data.workoutLogs
-          .filter(
-            (w) =>
-              new Date(w.createdAt).toDateString() == new Date().toDateString()
-          )
-          .slice()
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
-      );
-    };
+        setWorkoutLogs(
+          response.data.workoutLogs
+            .filter(
+              (w) =>
+                new Date(w.createdAt).toDateString() ==
+                new Date().toDateString(),
+            )
+            .slice()
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime(),
+            ),
+        );
+      };
 
-    getUser();
-    getCalorieLogs();
-    getWorkoutLogs();
-  }, []);
+      getUser();
+      getCalorieLogs();
+      getWorkoutLogs();
+    }, []),
+  );
+
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     const response: { data: { user: User } } = await axios.get(
+  //       `${baseUrl}/api/get-user/${data?.user.id}`,
+  //     );
+
+  //     setUser(response.data.user);
+  //   };
+
+  //   const getCalorieLogs = async () => {
+  //     const response: { data: { calorieLogs: CalorieLog[] } } = await axios.get(
+  //       `${baseUrl}/api/get-calorie-logs/${data?.user.id}`,
+  //     );
+
+  //     setCalorieLogs(
+  //       response.data.calorieLogs
+  //         .filter(
+  //           (c) =>
+  //             new Date(c.createdAt).toDateString() == new Date().toDateString(),
+  //         )
+  //         .slice()
+  //         .sort(
+  //           (a, b) =>
+  //             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  //         ),
+  //     );
+  //   };
+
+  //   const getWorkoutLogs = async () => {
+  //     const response: { data: { workoutLogs: WorkoutLog[] } } = await axios.get(
+  //       `${baseUrl}/api/get-workout-logs/${data?.user.id}`,
+  //     );
+
+  //     setWorkoutLogs(
+  //       response.data.workoutLogs
+  //         .filter(
+  //           (w) =>
+  //             new Date(w.createdAt).toDateString() == new Date().toDateString(),
+  //         )
+  //         .slice()
+  //         .sort(
+  //           (a, b) =>
+  //             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  //         ),
+  //     );
+  //   };
+
+  //   getUser();
+  //   getCalorieLogs();
+  //   getWorkoutLogs();
+  // }, []);
 
   const editCalorieLog = async (calorieLog: CalorieLog) => {
     setEditingCalorieLog(calorieLog);
@@ -122,14 +179,14 @@ export default function Index() {
           {
             userId: user.id,
             dailyCalorieGoal: Number(text),
-          }
+          },
         );
 
         setUser(response.data.user);
       },
       "plain-text",
       user.dailyCalorieGoal.toString(),
-      "number-pad"
+      "number-pad",
     );
 
     await Haptics.selectionAsync();
@@ -145,14 +202,14 @@ export default function Index() {
           {
             userId: user.id,
             dailyWorkoutGoal: Number(text),
-          }
+          },
         );
 
         setUser(response.data.user);
       },
       "plain-text",
       user.dailyWorkoutGoal.toString(),
-      "number-pad"
+      "number-pad",
     );
 
     await Haptics.selectionAsync();

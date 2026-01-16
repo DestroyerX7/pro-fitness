@@ -81,6 +81,7 @@ export default function Calories() {
       <TextInput
         className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
         placeholder="Calories"
+        keyboardType="number-pad"
         value={calories}
         onChangeText={(text) => setCalories(text)}
       />

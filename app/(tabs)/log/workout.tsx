@@ -81,6 +81,7 @@ export default function Workout() {
       <TextInput
         className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
         placeholder="Duration"
+        keyboardType="number-pad"
         value={duration}
         onChangeText={(text) => setDuration(text)}
       />
