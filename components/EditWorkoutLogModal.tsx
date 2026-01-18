@@ -60,6 +60,23 @@ export default function EditWorkoutLogModal({
     });
   };
 
+  const save = () => {
+    const trimmedName = name.trim();
+    const durationNum = Number(duration);
+
+    if (trimmedName.length < 1 || durationNum < 1) {
+      return;
+    }
+
+    onSave({
+      ...workoutLog,
+      name: trimmedName,
+      duration: durationNum,
+      iconLibrary: selectedIcon.library,
+      iconName: selectedIcon.name,
+    });
+  };
+
   return (
     <Modal animationType="slide" transparent={true}>
       <SafeAreaProvider>
@@ -147,7 +164,7 @@ export default function EditWorkoutLogModal({
 
               <Pressable
                 className="bg-primary p-4 rounded-lg flex-1 items-center justify-center"
-                onPress={() => onSave(workoutLog)}
+                onPress={save}
               >
                 <Text className="text-primaryForeground font-bold">Save</Text>
               </Pressable>

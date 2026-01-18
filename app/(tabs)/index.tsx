@@ -175,26 +175,29 @@ export default function Index() {
     await Haptics.selectionAsync();
   };
 
-  const saveCalorieLog = async (calorieLog: CalorieLog) => {
-    if (calorieLog === editingCalorieLog) {
+  const saveCalorieLog = async (editedCalorieLog: CalorieLog) => {
+    if (editedCalorieLog === editingCalorieLog) {
       console.log("Same");
       return;
     }
 
-    await axios.put(`${baseUrl}/api/update-calorie-log/${calorieLog.id}`, {
-      name: calorieLog.name,
-      calories: calorieLog.calories,
-      date: calorieLog.date,
-      imageUrl: calorieLog.imageUrl,
-    });
+    await axios.put(
+      `${baseUrl}/api/update-calorie-log/${editedCalorieLog.id}`,
+      {
+        name: editedCalorieLog.name,
+        calories: editedCalorieLog.calories,
+        date: editedCalorieLog.date,
+        imageUrl: editedCalorieLog.imageUrl,
+      },
+    );
 
     setCalorieLogs(
-      calorieLogs.map((yo) => {
-        if (yo.id === calorieLog.id) {
-          return calorieLog;
+      calorieLogs.map((calorieLog) => {
+        if (calorieLog.id === editedCalorieLog.id) {
+          return editedCalorieLog;
         }
 
-        return yo;
+        return calorieLog;
       }),
     );
     setEditingCalorieLog(null);
@@ -226,7 +229,7 @@ export default function Index() {
         return workoutLog;
       }),
     );
-    setEditingCalorieLog(null);
+    setEditingWorkoutLog(null);
   };
 
   const deleteCalorieLog = async (calorieLogId: string) => {

@@ -3,7 +3,7 @@ import { authClient } from "@/lib/auth-client";
 import { baseUrl } from "@/lib/backend";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { User } from ".";
 
@@ -15,7 +15,7 @@ export default function Profile() {
   useEffect(() => {
     const getUser = async () => {
       const response: { data: { user: User } } = await axios.get(
-        `${baseUrl}/api/get-user/${data?.user.id}`
+        `${baseUrl}/api/get-user/${data?.user.id}`,
       );
 
       setUser(response.data.user);
@@ -23,6 +23,29 @@ export default function Profile() {
 
     getUser();
   }, []);
+
+  const showConfirmDeleteUser = () => {
+    Alert.alert(
+      `Delete account`,
+      "Are you sure you want to permanently delete your account?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => deleteUser(),
+          style: "destructive",
+        },
+      ],
+    );
+  };
+
+  const deleteUser = async () => {
+    await axios.delete(`${baseUrl}/api/delete-user/${data?.user.id}`);
+    await authClient.signOut();
+  };
 
   if (user === null) {
     return;
@@ -73,12 +96,15 @@ export default function Profile() {
 
       <Pressable
         className="bg-foreground p-4 rounded-lg"
-        onPress={() => authClient.signOut()}
+        onPress={async () => await authClient.signOut()}
       >
         <Text className="text-primaryForeground">Log out</Text>
       </Pressable>
 
-      <Pressable className="bg-primaryForeground border border-border p-4 rounded-lg">
+      <Pressable
+        className="bg-primaryForeground border border-border p-4 rounded-lg"
+        onPress={showConfirmDeleteUser}
+      >
         <Text>Delete Account</Text>
       </Pressable>
     </SafeAreaView>

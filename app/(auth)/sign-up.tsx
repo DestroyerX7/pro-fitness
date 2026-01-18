@@ -3,15 +3,21 @@ import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Image, Pressable, Text, TextInput, View } from "react-native";
+import { Alert, Image, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleLogin = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert("Passwords do not match.");
+      return;
+    }
+
     await authClient.signUp.email({
       email,
       password,
@@ -53,6 +59,8 @@ export default function SignUp() {
         placeholder="Confirm Password"
         textContentType="newPassword"
         secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
       />
 
       <Pressable className="p-4 bg-primary rounded-lg" onPress={handleLogin}>

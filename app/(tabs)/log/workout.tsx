@@ -71,55 +71,69 @@ export default function Workout() {
 
   return (
     <View className="p-4 gap-4">
-      <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
-        placeholder="Name"
-        value={name}
-        onChangeText={(text) => setName(text)}
-      />
+      <View className="gap-1">
+        <Text className="font-bold text-foreground">Name</Text>
 
-      <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
-        placeholder="Duration"
-        keyboardType="number-pad"
-        value={duration}
-        onChangeText={(text) => setDuration(text)}
-      />
+        <TextInput
+          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          placeholder="Name"
+          value={name}
+          onChangeText={(text) => setName(text)}
+        />
+      </View>
 
-      <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
-        placeholder="Date"
-        value={new Date().toLocaleDateString()}
-      />
+      <View className="gap-1">
+        <Text className="font-bold text-foreground">Duration</Text>
 
-      <Text className="font-bold text-foreground text-2xl">Icon</Text>
+        <TextInput
+          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          placeholder="Duration"
+          keyboardType="number-pad"
+          value={duration}
+          onChangeText={(text) => setDuration(text)}
+        />
+      </View>
 
-      <View className="flex-row gap-4 flex-wrap">
-        {icons.map((icon, index) => {
-          const IconComponent = iconLibraries[icon.library];
+      <View className="gap-1">
+        <Text className="font-bold text-foreground">Date</Text>
 
-          return (
-            <Pressable
-              key={index}
-              className="w-16 h-16 items-center justify-center"
-              style={[
-                selectedIcon.library === icon.library &&
-                  selectedIcon.name === icon.name && {
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    borderColor: colors.foreground,
-                  },
-              ]}
-              onPress={() => setSelectedIcon(icon)}
-            >
-              <IconComponent
-                name={icon.name as any}
-                size={48}
-                color={colors.foreground}
-              />
-            </Pressable>
-          );
-        })}
+        <TextInput
+          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          placeholder="Date"
+          value={new Date().toLocaleDateString()}
+        />
+      </View>
+
+      <View className="gap-1">
+        <Text className="font-bold text-foreground">Icon</Text>
+
+        <View className="flex-row gap-4 flex-wrap">
+          {icons.map((icon, index) => {
+            const IconComponent = iconLibraries[icon.library];
+
+            return (
+              <Pressable
+                key={index}
+                className="w-16 h-16 items-center justify-center"
+                style={[
+                  selectedIcon.library === icon.library &&
+                    selectedIcon.name === icon.name && {
+                      borderWidth: 2,
+                      borderRadius: 8,
+                      borderColor: colors.foreground,
+                    },
+                ]}
+                onPress={() => setSelectedIcon(icon)}
+              >
+                <IconComponent
+                  name={icon.name as any}
+                  size={48}
+                  color={colors.foreground}
+                />
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
 
       <Pressable onPress={logWorkout} className="bg-primary p-4 rounded-full">
