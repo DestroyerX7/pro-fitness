@@ -3,7 +3,7 @@ import { calorieLog } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function DELETE(
-  request: Request,
+  _: Request,
   { calorieLogId }: Record<string, string>,
 ) {
   const [deletedCalorieLog] = await db

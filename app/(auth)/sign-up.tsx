@@ -41,6 +41,7 @@ export default function SignUp() {
         className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
         textContentType="emailAddress"
         placeholder="Email"
+        keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />

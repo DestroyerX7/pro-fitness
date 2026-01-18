@@ -39,6 +39,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ size, color }) => (
             <Ionicons name="person-circle" size={size} color={color} />
           ),
+          sceneStyle: { backgroundColor: colors.secondary },
         }}
       />
     </Tabs>

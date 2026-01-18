@@ -30,6 +30,7 @@ export default function Login() {
         className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
         placeholder="Email"
         textContentType="emailAddress"
+        keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />

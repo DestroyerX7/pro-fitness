@@ -1,6 +1,8 @@
 import { useAuth } from "@/components/AuthProvider";
 import { authClient } from "@/lib/auth-client";
 import { baseUrl } from "@/lib/backend";
+import { colors } from "@/lib/colors";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
@@ -61,51 +63,69 @@ export default function Profile() {
         <Text className="text-secondaryForeground">{user.email}</Text>
       </View>
 
-      <View className="gap-4">
-        <Text className="text-2xl font-bold text-foreground">
-          Account Settings
-        </Text>
-
-        <View>
-          <Text>Name</Text>
-          <Text>{user.name}</Text>
+      <View className="gap-4 bg-background p-8 rounded-[32px]">
+        <View className="flex-row justify-between">
+          <Text className="text-xl text-foreground">Name</Text>
+          <Text className="text-xl text-secondaryForeground">{user.name}</Text>
         </View>
 
-        <View>
-          <Text>Email</Text>
-          <Text>{user.email}</Text>
+        <View className="h-[1px] bg-secondary" />
+
+        <View className="flex-row justify-between">
+          <Text className="text-xl text-foreground">Email</Text>
+          <Text className="text-xl text-secondaryForeground">{user.email}</Text>
         </View>
 
-        <View>
-          <Text>Daily Calorie Goal</Text>
-          <Text>{user.dailyCalorieGoal} calories</Text>
+        <View className="h-[1px] bg-secondary" />
+
+        <View className="flex-row justify-between">
+          <Text className="text-xl text-foreground">Daily Calorie Goal</Text>
+          <Text className="text-xl text-secondaryForeground">
+            {user.dailyCalorieGoal} calories
+          </Text>
         </View>
 
-        <View>
-          <Text>Daily Workout Goal</Text>
-          <Text>{user.dailyWorkoutGoal} minutes</Text>
+        <View className="h-[1px] bg-secondary" />
+
+        <View className="flex-row justify-between">
+          <Text className="text-xl text-foreground">Daily Workout Goal</Text>
+          <Text className="text-xl text-secondaryForeground">
+            {user.dailyWorkoutGoal} minutes
+          </Text>
         </View>
 
-        <View>
-          <Text>Account Created</Text>
-          <Text>
+        <View className="h-[1px] bg-secondary" />
+
+        <View className="flex-row justify-between">
+          <Text className="text-xl text-foreground">Account Created</Text>
+          <Text className="text-xl text-secondaryForeground">
             {new Date(user.createdAt.toString()).toLocaleDateString()}
           </Text>
         </View>
       </View>
 
       <Pressable
-        className="bg-foreground p-4 rounded-lg"
+        className="bg-foreground p-4 rounded-full flex-row gap-2 items-center"
         onPress={async () => await authClient.signOut()}
       >
+        <MaterialCommunityIcons
+          name="logout"
+          size={24}
+          color={colors.primaryForeground}
+        />
         <Text className="text-primaryForeground">Log out</Text>
       </Pressable>
 
       <Pressable
-        className="bg-primaryForeground border border-border p-4 rounded-lg"
+        className="bg-destructiveForeground //border border-[#ffdddd] p-4 rounded-full flex-row gap-2 items-center"
         onPress={showConfirmDeleteUser}
       >
-        <Text>Delete Account</Text>
+        <MaterialCommunityIcons
+          name="trash-can"
+          size={24}
+          color={colors.destructive}
+        />
+        <Text className="text-destructive">Delete Account</Text>
       </Pressable>
     </SafeAreaView>
   );

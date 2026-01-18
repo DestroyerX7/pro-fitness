@@ -1,11 +1,8 @@
 import { db } from "@/db/index";
-import { calorieLogPreset, workoutLog } from "@/db/schema";
+import { calorieLogPreset } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(
-  request: Request,
-  { userId }: Record<string, string>
-) {
+export async function GET(_: Request, { userId }: Record<string, string>) {
   const calorieLogPresets = await db
     .select()
     .from(calorieLogPreset)

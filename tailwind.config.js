@@ -19,6 +19,8 @@ module.exports = {
         border: "#e5e7eb",
         input: "#e5e7eb",
         destructive: "#ef4444",
+        destructiveForeground: "#ffffff",
+        tabInactive: "#a0a0a0",
       },
     },
   },

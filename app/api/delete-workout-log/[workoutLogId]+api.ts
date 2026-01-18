@@ -3,7 +3,7 @@ import { workoutLog } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function DELETE(
-  request: Request,
+  _: Request,
   { workoutLogId }: Record<string, string>,
 ) {
   const [deletedWorkoutLog] = await db

@@ -195,13 +195,31 @@ export default function Scan() {
         </Text>
       </Pressable>
 
-      <Image
-        className="h-64"
-        style={{ objectFit: "contain" }}
-        source={{
-          uri: product.image_url,
-        }}
-      />
+      {imageUrl !== null ? (
+        <Image
+          className="h-64"
+          style={{ objectFit: "contain" }}
+          source={{
+            uri: imageUrl,
+          }}
+        />
+      ) : (
+        <View className="items-center border border-border p-4 rounded-xl h-64 justify-center">
+          <MaterialCommunityIcons
+            name="image"
+            size={64}
+            color={colors.foreground}
+          />
+
+          <Text className="text-foreground font-bold text-2xl">
+            Product image not found
+          </Text>
+
+          <Text className="text-secondaryForeground">
+            Tap to take your own picture
+          </Text>
+        </View>
+      )}
 
       <View className="gap-1">
         <Text className="font-bold">Name</Text>
