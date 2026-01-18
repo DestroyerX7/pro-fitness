@@ -35,12 +35,16 @@ export default function Favorites() {
     WorkoutLogPreset[]
   >([]);
 
+  const [activeTab, setActiveTab] = useState<"calories" | "workouts">(
+    "calories",
+  );
+
   const { data } = useAuth();
 
   useEffect(() => {
     const getCalorieLogPresets = async () => {
       const response = await axios.get(
-        `${baseUrl}/api/get-calorie-log-presets/${data?.user.id}`
+        `${baseUrl}/api/get-calorie-log-presets/${data?.user.id}`,
       );
 
       setCalorieLogPresets(response.data.calorieLogPresets);
@@ -48,7 +52,7 @@ export default function Favorites() {
 
     const getWorkoutLogPresets = async () => {
       const response = await axios.get(
-        `${baseUrl}/api/get-workout-log-presets/${data?.user.id}`
+        `${baseUrl}/api/get-workout-log-presets/${data?.user.id}`,
       );
 
       setWorkoutLogPresets(response.data.workoutLogPresets);
@@ -83,74 +87,98 @@ export default function Favorites() {
 
   return (
     <View className="p-4 gap-4">
-      <View className="flex-row gap-4">
-        <Text className="text-2xl font-bold border-b-2 border-foreground text-foreground">
-          Calories
-        </Text>
+      <View className="flex-row gap-4 items-center">
+        <Pressable
+          className={`border-b-2 ${
+            activeTab === "calories"
+              ? "border-foreground"
+              : "border-transparent"
+          }`}
+          onPress={() => setActiveTab("calories")}
+        >
+          <Text
+            className={`text-2xl text-foreground ${activeTab === "calories" ? "font-bold" : ""}`}
+          >
+            Calories
+          </Text>
+        </Pressable>
 
-        <Text className="text-2xl text-foreground">Workouts</Text>
+        <Pressable
+          className={`border-b-2 ${
+            activeTab === "workouts"
+              ? "border-foreground"
+              : "border-transparent"
+          }`}
+          onPress={() => setActiveTab("workouts")}
+        >
+          <Text
+            className={`text-2xl text-foreground ${activeTab === "workouts" ? "font-bold" : ""}`}
+          >
+            Workouts
+          </Text>
+        </Pressable>
       </View>
 
-      {calorieLogPresets.length > 0 ? (
-        calorieLogPresets.map((calorieLogPreset) => (
-          <Pressable
-            onPress={() => logCalories(calorieLogPreset)}
-            className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
-            key={calorieLogPreset.id}
-          >
-            {calorieLogPreset.imageUrl !== null ? (
-              <Image
-                className="w-16 h-16 rounded-md"
-                source={{ uri: calorieLogPreset.imageUrl }}
-              />
-            ) : (
-              <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
-                <MaterialCommunityIcons
-                  name="food"
-                  size={32}
+      {activeTab === "calories" ? (
+        calorieLogPresets.length > 0 ? (
+          calorieLogPresets.map((calorieLogPreset) => (
+            <Pressable
+              onPress={() => logCalories(calorieLogPreset)}
+              className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
+              key={calorieLogPreset.id}
+            >
+              {calorieLogPreset.imageUrl !== null ? (
+                <Image
+                  className="w-16 h-16 rounded-md"
+                  source={{ uri: calorieLogPreset.imageUrl }}
+                />
+              ) : (
+                <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
+                  <MaterialCommunityIcons
+                    name="food"
+                    size={32}
+                    color={colors.foreground}
+                  />
+                </View>
+              )}
+
+              <View className="flex-1 gap-2">
+                <Text className="text-lg font-bold text-foreground">
+                  {calorieLogPreset.name}
+                </Text>
+
+                <Text className="text-secondaryForeground">
+                  {calorieLogPreset.calories}
+                </Text>
+              </View>
+
+              <Pressable>
+                <Ionicons
+                  name="ellipsis-horizontal"
+                  size={24}
                   color={colors.foreground}
                 />
-              </View>
-            )}
-
-            <View className="flex-1 gap-2">
-              <Text className="text-lg font-bold text-foreground">
-                {calorieLogPreset.name}
-              </Text>
-
-              <Text className="text-secondaryForeground">
-                {calorieLogPreset.calories}
-              </Text>
-            </View>
-
-            <Pressable>
-              <Ionicons
-                name="ellipsis-horizontal"
-                size={24}
-                color={colors.foreground}
-              />
+              </Pressable>
             </Pressable>
-          </Pressable>
-        ))
-      ) : (
-        <View className="p-4 border border-border rounded-lg items-center">
-          <MaterialCommunityIcons
-            name="tune"
-            size={64}
-            color={colors.foreground}
-          />
+          ))
+        ) : (
+          <View className="p-4 border border-border rounded-lg items-center">
+            <MaterialCommunityIcons
+              name="tune"
+              size={64}
+              color={colors.foreground}
+            />
 
-          <Text className="text-foreground text-2xl font-bold">
-            No saved calorie presets
-          </Text>
+            <Text className="text-foreground text-2xl font-bold">
+              No saved calorie presets
+            </Text>
 
-          <Text className="text-secondaryForeground text-center">
-            Edit a calorie log and press create preset based off it's values
-          </Text>
-        </View>
-      )}
-
-      {workoutLogPresets.length > 0 ? (
+            <Text className="text-secondaryForeground text-center">
+              Edit a calorie log and press create preset based off it's values
+            </Text>
+          </View>
+        )
+      ) : workoutLogPresets.length > 0 ? (
         workoutLogPresets.map((workoutLogPreset) => {
           const IconComponent = iconLibraries[workoutLogPreset.iconLibrary];
 

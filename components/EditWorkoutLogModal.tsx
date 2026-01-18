@@ -1,41 +1,39 @@
-import { CalorieLog } from "@/app/(tabs)";
+import { WorkoutLog } from "@/app/(tabs)";
+import { Icon } from "@/app/(tabs)/log/workout";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
 import React, { useState } from "react";
-import {
-  Alert,
-  Image,
-  Modal,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import WorkoutIconList from "./WorkoutIconList";
 
 type Props = {
-  calorieLog: CalorieLog;
+  workoutLog: WorkoutLog;
   close: () => void;
-  onSave: (calorieLog: CalorieLog) => void;
-  onDelete: (calorieLogId: string) => void;
+  onSave: (workoutLog: WorkoutLog) => void;
+  onDelete: (workoutLogId: string) => void;
 };
 
-export default function EditCalorieLogModal({
-  calorieLog,
+export default function EditWorkoutLogModal({
+  workoutLog,
   close,
   onSave,
   onDelete,
 }: Props) {
-  const [name, setName] = useState(calorieLog.name);
-  const [calories, setCalories] = useState(calorieLog.calories.toString());
+  const [name, setName] = useState(workoutLog.name);
+  const [duration, setDuration] = useState(workoutLog.duration.toString());
+  const [selectedIcon, setSelectedIcon] = useState<Icon>({
+    library: "MaterialCommunityIcons",
+    name: "run",
+  });
 
-  const showConfirmDeleteCalorieLog = async (calorieLog: CalorieLog) => {
+  const showConfirmDeleteWorkoutLog = async (workoutLog: WorkoutLog) => {
     Alert.alert(
-      `Delete ${calorieLog.name}`,
-      "Are you sure you want to delete this calorie log?",
+      `Delete ${workoutLog.name}`,
+      "Are you sure you want to delete this workout log?",
       [
         {
           text: "Cancel",
@@ -43,7 +41,7 @@ export default function EditCalorieLogModal({
         },
         {
           text: "Delete",
-          onPress: () => onDelete(calorieLog.id),
+          onPress: () => onDelete(workoutLog.id),
           style: "destructive",
         },
       ],
@@ -52,12 +50,13 @@ export default function EditCalorieLogModal({
     await Haptics.selectionAsync();
   };
 
-  const createCalorieLogPreset = async (calorieLog: CalorieLog) => {
-    await axios.post(`${baseUrl}/api/create-calorie-log-preset`, {
-      userId: calorieLog.userId,
-      name: calorieLog.name,
-      calories: calorieLog.calories,
-      imageUrl: calorieLog.imageUrl,
+  const createWorkoutLogPreset = async (workoutLog: WorkoutLog) => {
+    await axios.post(`${baseUrl}/api/create-workout-log-preset`, {
+      userId: workoutLog.userId,
+      name: workoutLog.name,
+      duration: workoutLog.duration,
+      iconLibrary: workoutLog.iconLibrary,
+      iconName: workoutLog.iconName,
     });
   };
 
@@ -69,11 +68,11 @@ export default function EditCalorieLogModal({
 
           <View className="bg-background gap-4 rounded-t-[64px] pt-8 px-8 border-t border-x border-border">
             <View className="flex-row justify-between items-center">
-              <Text className="text-2xl font-bold">Edit Calorie Log</Text>
+              <Text className="text-2xl font-bold">Edit Workout Log</Text>
 
               <Pressable
                 className="p-2 border border-border bg-background rounded-lg justify-center items-center flex-row gap-2"
-                onPress={() => createCalorieLogPreset(calorieLog)}
+                onPress={() => createWorkoutLogPreset(workoutLog)}
               >
                 <MaterialCommunityIcons
                   name="tune"
@@ -97,13 +96,13 @@ export default function EditCalorieLogModal({
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Calories</Text>
+              <Text className="font-bold text-foreground">Duration</Text>
 
               <TextInput
                 className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
                 placeholder="Calories"
-                value={calories}
-                onChangeText={(text) => setCalories(text)}
+                value={duration}
+                onChangeText={(text) => setDuration(text)}
                 keyboardType="number-pad"
               />
             </View>
@@ -114,37 +113,23 @@ export default function EditCalorieLogModal({
               <TextInput
                 className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
                 placeholder="Calories"
-                defaultValue={calorieLog.date.toString()}
+                defaultValue={workoutLog.date.toString()}
               />
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Image</Text>
+              <Text className="font-bold text-foreground">Icon</Text>
 
-              <Pressable
-                className="w-full aspect-square" /*onPress={takePicture}*/
-              >
-                {calorieLog.imageUrl !== null ? (
-                  <Image
-                    source={{ uri: calorieLog.imageUrl }}
-                    style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
-                  />
-                ) : (
-                  <View className="flex-1 border rounded-2xl border-border items-center justify-center">
-                    <MaterialCommunityIcons
-                      name="food"
-                      size={256}
-                      color={colors.foreground}
-                    />
-                  </View>
-                )}
-              </Pressable>
+              <WorkoutIconList
+                defaultSelected={selectedIcon}
+                onSelect={(icon) => setSelectedIcon(icon)}
+              />
             </View>
 
             <View className="flex-row gap-4">
               <Pressable
                 className="bg-[#ffdddd] p-4 rounded-lg items-center justify-center"
-                onPress={() => showConfirmDeleteCalorieLog(calorieLog)}
+                onPress={() => showConfirmDeleteWorkoutLog(workoutLog)}
               >
                 <MaterialCommunityIcons
                   name="trash-can"
@@ -162,7 +147,7 @@ export default function EditCalorieLogModal({
 
               <Pressable
                 className="bg-primary p-4 rounded-lg flex-1 items-center justify-center"
-                onPress={() => onSave(calorieLog)}
+                onPress={() => onSave(workoutLog)}
               >
                 <Text className="text-primaryForeground font-bold">Save</Text>
               </Pressable>

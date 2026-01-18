@@ -32,7 +32,7 @@ type AuthState = {
       | {
           query?: SessionQueryParams;
         }
-      | undefined
+      | undefined,
   ) => Promise<void>;
 };
 

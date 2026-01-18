@@ -1,5 +1,6 @@
 import { useAuth } from "@/components/AuthProvider";
 import EditCalorieLogModal from "@/components/EditCalorieLogModal";
+import EditWorkoutLogModal from "@/components/EditWorkoutLogModal";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import {
@@ -9,7 +10,7 @@ import {
 } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -50,8 +51,16 @@ export default function Index() {
   const [user, setUser] = useState<User | null>(null);
   const [calorieLogs, setCalorieLogs] = useState<CalorieLog[]>([]);
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
+
   const [editingCalorieLog, setEditingCalorieLog] = useState<CalorieLog | null>(
     null,
+  );
+  const [editingWorkoutLog, setEditingWorkoutLog] = useState<WorkoutLog | null>(
+    null,
+  );
+
+  const [activeTab, setActiveTab] = useState<"calories" | "workouts">(
+    "calories",
   );
 
   const { data } = useAuth();
@@ -112,72 +121,14 @@ export default function Index() {
     }, []),
   );
 
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     const response: { data: { user: User } } = await axios.get(
-  //       `${baseUrl}/api/get-user/${data?.user.id}`,
-  //     );
-
-  //     setUser(response.data.user);
-  //   };
-
-  //   const getCalorieLogs = async () => {
-  //     const response: { data: { calorieLogs: CalorieLog[] } } = await axios.get(
-  //       `${baseUrl}/api/get-calorie-logs/${data?.user.id}`,
-  //     );
-
-  //     setCalorieLogs(
-  //       response.data.calorieLogs
-  //         .filter(
-  //           (c) =>
-  //             new Date(c.createdAt).toDateString() == new Date().toDateString(),
-  //         )
-  //         .slice()
-  //         .sort(
-  //           (a, b) =>
-  //             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  //         ),
-  //     );
-  //   };
-
-  //   const getWorkoutLogs = async () => {
-  //     const response: { data: { workoutLogs: WorkoutLog[] } } = await axios.get(
-  //       `${baseUrl}/api/get-workout-logs/${data?.user.id}`,
-  //     );
-
-  //     setWorkoutLogs(
-  //       response.data.workoutLogs
-  //         .filter(
-  //           (w) =>
-  //             new Date(w.createdAt).toDateString() == new Date().toDateString(),
-  //         )
-  //         .slice()
-  //         .sort(
-  //           (a, b) =>
-  //             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  //         ),
-  //     );
-  //   };
-
-  //   getUser();
-  //   getCalorieLogs();
-  //   getWorkoutLogs();
-  // }, []);
-
-  const editCalorieLog = async (calorieLog: CalorieLog) => {
-    setEditingCalorieLog(calorieLog);
-    await Haptics.selectionAsync();
-  };
-
   const editDailyCalorieGoal = async (user: User) => {
     Alert.prompt(
       "Edit calorie goal",
       "Update your daily calorie goal",
       async (text) => {
         const response: { data: { user: User } } = await axios.patch(
-          `${baseUrl}/api/update-daily-calorie-goal`,
+          `${baseUrl}/api/update-daily-calorie-goal/${user.id}`,
           {
-            userId: user.id,
             dailyCalorieGoal: Number(text),
           },
         );
@@ -198,9 +149,8 @@ export default function Index() {
       "Update your daily workout goal",
       async (text) => {
         const response: { data: { user: User } } = await axios.patch(
-          `${baseUrl}/api/update-daily-workout-goal`,
+          `${baseUrl}/api/update-daily-workout-goal/${user.id}`,
           {
-            userId: user.id,
             dailyWorkoutGoal: Number(text),
           },
         );
@@ -215,23 +165,82 @@ export default function Index() {
     await Haptics.selectionAsync();
   };
 
+  const editCalorieLog = async (calorieLog: CalorieLog) => {
+    setEditingCalorieLog(calorieLog);
+    await Haptics.selectionAsync();
+  };
+
+  const editWorkoutLog = async (workoutLog: WorkoutLog) => {
+    setEditingWorkoutLog(workoutLog);
+    await Haptics.selectionAsync();
+  };
+
   const saveCalorieLog = async (calorieLog: CalorieLog) => {
+    if (calorieLog === editingCalorieLog) {
+      console.log("Same");
+      return;
+    }
+
+    await axios.put(`${baseUrl}/api/update-calorie-log/${calorieLog.id}`, {
+      name: calorieLog.name,
+      calories: calorieLog.calories,
+      date: calorieLog.date,
+      imageUrl: calorieLog.imageUrl,
+    });
+
+    setCalorieLogs(
+      calorieLogs.map((yo) => {
+        if (yo.id === calorieLog.id) {
+          return calorieLog;
+        }
+
+        return yo;
+      }),
+    );
+    setEditingCalorieLog(null);
+  };
+
+  const saveWorkoutLog = async (editedWorkoutLog: WorkoutLog) => {
+    if (editedWorkoutLog === editingWorkoutLog) {
+      console.log("Same");
+      return;
+    }
+
+    await axios.put(
+      `${baseUrl}/api/update-workout-log/${editedWorkoutLog.id}`,
+      {
+        name: editedWorkoutLog.name,
+        duration: editedWorkoutLog.duration,
+        date: editedWorkoutLog.date,
+        iconLibrary: editedWorkoutLog.iconLibrary,
+        iconName: editedWorkoutLog.iconName,
+      },
+    );
+
+    setWorkoutLogs(
+      workoutLogs.map((workoutLog) => {
+        if (workoutLog.id === editedWorkoutLog.id) {
+          return editedWorkoutLog;
+        }
+
+        return workoutLog;
+      }),
+    );
     setEditingCalorieLog(null);
   };
 
   const deleteCalorieLog = async (calorieLogId: string) => {
-    await axios.delete(`${baseUrl}/api/delete-calorie-log`, {
-      data: {
-        calorieLogId,
-      },
-    });
+    await axios.delete(`${baseUrl}/api/delete-calorie-log/${calorieLogId}`);
 
     setCalorieLogs(calorieLogs.filter((c) => c.id !== calorieLogId));
     setEditingCalorieLog(null);
   };
 
-  const toggleFavoriteCalorieLog = async (calorieLog: CalorieLog) => {
-    console.log("Temp toggled favorite");
+  const deleteWorkoutLog = async (workoutLogId: string) => {
+    await axios.delete(`${baseUrl}/api/delete-workout-log/${workoutLogId}`);
+
+    setWorkoutLogs(workoutLogs.filter((w) => w.id !== workoutLogId));
+    setEditingWorkoutLog(null);
   };
 
   if (user === null) {
@@ -242,7 +251,7 @@ export default function Index() {
   const loggedWorkoutTime = workoutLogs.reduce((a, b) => a + b.duration, 0);
 
   return (
-    <SafeAreaView className="p-4 gap-4">
+    <SafeAreaView className="pt-4 px-4 gap-4 flex-1" edges={["top"]}>
       {editingCalorieLog !== null && (
         <EditCalorieLogModal
           calorieLog={editingCalorieLog}
@@ -252,9 +261,18 @@ export default function Index() {
         />
       )}
 
+      {editingWorkoutLog !== null && (
+        <EditWorkoutLogModal
+          workoutLog={editingWorkoutLog}
+          close={() => setEditingWorkoutLog(null)}
+          onSave={saveWorkoutLog}
+          onDelete={deleteWorkoutLog}
+        />
+      )}
+
       <Text className="text-4xl font-bold text-foreground">Home</Text>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="gap-4">
           <View className="bg-white p-4 border rounded-xl border-border gap-4">
             <View className="flex-row justify-between">
@@ -339,63 +357,101 @@ export default function Index() {
             </View>
           </View>
 
-          <View>
-            <Text className="text-2xl font-bold text-foreground">Calories</Text>
+          <View className="flex-row gap-4 items-center">
+            <Pressable
+              className={`border-b-2 ${
+                activeTab === "calories"
+                  ? "border-foreground"
+                  : "border-transparent"
+              }`}
+              onPress={() => setActiveTab("calories")}
+            >
+              <Text
+                className={`text-2xl text-foreground ${activeTab === "calories" ? "font-bold" : ""}`}
+              >
+                Calories
+              </Text>
+            </Pressable>
+
+            <Pressable
+              className={`border-b-2 ${
+                activeTab === "workouts"
+                  ? "border-foreground"
+                  : "border-transparent"
+              }`}
+              onPress={() => setActiveTab("workouts")}
+            >
+              <Text
+                className={`text-2xl text-foreground ${activeTab === "workouts" ? "font-bold" : ""}`}
+              >
+                Workouts
+              </Text>
+            </Pressable>
           </View>
 
-          {calorieLogs.length > 0 ? (
-            calorieLogs.map((calorieLog) => (
-              <View
-                className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
-                key={calorieLog.id}
-              >
-                {calorieLog.imageUrl !== null ? (
-                  <Image
-                    className="w-16 h-16 rounded-md"
-                    source={{ uri: calorieLog.imageUrl }}
-                  />
-                ) : (
-                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
-                    <MaterialCommunityIcons
-                      name="food"
-                      size={32}
+          {activeTab === "calories" ? (
+            calorieLogs.length > 0 ? (
+              calorieLogs.map((calorieLog) => (
+                <View
+                  className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
+                  key={calorieLog.id}
+                >
+                  {calorieLog.imageUrl !== null ? (
+                    <Image
+                      className="w-16 h-16 rounded-md"
+                      source={{ uri: calorieLog.imageUrl }}
+                    />
+                  ) : (
+                    <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
+                      <MaterialCommunityIcons
+                        name="food"
+                        size={32}
+                        color={colors.foreground}
+                      />
+                    </View>
+                  )}
+
+                  <View className="flex-1 gap-2">
+                    <Text className="text-lg font-bold text-foreground">
+                      {calorieLog.name}
+                    </Text>
+
+                    <Text className="text-secondaryForeground">
+                      {calorieLog.calories}
+                    </Text>
+                  </View>
+
+                  <Pressable onPress={() => editCalorieLog(calorieLog)}>
+                    <Ionicons
+                      name="ellipsis-horizontal"
+                      size={24}
                       color={colors.foreground}
                     />
-                  </View>
-                )}
-
-                <View className="flex-1 gap-2">
-                  <Text className="text-lg font-bold text-foreground">
-                    {calorieLog.name}
-                  </Text>
-
-                  <Text className="text-secondaryForeground">
-                    {calorieLog.calories}
-                  </Text>
+                  </Pressable>
                 </View>
+              ))
+            ) : (
+              <View className="gap-4 items-center p-4">
+                <MaterialCommunityIcons
+                  name="food"
+                  size={64}
+                  color={colors.foreground}
+                />
 
-                <Pressable onPress={() => editCalorieLog(calorieLog)}>
-                  <Ionicons
-                    name="ellipsis-horizontal"
-                    size={24}
-                    color={colors.foreground}
-                  />
+                <Text className="text-secondaryForeground text-center text-xl w-3/4">
+                  Your calorie logs will appear here, showing the things you
+                  have logged today.
+                </Text>
+
+                <Pressable
+                  className="bg-secondary p-4 rounded-lg"
+                  onPress={() => router.push("/(tabs)/log/calories")}
+                >
+                  <Text className="text-foreground">Log calories</Text>
                 </Pressable>
               </View>
-            ))
-          ) : (
-            <View className="p-4 border border-border rounded-lg">
-              <Text className="text-secondaryForeground">
-                No calories logged today
-              </Text>
-            </View>
-          )}
-
-          <View>
-            <Text className="text-2xl font-bold text-foreground">Workouts</Text>
-          </View>
-
-          {workoutLogs.length > 0 ? (
+            )
+          ) : workoutLogs.length > 0 ? (
             workoutLogs.map((workoutLog) => {
               const IconComponent = iconLibraries[workoutLog.iconLibrary];
 
@@ -419,7 +475,7 @@ export default function Index() {
                     </Text>
                   </View>
 
-                  <Pressable>
+                  <Pressable onPress={() => editWorkoutLog(workoutLog)}>
                     <Ionicons
                       name="ellipsis-horizontal"
                       size={24}
@@ -430,10 +486,24 @@ export default function Index() {
               );
             })
           ) : (
-            <View className="p-4 border border-border rounded-lg">
-              <Text className="text-secondaryForeground">
-                No workouts logged today
+            <View className="gap-4 items-center p-4">
+              <MaterialCommunityIcons
+                name="run"
+                size={64}
+                color={colors.foreground}
+              />
+
+              <Text className="text-secondaryForeground text-center text-xl w-3/4">
+                Your workout logs will appear here, showing the things you have
+                logged today.
               </Text>
+
+              <Pressable
+                className="bg-secondary p-4 rounded-lg"
+                onPress={() => router.push("/(tabs)/log/workout")}
+              >
+                <Text className="text-foreground">Log workout</Text>
+              </Pressable>
             </View>
           )}
         </View>
