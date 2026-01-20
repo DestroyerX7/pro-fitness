@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#3b82f6",
+        "backgroundColor": "#0080ff",
         "foregroundImage": "./assets/icons/adaptive-icon.png",
         "monochromeImage": "./assets/icons/adaptive-icon.png"
       },
@@ -38,7 +38,7 @@
           "image": "./assets/icons/splash-icon-light.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#3b82f6",
+          "backgroundColor": "#0080ff",
           "dark": {
             "image": "./assets/icons/splash-icon-dark.png",
             "backgroundColor": "#000000"
@@ -49,6 +49,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c3843f25-1680-4cfb-8ee3-1fbe1e1d3602"
+      }
     }
   }
 }

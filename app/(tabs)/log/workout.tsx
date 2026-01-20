@@ -75,7 +75,7 @@ export default function Workout() {
         <Text className="font-bold text-foreground">Name</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Name"
           value={name}
           onChangeText={(text) => setName(text)}
@@ -86,7 +86,7 @@ export default function Workout() {
         <Text className="font-bold text-foreground">Duration</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Duration"
           keyboardType="number-pad"
           value={duration}
@@ -98,7 +98,7 @@ export default function Workout() {
         <Text className="font-bold text-foreground">Date</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Date"
           value={new Date().toLocaleDateString()}
         />
@@ -137,7 +137,7 @@ export default function Workout() {
       </View>
 
       <Pressable onPress={logWorkout} className="bg-primary p-4 rounded-full">
-        <Text className="text-primaryForeground text-center text-lg font-bold">
+        <Text className="text-primary-foreground text-center text-lg font-bold">
           Log Workout
         </Text>
       </Pressable>

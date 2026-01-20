@@ -30,7 +30,7 @@ export default function SignUp() {
       <Text className="text-4xl font-bold">Sign Up</Text>
 
       <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+        className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
         placeholder="Name"
         textContentType="name"
         value={name}
@@ -38,7 +38,7 @@ export default function SignUp() {
       />
 
       <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+        className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
         textContentType="emailAddress"
         placeholder="Email"
         keyboardType="email-address"
@@ -47,7 +47,7 @@ export default function SignUp() {
       />
 
       <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+        className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
         placeholder="Password"
         textContentType="newPassword"
         secureTextEntry
@@ -56,21 +56,21 @@ export default function SignUp() {
       />
 
       <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+        className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
         placeholder="Confirm Password"
-        textContentType="newPassword"
+        textContentType="password"
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
 
       <Pressable className="p-4 bg-primary rounded-lg" onPress={handleLogin}>
-        <Text className="text-primaryForeground">Sign Up</Text>
+        <Text className="text-primary-foreground">Sign Up</Text>
       </Pressable>
 
       <View className="h-[2px] bg-border" />
 
-      <Pressable className="p-4 bg-primaryForeground rounded-lg border border-border flex-row items-center gap-4">
+      <Pressable className="p-4 bg-background rounded-lg border border-border flex-row items-center gap-4">
         <Image
           className="w-8 h-8"
           source={{
@@ -80,7 +80,7 @@ export default function SignUp() {
         <Text className="text-foreground">Sign up with Google</Text>
       </Pressable>
 
-      <Pressable className="p-4 bg-primaryForeground rounded-lg border border-border flex-row items-center gap-4">
+      <Pressable className="p-4 bg-background rounded-lg border border-border flex-row items-center gap-4">
         <MaterialCommunityIcons
           name="apple"
           size={32}

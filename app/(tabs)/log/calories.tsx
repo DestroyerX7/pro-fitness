@@ -75,7 +75,7 @@ export default function Calories() {
         <Text className="font-bold text-foreground">Name</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Name"
           value={name}
           onChangeText={(text) => setName(text)}
@@ -86,7 +86,7 @@ export default function Calories() {
         <Text className="font-bold text-foreground">Calories</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Calories"
           keyboardType="number-pad"
           value={calories}
@@ -98,7 +98,7 @@ export default function Calories() {
         <Text className="font-bold text-foreground">Date</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Date"
           value={new Date().toLocaleDateString()}
         />
@@ -118,14 +118,14 @@ export default function Calories() {
               <MaterialCommunityIcons
                 name="camera"
                 size={128}
-                color={colors.secondary}
+                color={colors.foreground}
               />
 
               <Text className="text-2xl font-bold text-foreground">
                 No picture taken
               </Text>
 
-              <Text className="text-secondaryForeground">
+              <Text className="text-muted-foreground">
                 Tap to take a picture
               </Text>
             </View>
@@ -134,7 +134,7 @@ export default function Calories() {
       </View>
 
       <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
-        <Text className="text-primaryForeground text-center text-lg font-bold">
+        <Text className="text-primary-foreground text-center text-lg font-bold">
           Log Calories
         </Text>
       </Pressable>

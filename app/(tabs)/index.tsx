@@ -1,4 +1,5 @@
 import { useAuth } from "@/components/AuthProvider";
+import Card from "@/components/Card";
 import EditCalorieLogModal from "@/components/EditCalorieLogModal";
 import EditWorkoutLogModal from "@/components/EditWorkoutLogModal";
 import { baseUrl } from "@/lib/backend";
@@ -254,7 +255,7 @@ export default function Index() {
   const loggedWorkoutTime = workoutLogs.reduce((a, b) => a + b.duration, 0);
 
   return (
-    <SafeAreaView className="pt-4 px-4 gap-4 flex-1" edges={["top"]}>
+    <SafeAreaView className="flex-1" edges={["top"]}>
       {editingCalorieLog !== null && (
         <EditCalorieLogModal
           calorieLog={editingCalorieLog}
@@ -273,243 +274,238 @@ export default function Index() {
         />
       )}
 
-      <Text className="text-4xl font-bold text-foreground">Home</Text>
+      <Text className="text-4xl font-bold text-foreground pt-4 px-4">Home</Text>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="gap-4">
-          <View className="bg-white p-4 border rounded-xl border-border gap-4">
-            <View className="flex-row justify-between">
-              <Text className="text-2xl font-bold text-foreground">
-                Today's Calories
-              </Text>
-
-              <Pressable onPress={() => editDailyCalorieGoal(user)}>
-                <MaterialIcons
-                  name="mode-edit"
-                  size={24}
-                  color={colors.foreground}
-                />
-              </Pressable>
-            </View>
-
-            <Text className="text-foreground">
-              <Text className="text-4xl font-bold">{loggedCalories}</Text> /{" "}
-              {user.dailyCalorieGoal}
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ gap: 16, padding: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Card className="gap-4">
+          <View className="flex-row justify-between">
+            <Text className="text-2xl font-bold text-foreground">
+              Today's Calories
             </Text>
 
-            <View className="h-8 bg-secondary rounded-full">
-              <View
-                className="h-full bg-[#30d030] rounded-full"
-                style={{
-                  width: `${Math.min((loggedCalories / user.dailyCalorieGoal) * 100, 100)}%`,
-                }}
+            <Pressable onPress={() => editDailyCalorieGoal(user)}>
+              <MaterialIcons
+                name="mode-edit"
+                size={24}
+                color={colors.foreground}
               />
-            </View>
-
-            <View className="flex-row justify-between">
-              <Text className="text-secondaryForeground">
-                {Math.max(user.dailyCalorieGoal - loggedCalories, 0)} calories
-                remaining
-              </Text>
-
-              <Text className="text-secondaryForeground">
-                {((loggedCalories / user.dailyCalorieGoal) * 100).toFixed(2)}%
-              </Text>
-            </View>
-          </View>
-
-          <View className="bg-white p-4 border rounded-xl border-border gap-4">
-            <View className="flex-row justify-between">
-              <Text className="text-2xl font-bold text-foreground">
-                Workout Time
-              </Text>
-
-              <Pressable onPress={() => editDailyWorkoutGoal(user)}>
-                <MaterialIcons
-                  name="mode-edit"
-                  size={24}
-                  color={colors.foreground}
-                />
-              </Pressable>
-            </View>
-
-            <Text className="text-foreground">
-              <Text className="text-4xl font-bold">{loggedWorkoutTime}</Text> /{" "}
-              {user.dailyWorkoutGoal}
-            </Text>
-
-            <View className="h-8 bg-secondary rounded-full">
-              <View
-                className="h-full bg-primary rounded-full"
-                style={{
-                  width: `${Math.min((loggedWorkoutTime / user.dailyWorkoutGoal) * 100, 100)}%`,
-                }}
-              />
-            </View>
-
-            <View className="flex-row justify-between">
-              <Text className="text-secondaryForeground">
-                {Math.max(user.dailyWorkoutGoal - loggedWorkoutTime, 0)} mins
-                remaining
-              </Text>
-
-              <Text className="text-secondaryForeground">
-                {((loggedWorkoutTime / user.dailyWorkoutGoal) * 100).toFixed(2)}
-                %
-              </Text>
-            </View>
-          </View>
-
-          <View className="flex-row gap-4 items-center">
-            <Pressable
-              className={`border-b-2 ${
-                activeTab === "calories"
-                  ? "border-foreground"
-                  : "border-transparent"
-              }`}
-              onPress={() => setActiveTab("calories")}
-            >
-              <Text
-                className={`text-2xl text-foreground ${activeTab === "calories" ? "font-bold" : ""}`}
-              >
-                Calories
-              </Text>
-            </Pressable>
-
-            <Pressable
-              className={`border-b-2 ${
-                activeTab === "workouts"
-                  ? "border-foreground"
-                  : "border-transparent"
-              }`}
-              onPress={() => setActiveTab("workouts")}
-            >
-              <Text
-                className={`text-2xl text-foreground ${activeTab === "workouts" ? "font-bold" : ""}`}
-              >
-                Workouts
-              </Text>
             </Pressable>
           </View>
 
-          {activeTab === "calories" ? (
-            calorieLogs.length > 0 ? (
-              calorieLogs.map((calorieLog) => (
-                <View
-                  className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
-                  key={calorieLog.id}
-                >
-                  {calorieLog.imageUrl !== null ? (
-                    <Image
-                      className="w-16 h-16 rounded-md"
-                      source={{ uri: calorieLog.imageUrl }}
-                    />
-                  ) : (
-                    <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
-                      <MaterialCommunityIcons
-                        name="food"
-                        size={32}
-                        color={colors.foreground}
-                      />
-                    </View>
-                  )}
+          <Text className="text-foreground">
+            <Text className="text-4xl font-bold">{loggedCalories}</Text> /{" "}
+            {user.dailyCalorieGoal}
+          </Text>
 
-                  <View className="flex-1 gap-2">
-                    <Text className="text-lg font-bold text-foreground">
-                      {calorieLog.name}
-                    </Text>
+          <View className="h-8 bg-secondary rounded-full">
+            <View
+              className="h-full bg-[#30d030] rounded-full"
+              style={{
+                width: `${Math.min((loggedCalories / user.dailyCalorieGoal) * 100, 100)}%`,
+              }}
+            />
+          </View>
 
-                    <Text className="text-secondaryForeground">
-                      {calorieLog.calories}
-                    </Text>
-                  </View>
+          <View className="flex-row justify-between">
+            <Text className="text-foreground">
+              {Math.max(user.dailyCalorieGoal - loggedCalories, 0)} calories
+              remaining
+            </Text>
 
-                  <Pressable onPress={() => editCalorieLog(calorieLog)}>
-                    <Ionicons
-                      name="ellipsis-horizontal"
-                      size={24}
+            <Text className="text-foreground">
+              {((loggedCalories / user.dailyCalorieGoal) * 100).toFixed(2)}%
+            </Text>
+          </View>
+        </Card>
+
+        <Card className="gap-4">
+          <View className="flex-row justify-between">
+            <Text className="text-2xl font-bold text-foreground">
+              Workout Time
+            </Text>
+
+            <Pressable onPress={() => editDailyWorkoutGoal(user)}>
+              <MaterialIcons
+                name="mode-edit"
+                size={24}
+                color={colors.foreground}
+              />
+            </Pressable>
+          </View>
+
+          <Text className="text-foreground">
+            <Text className="text-4xl font-bold">{loggedWorkoutTime}</Text> /{" "}
+            {user.dailyWorkoutGoal}
+          </Text>
+
+          <View className="h-8 bg-secondary rounded-full">
+            <View
+              className="h-full bg-primary rounded-full"
+              style={{
+                width: `${Math.min((loggedWorkoutTime / user.dailyWorkoutGoal) * 100, 100)}%`,
+              }}
+            />
+          </View>
+
+          <View className="flex-row justify-between">
+            <Text className="text-foreground">
+              {Math.max(user.dailyWorkoutGoal - loggedWorkoutTime, 0)} mins
+              remaining
+            </Text>
+
+            <Text className="text-foreground">
+              {((loggedWorkoutTime / user.dailyWorkoutGoal) * 100).toFixed(2)}%
+            </Text>
+          </View>
+        </Card>
+
+        <View className="flex-row gap-4 items-center">
+          <Pressable
+            className={`border-b-2 ${
+              activeTab === "calories"
+                ? "border-foreground"
+                : "border-transparent"
+            }`}
+            onPress={() => setActiveTab("calories")}
+          >
+            <Text
+              className={`text-2xl text-foreground ${activeTab === "calories" ? "font-bold" : ""}`}
+            >
+              Calories
+            </Text>
+          </Pressable>
+
+          <Pressable
+            className={`border-b-2 ${
+              activeTab === "workouts"
+                ? "border-foreground"
+                : "border-transparent"
+            }`}
+            onPress={() => setActiveTab("workouts")}
+          >
+            <Text
+              className={`text-2xl text-foreground ${activeTab === "workouts" ? "font-bold" : ""}`}
+            >
+              Workouts
+            </Text>
+          </Pressable>
+        </View>
+
+        {activeTab === "calories" ? (
+          calorieLogs.length > 0 ? (
+            calorieLogs.map((calorieLog) => (
+              <Card className="flex-row gap-4" key={calorieLog.id}>
+                {calorieLog.imageUrl !== null ? (
+                  <Image
+                    className="w-16 h-16 rounded-md"
+                    source={{ uri: calorieLog.imageUrl }}
+                  />
+                ) : (
+                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
+                    <MaterialCommunityIcons
+                      name="food"
+                      size={32}
                       color={colors.foreground}
                     />
-                  </Pressable>
+                  </View>
+                )}
+
+                <View className="flex-1 gap-1">
+                  <Text className="text-lg font-bold text-foreground">
+                    {calorieLog.name}
+                  </Text>
+
+                  <Text className="text-muted-foreground">
+                    {calorieLog.calories}
+                  </Text>
                 </View>
-              ))
-            ) : (
-              <View className="gap-4 items-center p-4">
-                <MaterialCommunityIcons
-                  name="food"
-                  size={64}
-                  color={colors.foreground}
-                />
 
-                <Text className="text-secondaryForeground text-center text-xl w-3/4">
-                  Your calorie logs will appear here, showing the things you
-                  have logged today.
-                </Text>
-
-                <Pressable
-                  className="bg-secondary p-4 rounded-lg"
-                  onPress={() => router.push("/(tabs)/log/calories")}
-                >
-                  <Text className="text-foreground">Log calories</Text>
-                </Pressable>
-              </View>
-            )
-          ) : workoutLogs.length > 0 ? (
-            workoutLogs.map((workoutLog) => {
-              const IconComponent = iconLibraries[workoutLog.iconLibrary];
-
-              return (
-                <View
-                  className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
-                  key={workoutLog.id}
-                >
-                  <IconComponent
-                    name={workoutLog.iconName as any}
-                    size={48}
+                <Pressable onPress={() => editCalorieLog(calorieLog)}>
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={24}
                     color={colors.foreground}
                   />
-
-                  <View className="flex-1 gap-2">
-                    <Text className="text-lg font-bold text-foreground">
-                      {workoutLog.name}
-                    </Text>
-                    <Text className="text-secondaryForeground">
-                      {workoutLog.duration} minutes
-                    </Text>
-                  </View>
-
-                  <Pressable onPress={() => editWorkoutLog(workoutLog)}>
-                    <Ionicons
-                      name="ellipsis-horizontal"
-                      size={24}
-                      color={colors.foreground}
-                    />
-                  </Pressable>
-                </View>
-              );
-            })
+                </Pressable>
+              </Card>
+            ))
           ) : (
             <View className="gap-4 items-center p-4">
               <MaterialCommunityIcons
-                name="run"
+                name="food"
                 size={64}
                 color={colors.foreground}
               />
 
-              <Text className="text-secondaryForeground text-center text-xl w-3/4">
-                Your workout logs will appear here, showing the things you have
+              <Text className="text-foreground text-center text-xl w-3/4">
+                Your calorie logs will appear here, showing the things you have
                 logged today.
               </Text>
 
               <Pressable
                 className="bg-secondary p-4 rounded-lg"
-                onPress={() => router.push("/(tabs)/log/workout")}
+                onPress={() => router.push("/(tabs)/log/calories")}
               >
-                <Text className="text-foreground">Log workout</Text>
+                <Text className="text-secondary-foreground">Log calories</Text>
               </Pressable>
             </View>
-          )}
-        </View>
+          )
+        ) : workoutLogs.length > 0 ? (
+          workoutLogs.map((workoutLog) => {
+            const IconComponent = iconLibraries[workoutLog.iconLibrary];
+
+            return (
+              <Card className="flex-row gap-4" key={workoutLog.id}>
+                <IconComponent
+                  name={workoutLog.iconName as any}
+                  size={48}
+                  color={colors.foreground}
+                />
+
+                <View className="flex-1 gap-1">
+                  <Text className="text-lg font-bold text-foreground">
+                    {workoutLog.name}
+                  </Text>
+                  <Text className="text-muted-foreground">
+                    {workoutLog.duration} minutes
+                  </Text>
+                </View>
+
+                <Pressable onPress={() => editWorkoutLog(workoutLog)}>
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={24}
+                    color={colors.foreground}
+                  />
+                </Pressable>
+              </Card>
+            );
+          })
+        ) : (
+          <View className="gap-4 items-center p-4">
+            <MaterialCommunityIcons
+              name="run"
+              size={64}
+              color={colors.foreground}
+            />
+
+            <Text className="text-foreground text-center text-xl w-3/4">
+              Your workout logs will appear here, showing the things you have
+              logged today.
+            </Text>
+
+            <Pressable
+              className="bg-secondary p-4 rounded-lg"
+              onPress={() => router.push("/(tabs)/log/workout")}
+            >
+              <Text className="text-secondary-foreground">Log workout</Text>
+            </Pressable>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

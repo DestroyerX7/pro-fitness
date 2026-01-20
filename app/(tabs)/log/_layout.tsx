@@ -14,6 +14,8 @@ export default function LogLayout() {
       <Stack.Screen name="workout" options={{ title: "Log Workout" }} />
       <Stack.Screen name="scan" options={{ title: "Scan Barcode" }} />
       <Stack.Screen name="presets" options={{ title: "Presets" }} />
+
+      <Stack.Screen name="test" options={{ title: "Test" }} />
     </Stack>
   );
 }

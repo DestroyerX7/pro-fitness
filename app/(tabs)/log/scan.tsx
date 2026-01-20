@@ -215,7 +215,7 @@ export default function Scan() {
             Product image not found
           </Text>
 
-          <Text className="text-secondaryForeground">
+          <Text className="text-muted-foreground">
             Tap to take your own picture
           </Text>
         </View>
@@ -225,7 +225,7 @@ export default function Scan() {
         <Text className="font-bold">Name</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Name"
           value={name}
           onChangeText={(text) => setName(text)}
@@ -236,7 +236,7 @@ export default function Scan() {
         <Text className="font-bold">Date</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Date"
           value={new Date().toLocaleDateString()}
         />
@@ -246,7 +246,7 @@ export default function Scan() {
         <Text className="font-bold">Calories per serving</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Calories per serving"
           keyboardType="number-pad"
           value={caloriesPerServing}
@@ -258,7 +258,7 @@ export default function Scan() {
         <Text className="font-bold">Number of servings</Text>
 
         <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
           placeholder="Number of servings"
           keyboardType="number-pad"
           value={numberOfServings}
@@ -267,7 +267,7 @@ export default function Scan() {
       </View>
 
       <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
-        <Text className="text-primaryForeground text-center text-lg font-bold">
+        <Text className="text-primary-foreground text-center text-lg font-bold">
           Log Calories
         </Text>
       </Pressable>

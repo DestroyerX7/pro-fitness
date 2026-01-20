@@ -1,4 +1,5 @@
 import { useAuth } from "@/components/AuthProvider";
+import Card from "@/components/Card";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -124,41 +125,42 @@ export default function Favorites() {
           calorieLogPresets.map((calorieLogPreset) => (
             <Pressable
               onPress={() => logCalories(calorieLogPreset)}
-              className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
               key={calorieLogPreset.id}
             >
-              {calorieLogPreset.imageUrl !== null ? (
-                <Image
-                  className="w-16 h-16 rounded-md"
-                  source={{ uri: calorieLogPreset.imageUrl }}
-                />
-              ) : (
-                <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
-                  <MaterialCommunityIcons
-                    name="food"
-                    size={32}
+              <Card className="flex-row gap-4">
+                {calorieLogPreset.imageUrl !== null ? (
+                  <Image
+                    className="w-16 h-16 rounded-md"
+                    source={{ uri: calorieLogPreset.imageUrl }}
+                  />
+                ) : (
+                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
+                    <MaterialCommunityIcons
+                      name="food"
+                      size={32}
+                      color={colors.foreground}
+                    />
+                  </View>
+                )}
+
+                <View className="flex-1 gap-1">
+                  <Text className="text-lg font-bold text-foreground">
+                    {calorieLogPreset.name}
+                  </Text>
+
+                  <Text className="text-muted-foreground">
+                    {calorieLogPreset.calories}
+                  </Text>
+                </View>
+
+                <Pressable>
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={24}
                     color={colors.foreground}
                   />
-                </View>
-              )}
-
-              <View className="flex-1 gap-2">
-                <Text className="text-lg font-bold text-foreground">
-                  {calorieLogPreset.name}
-                </Text>
-
-                <Text className="text-secondaryForeground">
-                  {calorieLogPreset.calories}
-                </Text>
-              </View>
-
-              <Pressable>
-                <Ionicons
-                  name="ellipsis-horizontal"
-                  size={24}
-                  color={colors.foreground}
-                />
-              </Pressable>
+                </Pressable>
+              </Card>
             </Pressable>
           ))
         ) : (
@@ -173,7 +175,7 @@ export default function Favorites() {
               No saved calorie presets
             </Text>
 
-            <Text className="text-secondaryForeground text-center">
+            <Text className="text-muted-foreground text-center">
               Edit a calorie log and press create preset based off it's values
             </Text>
           </View>
@@ -185,31 +187,32 @@ export default function Favorites() {
           return (
             <Pressable
               onPress={() => logWorkout(workoutLogPreset)}
-              className="flex-row p-4 gap-4 border rounded-xl bg-primaryForeground border-border"
               key={workoutLogPreset.id}
             >
-              <IconComponent
-                name={workoutLogPreset.iconName as any}
-                size={48}
-                color={colors.foreground}
-              />
-
-              <View className="flex-1 gap-2">
-                <Text className="text-lg font-bold text-foreground">
-                  {workoutLogPreset.name}
-                </Text>
-                <Text className="text-secondaryForeground">
-                  {workoutLogPreset.duration} minutes
-                </Text>
-              </View>
-
-              <Pressable>
-                <Ionicons
-                  name="ellipsis-horizontal"
-                  size={24}
+              <Card className="flex-row gap-4">
+                <IconComponent
+                  name={workoutLogPreset.iconName as any}
+                  size={48}
                   color={colors.foreground}
                 />
-              </Pressable>
+
+                <View className="flex-1 gap-1">
+                  <Text className="text-lg font-bold text-foreground">
+                    {workoutLogPreset.name}
+                  </Text>
+                  <Text className="text-muted-foreground">
+                    {workoutLogPreset.duration} minutes
+                  </Text>
+                </View>
+
+                <Pressable>
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={24}
+                    color={colors.foreground}
+                  />
+                </Pressable>
+              </Card>
             </Pressable>
           );
         })
@@ -225,7 +228,7 @@ export default function Favorites() {
             No saved workout presets
           </Text>
 
-          <Text className="text-secondaryForeground text-center">
+          <Text className="text-muted-foreground text-center">
             Edit a workout log and press create preset based off it's values
           </Text>
         </View>

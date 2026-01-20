@@ -22,12 +22,26 @@ export default function Login() {
     });
   };
 
+  const loginWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      fetchOptions: {
+        onSuccess: (ctx) => {
+          console.log(ctx.data);
+        },
+        onError: (ctx) => {
+          console.log(ctx.error.message);
+        },
+      },
+    });
+  };
+
   return (
     <SafeAreaView className="p-4 gap-4">
       <Text className="text-4xl font-bold">Login</Text>
 
       <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+        className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
         placeholder="Email"
         textContentType="emailAddress"
         keyboardType="email-address"
@@ -36,7 +50,7 @@ export default function Login() {
       />
 
       <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+        className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
         placeholder="Password"
         textContentType="password"
         secureTextEntry
@@ -45,12 +59,15 @@ export default function Login() {
       />
 
       <Pressable className="p-4 bg-primary rounded-lg" onPress={handleLogin}>
-        <Text className="text-primaryForeground">Login</Text>
+        <Text className="text-primary-foreground">Login</Text>
       </Pressable>
 
       <View className="h-[2px] bg-border" />
 
-      <Pressable className="p-4 bg-primaryForeground rounded-lg border border-border flex-row items-center gap-4">
+      <Pressable
+        className="p-4 bg-background rounded-lg border border-border flex-row items-center gap-4"
+        onPress={loginWithGoogle}
+      >
         <Image
           className="w-8 h-8"
           source={{
@@ -60,7 +77,7 @@ export default function Login() {
         <Text className="text-foreground">Login with Google</Text>
       </Pressable>
 
-      <Pressable className="p-4 bg-primaryForeground rounded-lg border border-border flex-row items-center gap-4">
+      <Pressable className="p-4 bg-background rounded-lg border border-border flex-row items-center gap-4">
         <MaterialCommunityIcons
           name="apple"
           size={32}

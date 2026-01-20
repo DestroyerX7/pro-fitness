@@ -111,13 +111,13 @@ export default function Profile() {
         <MaterialCommunityIcons
           name="logout"
           size={24}
-          color={colors.primaryForeground}
+          color={colors.background}
         />
-        <Text className="text-primaryForeground">Log out</Text>
+        <Text className="text-background">Log out</Text>
       </Pressable>
 
       <Pressable
-        className="bg-destructiveForeground //border border-[#ffdddd] p-4 rounded-full flex-row gap-2 items-center"
+        className="bg-destructive-foreground //border border-[#ffdddd] p-4 rounded-full flex-row gap-2 items-center"
         onPress={showConfirmDeleteUser}
       >
         <MaterialCommunityIcons

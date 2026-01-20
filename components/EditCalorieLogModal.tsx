@@ -104,7 +104,7 @@ export default function EditCalorieLogModal({
               <Text className="font-bold text-foreground">Name</Text>
 
               <TextInput
-                className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+                className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
                 placeholder="Name"
                 value={name}
                 onChangeText={(text) => setName(text)}
@@ -115,7 +115,7 @@ export default function EditCalorieLogModal({
               <Text className="font-bold text-foreground">Calories</Text>
 
               <TextInput
-                className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+                className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
                 placeholder="Calories"
                 value={calories}
                 onChangeText={(text) => setCalories(text)}
@@ -127,7 +127,7 @@ export default function EditCalorieLogModal({
               <Text className="font-bold text-foreground">Date</Text>
 
               <TextInput
-                className="p-4 border border-border rounded-lg placeholder:text-secondaryForeground"
+                className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
                 placeholder="Calories"
                 defaultValue={calorieLog.date.toString()}
               />
@@ -179,7 +179,7 @@ export default function EditCalorieLogModal({
                 className="bg-primary p-4 rounded-lg flex-1 items-center justify-center"
                 onPress={save}
               >
-                <Text className="text-primaryForeground font-bold">Save</Text>
+                <Text className="text-primary-foreground font-bold">Save</Text>
               </Pressable>
             </View>
           </View>
