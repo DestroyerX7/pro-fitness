@@ -1,4 +1,5 @@
 import { useAuth } from "@/components/AuthProvider";
+import ThemedText from "@/components/ThemedText";
 import { authClient } from "@/lib/auth-client";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
@@ -6,7 +7,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import { useColorScheme } from "nativewind";
 import React, { useEffect, useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { User } from ".";
 
@@ -60,51 +61,55 @@ export default function Profile() {
   return (
     <SafeAreaView className="p-4 gap-4">
       <View>
-        <Text className="text-4xl font-bold text-foreground">
+        <ThemedText className="text-4xl font-bold">
           Welcome {user.name}
-        </Text>
+        </ThemedText>
 
-        <Text className="text-muted-foreground">{user.email}</Text>
+        <ThemedText variant="muted-foreground">{user.email}</ThemedText>
       </View>
 
-      <View className="gap-4 bg-background p-8 rounded-[32px]">
+      <View className="gap-4 bg-card-background p-8 rounded-[32px] border border-border">
         <View className="flex-row justify-between">
-          <Text className="text-xl text-foreground">Name</Text>
-          <Text className="text-xl text-secondaryForeground">{user.name}</Text>
+          <ThemedText className="text-xl">Name</ThemedText>
+          <ThemedText variant="secondary-foreground" className="text-xl">
+            {user.name}
+          </ThemedText>
         </View>
 
-        <View className="h-[1px] bg-secondary" />
+        <View className="h-[1px] bg-muted-foreground" />
 
         <View className="flex-row justify-between">
-          <Text className="text-xl text-foreground">Email</Text>
-          <Text className="text-xl text-secondaryForeground">{user.email}</Text>
+          <ThemedText className="text-xl">Email</ThemedText>
+          <ThemedText variant="secondary-foreground" className="text-xl">
+            {user.email}
+          </ThemedText>
         </View>
 
-        <View className="h-[1px] bg-secondary" />
+        <View className="h-[1px] bg-muted-foreground" />
 
         <View className="flex-row justify-between">
-          <Text className="text-xl text-foreground">Daily Calorie Goal</Text>
-          <Text className="text-xl text-secondaryForeground">
+          <ThemedText className="text-xl">Daily Calorie Goal</ThemedText>
+          <ThemedText variant="secondary-foreground" className="text-xl">
             {user.dailyCalorieGoal} calories
-          </Text>
+          </ThemedText>
         </View>
 
-        <View className="h-[1px] bg-secondary" />
+        <View className="h-[1px] bg-muted-foreground" />
 
         <View className="flex-row justify-between">
-          <Text className="text-xl text-foreground">Daily Workout Goal</Text>
-          <Text className="text-xl text-secondaryForeground">
+          <ThemedText className="text-xl">Daily Workout Goal</ThemedText>
+          <ThemedText variant="secondary-foreground" className="text-xl">
             {user.dailyWorkoutGoal} minutes
-          </Text>
+          </ThemedText>
         </View>
 
-        <View className="h-[1px] bg-secondary" />
+        <View className="h-[1px] bg-muted-foreground" />
 
         <View className="flex-row justify-between">
-          <Text className="text-xl text-foreground">Account Created</Text>
-          <Text className="text-xl text-secondaryForeground">
+          <ThemedText className="text-xl">Account Created</ThemedText>
+          <ThemedText variant="secondary-foreground" className="text-xl">
             {new Date(user.createdAt.toString()).toLocaleDateString()}
-          </Text>
+          </ThemedText>
         </View>
       </View>
 
@@ -117,11 +122,11 @@ export default function Profile() {
           size={24}
           color={theme.background}
         />
-        <Text className="text-background">Log out</Text>
+        <ThemedText variant="background">Log out</ThemedText>
       </Pressable>
 
       <Pressable
-        className="bg-destructive-foreground //border border-[#ffdddd] p-4 rounded-full flex-row gap-2 items-center"
+        className="bg-muted //border border-[#ffdddd] p-4 rounded-full flex-row gap-2 items-center"
         onPress={showConfirmDeleteUser}
       >
         <MaterialCommunityIcons
@@ -129,7 +134,7 @@ export default function Profile() {
           size={24}
           color={theme.destructive}
         />
-        <Text className="text-destructive">Delete Account</Text>
+        <ThemedText variant="foreground">Delete Account</ThemedText>
       </Pressable>
     </SafeAreaView>
   );

@@ -10,7 +10,7 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, View } from "react-native";
 
 export default function Calories() {
   const [name, setName] = useState("");
@@ -117,7 +117,7 @@ export default function Calories() {
               style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
             />
           ) : (
-            <View className="border border-border rounded-2xl h-full items-center justify-center dark:border-border-dark">
+            <View className="border border-border rounded-2xl h-full items-center justify-center">
               <MaterialCommunityIcons
                 name="camera"
                 size={128}
@@ -128,18 +128,21 @@ export default function Calories() {
                 No picture taken
               </ThemedText>
 
-              <Text className="text-muted-foreground dark:text-muted-foreground-dark">
+              <ThemedText variant="muted-foreground">
                 Tap to take a picture
-              </Text>
+              </ThemedText>
             </View>
           )}
         </Pressable>
       </View>
 
       <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
-        <Text className="text-primary-foreground text-center text-lg font-bold">
+        <ThemedText
+          variant="primary-foreground"
+          className="text-center text-lg font-bold"
+        >
           Log Calories
-        </Text>
+        </ThemedText>
       </Pressable>
     </View>
   );

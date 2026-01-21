@@ -13,7 +13,7 @@ import { BarcodeScanningResult, CameraView } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import { useRef, useState } from "react";
-import { Image, Pressable, Text, TextInput, View } from "react-native";
+import { Image, Pressable, TextInput, View } from "react-native";
 
 type GetProductByBarcodeResponse = {
   product: Product;
@@ -138,14 +138,17 @@ export default function Scan() {
             color={theme.primaryForeground}
           />
 
-          <Text className="text-primaryForeground text-center text-lg font-bold">
+          <ThemedText
+            variant="primary-foreground"
+            className="text-center text-lg font-bold"
+          >
             Rescan
-          </Text>
+          </ThemedText>
         </Pressable>
 
         <View className="flex-row gap-2 items-center justify-center">
           <MaterialIcons name="error" size={32} color={theme.foreground} />
-          <Text className="text-2xl">{error}</Text>
+          <ThemedText className="text-2xl">{error}</ThemedText>
         </View>
       </View>
     );
@@ -161,7 +164,7 @@ export default function Scan() {
           color={theme.foreground}
         />
 
-        <Text>Loading...</Text>
+        <ThemedText>Loading...</ThemedText>
       </View>
     );
   }
@@ -187,7 +190,7 @@ export default function Scan() {
   return (
     <View className="p-4 gap-4">
       <Pressable
-        className="bg-secondary p-4 rounded-full flex-row items-center justify-center gap-2 dark:bg-secondary-dark"
+        className="bg-secondary p-4 rounded-full flex-row items-center justify-center gap-2"
         onPress={rescan}
       >
         <MaterialCommunityIcons
@@ -196,9 +199,12 @@ export default function Scan() {
           color={theme.secondaryForeground}
         />
 
-        <Text className="text-secondary-foreground text-center text-lg font-bold dark:text-secondary-foreground-dark">
+        <ThemedText
+          variant="secondary-foreground"
+          className="text-center text-lg font-bold"
+        >
           Rescan
-        </Text>
+        </ThemedText>
       </Pressable>
 
       {imageUrl !== null ? (
@@ -217,13 +223,13 @@ export default function Scan() {
             color={theme.foreground}
           />
 
-          <Text className="text-foreground font-bold text-2xl">
+          <ThemedText className="font-bold text-2xl">
             Product image not found
-          </Text>
+          </ThemedText>
 
-          <Text className="text-muted-foreground">
+          <ThemedText variant="muted-foreground">
             Tap to take your own picture
-          </Text>
+          </ThemedText>
         </View>
       )}
 
@@ -240,7 +246,7 @@ export default function Scan() {
       </View>
 
       <View className="gap-1">
-        <Text className="font-bold">Date</Text>
+        <ThemedText className="font-bold">Date</ThemedText>
 
         <TextInput
           className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
@@ -250,7 +256,7 @@ export default function Scan() {
       </View>
 
       <View className="gap-1">
-        <Text className="font-bold">Calories per serving</Text>
+        <ThemedText className="font-bold">Calories per serving</ThemedText>
 
         <TextInput
           className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
@@ -262,7 +268,7 @@ export default function Scan() {
       </View>
 
       <View className="gap-1">
-        <Text className="font-bold">Number of servings</Text>
+        <ThemedText className="font-bold">Number of servings</ThemedText>
 
         <TextInput
           className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
@@ -274,9 +280,12 @@ export default function Scan() {
       </View>
 
       <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
-        <Text className="text-primary-foreground text-center text-lg font-bold">
+        <ThemedText
+          variant="primary-foreground"
+          className="text-center text-lg font-bold"
+        >
           Log Calories
-        </Text>
+        </ThemedText>
       </Pressable>
     </View>
   );

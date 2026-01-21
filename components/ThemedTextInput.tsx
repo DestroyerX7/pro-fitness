@@ -8,7 +8,7 @@ export default function ThemedTextInput({
   return (
     <TextInput
       className={
-        "text-foreground dark:text-foreground-dark p-4 border border-border rounded-lg dark:border-border-dark " +
+        "text-foreground p-4 border border-border rounded-lg " +
         (className || "")
       }
       {...props}

@@ -8,7 +8,7 @@ import axios from "axios";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 export type Icon =
   | { library: "MaterialIcons"; name: keyof typeof MaterialIcons.glyphMap }
@@ -140,9 +140,12 @@ export default function Workout() {
       </View>
 
       <Pressable onPress={logWorkout} className="bg-primary p-4 rounded-full">
-        <Text className="text-primary-foreground text-center text-lg font-bold">
+        <ThemedText
+          variant="primary-foreground"
+          className="text-center text-lg font-bold"
+        >
           Log Workout
-        </Text>
+        </ThemedText>
       </Pressable>
     </View>
   );

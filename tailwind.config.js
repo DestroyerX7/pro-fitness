@@ -6,69 +6,31 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        foreground: {
-          DEFAULT: "#333333",
-          dark: "#eeeeee",
-        },
-        background: {
-          DEFAULT: "#ffffff",
-          dark: "#111111",
-        },
+        foreground: "var(--color-foreground)",
+        background: "var(--color-background)",
         primary: {
-          DEFAULT: "#0080ff",
-          dark: "#0080ff",
-          foreground: {
-            DEFAULT: "#ffffff",
-            dark: "#ffffff",
-          },
+          DEFAULT: "var(--color-primary)",
+          foreground: "var(--color-primary-foreground)",
         },
         secondary: {
-          DEFAULT: "#f0f0f0",
-          dark: "#222222",
-          foreground: {
-            DEFAULT: "#444444",
-            dark: "#eeeeee",
-          },
+          DEFAULT: "var(--color-secondary)",
+          foreground: "var(--color-secondary-foreground)",
         },
         muted: {
-          DEFAULT: "#f8f8f8",
-          dark: "#181818",
-          foreground: {
-            DEFAULT: "#888888",
-            dark: "#aaaaaa",
-          },
+          DEFAULT: "var(--color-muted)",
+          foreground: "var(--color-muted-foreground)",
         },
-        "card-background": {
-          DEFAULT: "#ffffff",
-          dark: "#222222",
-        },
-        "card-foreground": {
-          DEFAULT: "#333333",
-          dark: "#eeeeee",
-        },
-        border: {
-          DEFAULT: "#e0e0e0",
-          dark: "#404040",
-        },
-        input: {
-          DEFAULT: "#e0e0e0",
-          dark: "#404040",
-        },
+        "card-background": "var(--color-card-background)",
+        "card-foreground": "var(--color-card-foreground)",
+        border: "var(--color-border)",
+        input: "var(--color-input)",
         accent: {
-          DEFAULT: "#e0f2fe",
-          dark: "#1e3a8a",
-          foreground: {
-            DEFAULT: "#1e3a8a",
-            dark: "#e0f2fe",
-          },
+          DEFAULT: "var(--color-accent)",
+          foreground: "var(--color-accent-foreground)",
         },
         destructive: {
-          DEFAULT: "#ef4444",
-          dark: "#ef4444",
-          foreground: {
-            DEFAULT: "#ffffff",
-            dark: "#ffffff",
-          },
+          DEFAULT: "var(--color-destructive)",
+          foreground: "var(--color-destructive-foreground)",
         },
       },
     },

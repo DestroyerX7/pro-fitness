@@ -1,5 +1,6 @@
 import AuthProvider, { useAuth } from "@/components/AuthProvider";
 import { SplashScreenController } from "@/components/SplashScreenController";
+import ThemeProvider from "@/components/ThemeProvider";
 import "@/global.css";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -8,10 +9,12 @@ import { View } from "react-native";
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <SplashScreenController />
+      <ThemeProvider>
+        <SplashScreenController />
 
-      <StatusBar style="auto" />
-      <RootNavigator />
+        <StatusBar style="auto" />
+        <RootNavigator />
+      </ThemeProvider>
     </AuthProvider>
   );
 }

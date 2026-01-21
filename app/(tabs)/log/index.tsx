@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 export default function Index() {
   const { colorScheme } = useColorScheme();
@@ -24,9 +24,9 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Log Calories</ThemedText>
 
-            <Text className="text-muted-foreground">
+            <ThemedText variant="muted-foreground">
               Add food or drinks you have consumed to log their calories
-            </Text>
+            </ThemedText>
           </View>
         </Card>
       </Pressable>
@@ -42,9 +42,9 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Log Workout</ThemedText>
 
-            <Text className="text-muted-foreground">
+            <ThemedText variant="muted-foreground">
               Enter a workout to log its duration
-            </Text>
+            </ThemedText>
           </View>
         </Card>
       </Pressable>
@@ -60,9 +60,9 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Scan Barcode</ThemedText>
 
-            <Text className="text-muted-foreground">
+            <ThemedText variant="muted-foreground">
               Use your camera to scan a barcode and log its calories
-            </Text>
+            </ThemedText>
           </View>
         </Card>
       </Pressable>
@@ -78,10 +78,10 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Presets</ThemedText>
 
-            <Text className="text-muted-foreground">
+            <ThemedText variant="muted-foreground">
               Quickly log calories or workouts by using one of your saved
               presets
-            </Text>
+            </ThemedText>
           </View>
         </Card>
       </Pressable>
@@ -97,7 +97,7 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Test</ThemedText>
 
-            <Text className="text-muted-foreground">Test</Text>
+            <ThemedText variant="muted-foreground">Test</ThemedText>
           </View>
         </Card>
       </Pressable>

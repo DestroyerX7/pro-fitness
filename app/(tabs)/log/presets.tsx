@@ -1,5 +1,6 @@
 import { useAuth } from "@/components/AuthProvider";
 import Card from "@/components/Card";
+import ThemedText from "@/components/ThemedText";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -7,7 +8,7 @@ import axios from "axios";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useEffect, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, View } from "react-native";
 import { iconLibraries } from "./workout";
 
 export type CalorieLogPreset = {
@@ -101,11 +102,11 @@ export default function Favorites() {
           }`}
           onPress={() => setActiveTab("calories")}
         >
-          <Text
-            className={`text-2xl text-foreground ${activeTab === "calories" ? "font-bold" : ""}`}
+          <ThemedText
+            className={`text-2xl ${activeTab === "calories" ? "font-bold" : ""}`}
           >
             Calories
-          </Text>
+          </ThemedText>
         </Pressable>
 
         <Pressable
@@ -116,11 +117,11 @@ export default function Favorites() {
           }`}
           onPress={() => setActiveTab("workouts")}
         >
-          <Text
-            className={`text-2xl text-foreground ${activeTab === "workouts" ? "font-bold" : ""}`}
+          <ThemedText
+            className={`text-2xl ${activeTab === "workouts" ? "font-bold" : ""}`}
           >
             Workouts
-          </Text>
+          </ThemedText>
         </Pressable>
       </View>
 
@@ -148,13 +149,13 @@ export default function Favorites() {
                 )}
 
                 <View className="flex-1 gap-1">
-                  <Text className="text-lg font-bold text-foreground">
+                  <ThemedText className="text-lg font-bold">
                     {calorieLogPreset.name}
-                  </Text>
+                  </ThemedText>
 
-                  <Text className="text-muted-foreground">
+                  <ThemedText variant="muted-foreground">
                     {calorieLogPreset.calories}
-                  </Text>
+                  </ThemedText>
                 </View>
 
                 <Pressable>
@@ -175,13 +176,13 @@ export default function Favorites() {
               color={theme.foreground}
             />
 
-            <Text className="text-foreground text-2xl font-bold">
+            <ThemedText className="text-2xl font-bold">
               No saved calorie presets
-            </Text>
+            </ThemedText>
 
-            <Text className="text-muted-foreground text-center">
+            <ThemedText variant="muted-foreground" className="text-center">
               Edit a calorie log and press create preset based off it's values
-            </Text>
+            </ThemedText>
           </View>
         )
       ) : workoutLogPresets.length > 0 ? (
@@ -201,12 +202,13 @@ export default function Favorites() {
                 />
 
                 <View className="flex-1 gap-1">
-                  <Text className="text-lg font-bold text-foreground">
+                  <ThemedText className="text-lg font-bold">
                     {workoutLogPreset.name}
-                  </Text>
-                  <Text className="text-muted-foreground">
+                  </ThemedText>
+
+                  <ThemedText variant="muted-foreground">
                     {workoutLogPreset.duration} minutes
-                  </Text>
+                  </ThemedText>
                 </View>
 
                 <Pressable>
@@ -228,13 +230,13 @@ export default function Favorites() {
             color={theme.foreground}
           />
 
-          <Text className="text-foreground text-2xl font-bold">
+          <ThemedText className="text-2xl font-bold">
             No saved workout presets
-          </Text>
+          </ThemedText>
 
-          <Text className="text-muted-foreground text-center">
+          <ThemedText variant="muted-foreground" className="text-center">
             Edit a workout log and press create preset based off it's values
-          </Text>
+          </ThemedText>
         </View>
       )}
     </View>

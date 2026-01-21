@@ -1,17 +1,33 @@
-import React, { PropsWithChildren } from "react";
-import { Text } from "react-native";
+import React from "react";
+import { Text, TextProps } from "react-native";
 
 type Props = {
-  className?: string;
-} & PropsWithChildren;
+  variant?:
+    | "foreground"
+    | "background"
+    | "primary"
+    | "primary-foreground"
+    | "secondary"
+    | "secondary-foreground"
+    | "muted"
+    | "muted-foreground"
+    | "accent"
+    | "accent-foreground"
+    | "destructive"
+    | "destructive-foreground"
+    | "custom";
+} & TextProps;
 
-export default function ThemedText({ className, children }: Props) {
+export default function ThemedText({
+  variant = "foreground",
+  className = "",
+  children,
+  ...props
+}: Props) {
+  const yo = variant !== "custom" ? "text-" + variant : "";
+
   return (
-    <Text
-      className={
-        "text-foreground dark:text-foreground-dark " + (className || "")
-      }
-    >
+    <Text className={yo + " " + className} {...props}>
       {children}
     </Text>
   );

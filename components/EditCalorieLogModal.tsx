@@ -6,17 +6,10 @@ import axios from "axios";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
-import {
-  Alert,
-  Image,
-  Modal,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Image, Modal, Pressable, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ThemedText from "./ThemedText";
+import ThemedTextInput from "./ThemedTextInput";
 
 type Props = {
   calorieLog: CalorieLog;
@@ -87,7 +80,7 @@ export default function EditCalorieLogModal({
         <SafeAreaView className="flex-1">
           <Pressable className="flex-1" onPress={close} />
 
-          <View className="bg-background gap-4 rounded-t-[64px] pt-8 px-8 border-t border-x border-border dark:bg-background-dark dark:border-border-dark">
+          <View className="bg-background gap-4 rounded-t-[64px] pt-8 px-8 border-t border-x border-border">
             <View className="flex-row justify-between items-center">
               <ThemedText className="text-2xl font-bold">
                 Edit Calorie Log
@@ -103,15 +96,14 @@ export default function EditCalorieLogModal({
                   color={theme.foreground}
                 />
 
-                <Text className="text-foreground">Create Preset</Text>
+                <ThemedText>Create Preset</ThemedText>
               </Pressable>
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Name</Text>
+              <ThemedText className="font-bold">Name</ThemedText>
 
-              <TextInput
-                className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+              <ThemedTextInput
                 placeholder="Name"
                 value={name}
                 onChangeText={(text) => setName(text)}
@@ -119,10 +111,9 @@ export default function EditCalorieLogModal({
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Calories</Text>
+              <ThemedText className="font-bold">Calories</ThemedText>
 
-              <TextInput
-                className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+              <ThemedTextInput
                 placeholder="Calories"
                 value={calories}
                 onChangeText={(text) => setCalories(text)}
@@ -131,17 +122,16 @@ export default function EditCalorieLogModal({
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Date</Text>
+              <ThemedText className="font-bold">Date</ThemedText>
 
-              <TextInput
-                className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+              <ThemedTextInput
                 placeholder="Calories"
                 defaultValue={calorieLog.date.toString()}
               />
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Image</Text>
+              <ThemedText className="font-bold">Image</ThemedText>
 
               <Pressable
                 className="w-full aspect-square" /*onPress={takePicture}*/
@@ -179,14 +169,16 @@ export default function EditCalorieLogModal({
                 className="bg-secondary p-4 rounded-lg flex-1 items-center justify-center"
                 onPress={close}
               >
-                <Text className="text-foreground font-bold">Cancel</Text>
+                <ThemedText className="font-bold">Cancel</ThemedText>
               </Pressable>
 
               <Pressable
                 className="bg-primary p-4 rounded-lg flex-1 items-center justify-center"
                 onPress={save}
               >
-                <Text className="text-primary-foreground font-bold">Save</Text>
+                <ThemedText variant="primary-foreground" className="font-bold">
+                  Save
+                </ThemedText>
               </Pressable>
             </View>
           </View>

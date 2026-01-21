@@ -7,8 +7,10 @@ import axios from "axios";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
-import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
+import { Alert, Modal, Pressable, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import ThemedText from "./ThemedText";
+import ThemedTextInput from "./ThemedTextInput";
 import WorkoutIconList from "./WorkoutIconList";
 
 type Props = {
@@ -89,7 +91,9 @@ export default function EditWorkoutLogModal({
 
           <View className="bg-background gap-4 rounded-t-[64px] pt-8 px-8 border-t border-x border-border">
             <View className="flex-row justify-between items-center">
-              <Text className="text-2xl font-bold">Edit Workout Log</Text>
+              <ThemedText className="text-2xl font-bold">
+                Edit Workout Log
+              </ThemedText>
 
               <Pressable
                 className="p-2 border border-border bg-background rounded-lg justify-center items-center flex-row gap-2"
@@ -101,15 +105,14 @@ export default function EditWorkoutLogModal({
                   color={theme.foreground}
                 />
 
-                <Text className="text-foreground">Create Preset</Text>
+                <ThemedText>Create Preset</ThemedText>
               </Pressable>
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Name</Text>
+              <ThemedText className="font-bold">Name</ThemedText>
 
-              <TextInput
-                className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+              <ThemedTextInput
                 placeholder="Name"
                 value={name}
                 onChangeText={(text) => setName(text)}
@@ -117,10 +120,9 @@ export default function EditWorkoutLogModal({
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Duration</Text>
+              <ThemedText className="font-bold">Duration</ThemedText>
 
-              <TextInput
-                className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+              <ThemedTextInput
                 placeholder="Calories"
                 value={duration}
                 onChangeText={(text) => setDuration(text)}
@@ -129,17 +131,16 @@ export default function EditWorkoutLogModal({
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Date</Text>
+              <ThemedText className="font-bold">Date</ThemedText>
 
-              <TextInput
-                className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+              <ThemedTextInput
                 placeholder="Calories"
                 defaultValue={workoutLog.date.toString()}
               />
             </View>
 
             <View className="gap-1">
-              <Text className="font-bold text-foreground">Icon</Text>
+              <ThemedText className="font-bold">Icon</ThemedText>
 
               <WorkoutIconList
                 defaultSelected={selectedIcon}
@@ -163,14 +164,16 @@ export default function EditWorkoutLogModal({
                 className="bg-secondary p-4 rounded-lg flex-1 items-center justify-center"
                 onPress={close}
               >
-                <Text className="text-foreground font-bold">Cancel</Text>
+                <ThemedText className="font-bold">Cancel</ThemedText>
               </Pressable>
 
               <Pressable
                 className="bg-primary p-4 rounded-lg flex-1 items-center justify-center"
                 onPress={save}
               >
-                <Text className="text-primary-foreground font-bold">Save</Text>
+                <ThemedText variant="primary-foreground" className="font-bold">
+                  Save
+                </ThemedText>
               </Pressable>
             </View>
           </View>

@@ -15,7 +15,7 @@ import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
 import { useColorScheme } from "nativewind";
 import React, { useCallback, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { iconLibraries } from "./log/workout";
 
@@ -302,11 +302,13 @@ export default function Index() {
           </View>
 
           <ThemedText>
-            <Text className="text-4xl font-bold">{loggedCalories}</Text> /{" "}
-            {user.dailyCalorieGoal}
+            <ThemedText className="text-4xl font-bold">
+              {loggedCalories}
+            </ThemedText>{" "}
+            / {user.dailyCalorieGoal}
           </ThemedText>
 
-          <View className="h-8 bg-muted rounded-full dark:bg-muted-dark">
+          <View className="h-8 bg-muted rounded-full">
             <View
               className="h-full bg-[#30d030] rounded-full"
               style={{
@@ -341,11 +343,13 @@ export default function Index() {
           </View>
 
           <ThemedText>
-            <Text className="text-4xl font-bold">{loggedWorkoutTime}</Text> /{" "}
-            {user.dailyWorkoutGoal}
+            <ThemedText className="text-4xl font-bold">
+              {loggedWorkoutTime}
+            </ThemedText>{" "}
+            / {user.dailyWorkoutGoal}
           </ThemedText>
 
-          <View className="h-8 bg-muted rounded-full dark:bg-muted-dark">
+          <View className="h-8 bg-muted rounded-full">
             <View
               className="h-full bg-primary rounded-full"
               style={{
@@ -370,7 +374,7 @@ export default function Index() {
           <Pressable
             className={`border-b-2 ${
               activeTab === "calories"
-                ? "border-foreground dark:border-foreground-dark"
+                ? "border-foreground"
                 : "border-transparent"
             }`}
             onPress={() => setActiveTab("calories")}
@@ -385,7 +389,7 @@ export default function Index() {
           <Pressable
             className={`border-b-2 ${
               activeTab === "workouts"
-                ? "border-foreground dark:border-foreground-dark"
+                ? "border-foreground"
                 : "border-transparent"
             }`}
             onPress={() => setActiveTab("workouts")}
@@ -408,7 +412,7 @@ export default function Index() {
                     source={{ uri: calorieLog.imageUrl }}
                   />
                 ) : (
-                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center dark:border-border-dark">
+                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
                     <MaterialCommunityIcons
                       name="food"
                       size={32}
@@ -422,9 +426,9 @@ export default function Index() {
                     {calorieLog.name}
                   </ThemedText>
 
-                  <Text className="text-muted-foreground dark:text-muted-foreground-dark">
+                  <ThemedText variant="muted-foreground">
                     {calorieLog.calories}
-                  </Text>
+                  </ThemedText>
                 </View>
 
                 <Pressable onPress={() => editCalorieLog(calorieLog)}>
@@ -450,12 +454,12 @@ export default function Index() {
               </ThemedText>
 
               <Pressable
-                className="bg-secondary p-4 rounded-lg dark:bg-secondary-dark"
+                className="bg-secondary p-4 rounded-lg"
                 onPress={() => router.push("/(tabs)/log/calories")}
               >
-                <Text className="text-secondary-foreground dark:text-secondary-foreground-dark">
+                <ThemedText variant="secondary-foreground">
                   Log calories
-                </Text>
+                </ThemedText>
               </Pressable>
             </View>
           )
@@ -476,9 +480,9 @@ export default function Index() {
                     {workoutLog.name}
                   </ThemedText>
 
-                  <Text className="text-muted-foreground dark:text-muted-foreground-dark">
+                  <ThemedText variant="muted-foreground">
                     {workoutLog.duration} minutes
-                  </Text>
+                  </ThemedText>
                 </View>
 
                 <Pressable onPress={() => editWorkoutLog(workoutLog)}>
@@ -505,12 +509,12 @@ export default function Index() {
             </ThemedText>
 
             <Pressable
-              className="bg-secondary p-4 rounded-lg dark:bg-secondary-dark"
+              className="bg-secondary p-4 rounded-lg"
               onPress={() => router.push("/(tabs)/log/workout")}
             >
-              <Text className="text-secondary-foreground dark:text-secondary-foreground-dark">
+              <ThemedText variant="secondary-foreground">
                 Log workout
-              </Text>
+              </ThemedText>
             </Pressable>
           </View>
         )}
