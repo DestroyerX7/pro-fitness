@@ -24,7 +24,7 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Log Calories</ThemedText>
 
-            <ThemedText variant="muted-foreground">
+            <ThemedText color="muted-foreground">
               Add food or drinks you have consumed to log their calories
             </ThemedText>
           </View>
@@ -42,7 +42,7 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Log Workout</ThemedText>
 
-            <ThemedText variant="muted-foreground">
+            <ThemedText color="muted-foreground">
               Enter a workout to log its duration
             </ThemedText>
           </View>
@@ -60,7 +60,7 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Scan Barcode</ThemedText>
 
-            <ThemedText variant="muted-foreground">
+            <ThemedText color="muted-foreground">
               Use your camera to scan a barcode and log its calories
             </ThemedText>
           </View>
@@ -78,26 +78,10 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Presets</ThemedText>
 
-            <ThemedText variant="muted-foreground">
+            <ThemedText color="muted-foreground">
               Quickly log calories or workouts by using one of your saved
               presets
             </ThemedText>
-          </View>
-        </Card>
-      </Pressable>
-
-      <Pressable onPress={() => router.push("/(tabs)/log/test")}>
-        <Card className="flex-row gap-4">
-          <MaterialCommunityIcons
-            name="test-tube"
-            size={64}
-            color={theme.foreground}
-          />
-
-          <View className="gap-1 flex-1">
-            <ThemedText className="text-2xl font-bold">Test</ThemedText>
-
-            <ThemedText variant="muted-foreground">Test</ThemedText>
           </View>
         </Card>
       </Pressable>

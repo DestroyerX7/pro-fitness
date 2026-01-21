@@ -117,7 +117,7 @@ export default function Calories() {
               style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
             />
           ) : (
-            <View className="border border-border rounded-2xl h-full items-center justify-center">
+            <View className="border border-border rounded-xl h-full items-center justify-center">
               <MaterialCommunityIcons
                 name="camera"
                 size={128}
@@ -128,7 +128,7 @@ export default function Calories() {
                 No picture taken
               </ThemedText>
 
-              <ThemedText variant="muted-foreground">
+              <ThemedText color="muted-foreground">
                 Tap to take a picture
               </ThemedText>
             </View>
@@ -138,7 +138,7 @@ export default function Calories() {
 
       <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
         <ThemedText
-          variant="primary-foreground"
+          color="primary-foreground"
           className="text-center text-lg font-bold"
         >
           Log Calories

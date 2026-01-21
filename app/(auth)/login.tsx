@@ -1,14 +1,20 @@
+import ThemedText from "@/components/ThemedText";
+import ThemedTextInput from "@/components/ThemedTextInput";
 import { authClient } from "@/lib/auth-client";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
+import { useColorScheme } from "nativewind";
 import { useState } from "react";
-import { Image, Pressable, Text, TextInput, View } from "react-native";
+import { Image, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   const handleLogin = async () => {
     await authClient.signIn.email({
@@ -38,10 +44,9 @@ export default function Login() {
 
   return (
     <SafeAreaView className="p-4 gap-4">
-      <Text className="text-4xl font-bold">Login</Text>
+      <ThemedText className="text-4xl font-bold">Login</ThemedText>
 
-      <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+      <ThemedTextInput
         placeholder="Email"
         textContentType="emailAddress"
         keyboardType="email-address"
@@ -49,8 +54,7 @@ export default function Login() {
         onChangeText={setEmail}
       />
 
-      <TextInput
-        className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+      <ThemedTextInput
         placeholder="Password"
         textContentType="password"
         secureTextEntry
@@ -58,14 +62,14 @@ export default function Login() {
         onChangeText={setPassword}
       />
 
-      <Pressable className="p-4 bg-primary rounded-lg" onPress={handleLogin}>
-        <Text className="text-primary-foreground">Login</Text>
+      <Pressable className="p-4 bg-primary rounded-xl" onPress={handleLogin}>
+        <ThemedText color="primary-foreground">Login</ThemedText>
       </Pressable>
 
-      <View className="h-[2px] bg-border" />
+      <View className="h-[1px] bg-border " />
 
       <Pressable
-        className="p-4 bg-background rounded-lg border border-border flex-row items-center gap-4"
+        className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"
         onPress={loginWithGoogle}
       >
         <Image
@@ -74,24 +78,26 @@ export default function Login() {
             uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/500px-Google_%22G%22_logo.svg.png",
           }}
         />
-        <Text className="text-foreground">Login with Google</Text>
+        <ThemedText>Login with Google</ThemedText>
       </Pressable>
 
-      <Pressable className="p-4 bg-background rounded-lg border border-border flex-row items-center gap-4">
+      <Pressable className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4">
         <MaterialCommunityIcons
           name="apple"
           size={32}
-          color={colors.foreground}
+          color={theme.foreground}
         />
-        <Text className="text-foreground">Login with Apple</Text>
+        <ThemedText>Login with Apple</ThemedText>
       </Pressable>
 
-      <Text className="text-center text-xl">
+      <ThemedText className="text-center text-xl">
         Don't have an account?{" "}
-        <Link className="text-primary underline" href="/(auth)/sign-up">
-          <Text>Sign Up</Text>
+        <Link href="/(auth)/sign-up">
+          <ThemedText color="primary" className="underline">
+            Sign Up
+          </ThemedText>
         </Link>
-      </Text>
+      </ThemedText>
     </SafeAreaView>
   );
 }

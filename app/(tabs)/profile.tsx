@@ -59,62 +59,62 @@ export default function Profile() {
   }
 
   return (
-    <SafeAreaView className="p-4 gap-4">
+    <SafeAreaView className="p-4 gap-4" edges={["top"]}>
       <View>
-        <ThemedText className="text-4xl font-bold">
-          Welcome {user.name}
-        </ThemedText>
+        <ThemedText className="text-4xl font-bold">{user.name}</ThemedText>
 
-        <ThemedText variant="muted-foreground">{user.email}</ThemedText>
+        <ThemedText color="muted-foreground">{user.email}</ThemedText>
       </View>
 
-      <View className="gap-4 bg-card-background p-8 rounded-[32px] border border-border">
+      <View className="gap-4 bg-card-background p-4 rounded-xl border border-border">
+        <ThemedText className="text-2xl font-bold">Profile Info</ThemedText>
+
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Name</ThemedText>
-          <ThemedText variant="secondary-foreground" className="text-xl">
+          <ThemedText color="muted-foreground" className="text-xl">
             {user.name}
           </ThemedText>
         </View>
 
-        <View className="h-[1px] bg-muted-foreground" />
+        <View className="h-[1px] bg-border" />
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Email</ThemedText>
-          <ThemedText variant="secondary-foreground" className="text-xl">
+          <ThemedText color="muted-foreground" className="text-xl">
             {user.email}
           </ThemedText>
         </View>
 
-        <View className="h-[1px] bg-muted-foreground" />
+        <View className="h-[1px] bg-border" />
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Daily Calorie Goal</ThemedText>
-          <ThemedText variant="secondary-foreground" className="text-xl">
+          <ThemedText color="muted-foreground" className="text-xl">
             {user.dailyCalorieGoal} calories
           </ThemedText>
         </View>
 
-        <View className="h-[1px] bg-muted-foreground" />
+        <View className="h-[1px] bg-border" />
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Daily Workout Goal</ThemedText>
-          <ThemedText variant="secondary-foreground" className="text-xl">
+          <ThemedText color="muted-foreground" className="text-xl">
             {user.dailyWorkoutGoal} minutes
           </ThemedText>
         </View>
 
-        <View className="h-[1px] bg-muted-foreground" />
+        <View className="h-[1px] bg-border" />
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Account Created</ThemedText>
-          <ThemedText variant="secondary-foreground" className="text-xl">
+          <ThemedText color="muted-foreground" className="text-xl">
             {new Date(user.createdAt.toString()).toLocaleDateString()}
           </ThemedText>
         </View>
       </View>
 
       <Pressable
-        className="bg-foreground p-4 rounded-full flex-row gap-2 items-center"
+        className="bg-foreground p-4 rounded-xl flex-row gap-2 items-center"
         onPress={async () => await authClient.signOut()}
       >
         <MaterialCommunityIcons
@@ -122,11 +122,12 @@ export default function Profile() {
           size={24}
           color={theme.background}
         />
-        <ThemedText variant="background">Log out</ThemedText>
+
+        <ThemedText color="background">Log out</ThemedText>
       </Pressable>
 
       <Pressable
-        className="bg-muted //border border-[#ffdddd] p-4 rounded-full flex-row gap-2 items-center"
+        className="bg-muted p-4 rounded-xl flex-row gap-2 items-center"
         onPress={showConfirmDeleteUser}
       >
         <MaterialCommunityIcons
@@ -134,7 +135,7 @@ export default function Profile() {
           size={24}
           color={theme.destructive}
         />
-        <ThemedText variant="foreground">Delete Account</ThemedText>
+        <ThemedText color="muted-foreground">Delete Account</ThemedText>
       </Pressable>
     </SafeAreaView>
   );

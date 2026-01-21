@@ -13,7 +13,7 @@ import { BarcodeScanningResult, CameraView } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import { useRef, useState } from "react";
-import { Image, Pressable, TextInput, View } from "react-native";
+import { Image, Pressable, View } from "react-native";
 
 type GetProductByBarcodeResponse = {
   product: Product;
@@ -139,7 +139,7 @@ export default function Scan() {
           />
 
           <ThemedText
-            variant="primary-foreground"
+            color="primary-foreground"
             className="text-center text-lg font-bold"
           >
             Rescan
@@ -200,7 +200,7 @@ export default function Scan() {
         />
 
         <ThemedText
-          variant="secondary-foreground"
+          color="secondary-foreground"
           className="text-center text-lg font-bold"
         >
           Rescan
@@ -227,7 +227,7 @@ export default function Scan() {
             Product image not found
           </ThemedText>
 
-          <ThemedText variant="muted-foreground">
+          <ThemedText color="muted-foreground">
             Tap to take your own picture
           </ThemedText>
         </View>
@@ -248,8 +248,7 @@ export default function Scan() {
       <View className="gap-1">
         <ThemedText className="font-bold">Date</ThemedText>
 
-        <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+        <ThemedTextInput
           placeholder="Date"
           value={new Date().toLocaleDateString()}
         />
@@ -258,8 +257,7 @@ export default function Scan() {
       <View className="gap-1">
         <ThemedText className="font-bold">Calories per serving</ThemedText>
 
-        <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+        <ThemedTextInput
           placeholder="Calories per serving"
           keyboardType="number-pad"
           value={caloriesPerServing}
@@ -270,8 +268,7 @@ export default function Scan() {
       <View className="gap-1">
         <ThemedText className="font-bold">Number of servings</ThemedText>
 
-        <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+        <ThemedTextInput
           placeholder="Number of servings"
           keyboardType="number-pad"
           value={numberOfServings}
@@ -281,7 +278,7 @@ export default function Scan() {
 
       <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
         <ThemedText
-          variant="primary-foreground"
+          color="primary-foreground"
           className="text-center text-lg font-bold"
         >
           Log Calories

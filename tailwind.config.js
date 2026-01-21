@@ -31,6 +31,7 @@ module.exports = {
         destructive: {
           DEFAULT: "var(--color-destructive)",
           foreground: "var(--color-destructive-foreground)",
+          accent: "var(--color-destructive-accent)",
         },
       },
     },

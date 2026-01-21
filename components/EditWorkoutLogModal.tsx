@@ -96,7 +96,7 @@ export default function EditWorkoutLogModal({
               </ThemedText>
 
               <Pressable
-                className="p-2 border border-border bg-background rounded-lg justify-center items-center flex-row gap-2"
+                className="p-2 border border-border bg-background rounded-xl justify-center items-center flex-row gap-2"
                 onPress={() => createWorkoutLogPreset(workoutLog)}
               >
                 <MaterialCommunityIcons
@@ -150,7 +150,7 @@ export default function EditWorkoutLogModal({
 
             <View className="flex-row gap-4">
               <Pressable
-                className="bg-[#ffdddd] p-4 rounded-lg items-center justify-center"
+                className="bg-destructive-accent p-4 rounded-xl items-center justify-center"
                 onPress={() => showConfirmDeleteWorkoutLog(workoutLog)}
               >
                 <MaterialCommunityIcons
@@ -161,19 +161,17 @@ export default function EditWorkoutLogModal({
               </Pressable>
 
               <Pressable
-                className="bg-secondary p-4 rounded-lg flex-1 items-center justify-center"
+                className="bg-secondary p-4 rounded-xl flex-1 items-center justify-center"
                 onPress={close}
               >
-                <ThemedText className="font-bold">Cancel</ThemedText>
+                <ThemedText>Cancel</ThemedText>
               </Pressable>
 
               <Pressable
-                className="bg-primary p-4 rounded-lg flex-1 items-center justify-center"
+                className="bg-primary p-4 rounded-xl flex-1 items-center justify-center"
                 onPress={save}
               >
-                <ThemedText variant="primary-foreground" className="font-bold">
-                  Save
-                </ThemedText>
+                <ThemedText color="primary-foreground">Save</ThemedText>
               </Pressable>
             </View>
           </View>

@@ -87,7 +87,7 @@ export default function EditCalorieLogModal({
               </ThemedText>
 
               <Pressable
-                className="p-2 border border-border bg-background rounded-lg justify-center items-center flex-row gap-2"
+                className="p-2 border border-border bg-background rounded-xl justify-center items-center flex-row gap-2"
                 onPress={() => createCalorieLogPreset(calorieLog)}
               >
                 <MaterialCommunityIcons
@@ -142,7 +142,7 @@ export default function EditCalorieLogModal({
                     style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
                   />
                 ) : (
-                  <View className="flex-1 border rounded-2xl border-border items-center justify-center">
+                  <View className="flex-1 border rounded-xl border-border items-center justify-center">
                     <MaterialCommunityIcons
                       name="food"
                       size={256}
@@ -155,7 +155,7 @@ export default function EditCalorieLogModal({
 
             <View className="flex-row gap-4">
               <Pressable
-                className="bg-[#ffdddd] p-4 rounded-lg items-center justify-center"
+                className="bg-destructive-accent p-4 rounded-xl items-center justify-center"
                 onPress={() => showConfirmDeleteCalorieLog(calorieLog)}
               >
                 <MaterialCommunityIcons
@@ -166,19 +166,17 @@ export default function EditCalorieLogModal({
               </Pressable>
 
               <Pressable
-                className="bg-secondary p-4 rounded-lg flex-1 items-center justify-center"
+                className="bg-secondary p-4 rounded-xl flex-1 items-center justify-center"
                 onPress={close}
               >
-                <ThemedText className="font-bold">Cancel</ThemedText>
+                <ThemedText>Cancel</ThemedText>
               </Pressable>
 
               <Pressable
-                className="bg-primary p-4 rounded-lg flex-1 items-center justify-center"
+                className="bg-primary p-4 rounded-xl flex-1 items-center justify-center"
                 onPress={save}
               >
-                <ThemedText variant="primary-foreground" className="font-bold">
-                  Save
-                </ThemedText>
+                <ThemedText color="primary-foreground">Save</ThemedText>
               </Pressable>
             </View>
           </View>

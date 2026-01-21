@@ -1,13 +1,12 @@
-import { SplashScreen } from "expo-router";
 import { useAuth } from "./AuthProvider";
 
-SplashScreen.preventAutoHideAsync();
+// SplashScreen.preventAutoHideAsync();
 
 export function SplashScreenController() {
   const { isPending } = useAuth();
 
   if (!isPending) {
-    SplashScreen.hide();
+    // SplashScreen.hide();
   }
 
   return null;

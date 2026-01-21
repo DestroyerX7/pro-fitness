@@ -21,6 +21,7 @@ const themes = {
     "--color-accent-foreground": colors.light.accentForeground,
     "--color-destructive": colors.light.destructive,
     "--color-destructive-foreground": colors.light.destructiveForeground,
+    "--color-destructive-accent": colors.light.destructiveAccent,
   }),
   dark: vars({
     "--color-foreground": colors.dark.foreground,
@@ -39,6 +40,7 @@ const themes = {
     "--color-accent-foreground": colors.dark.accentForeground,
     "--color-destructive": colors.dark.destructive,
     "--color-destructive-foreground": colors.dark.destructiveForeground,
+    "--color-destructive-accent": colors.dark.destructiveAccent,
   }),
 };
 

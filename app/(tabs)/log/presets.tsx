@@ -135,11 +135,11 @@ export default function Favorites() {
               <Card className="flex-row gap-4">
                 {calorieLogPreset.imageUrl !== null ? (
                   <Image
-                    className="w-16 h-16 rounded-md"
+                    className="w-16 h-16 rounded-xl"
                     source={{ uri: calorieLogPreset.imageUrl }}
                   />
                 ) : (
-                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
+                  <View className="w-16 h-16 border rounded-xl border-border items-center justify-center">
                     <MaterialCommunityIcons
                       name="food"
                       size={32}
@@ -153,7 +153,7 @@ export default function Favorites() {
                     {calorieLogPreset.name}
                   </ThemedText>
 
-                  <ThemedText variant="muted-foreground">
+                  <ThemedText color="muted-foreground">
                     {calorieLogPreset.calories}
                   </ThemedText>
                 </View>
@@ -169,7 +169,7 @@ export default function Favorites() {
             </Pressable>
           ))
         ) : (
-          <View className="p-4 border border-border rounded-lg items-center">
+          <View className="p-4 border border-border rounded-xl items-center">
             <MaterialCommunityIcons
               name="tune"
               size={64}
@@ -180,7 +180,7 @@ export default function Favorites() {
               No saved calorie presets
             </ThemedText>
 
-            <ThemedText variant="muted-foreground" className="text-center">
+            <ThemedText color="muted-foreground" className="text-center">
               Edit a calorie log and press create preset based off it's values
             </ThemedText>
           </View>
@@ -206,7 +206,7 @@ export default function Favorites() {
                     {workoutLogPreset.name}
                   </ThemedText>
 
-                  <ThemedText variant="muted-foreground">
+                  <ThemedText color="muted-foreground">
                     {workoutLogPreset.duration} minutes
                   </ThemedText>
                 </View>
@@ -223,7 +223,7 @@ export default function Favorites() {
           );
         })
       ) : (
-        <View className="p-4 border border-border rounded-lg items-center">
+        <View className="p-4 border border-border rounded-xl items-center">
           <MaterialCommunityIcons
             name="tune"
             size={64}
@@ -234,7 +234,7 @@ export default function Favorites() {
             No saved workout presets
           </ThemedText>
 
-          <ThemedText variant="muted-foreground" className="text-center">
+          <ThemedText color="muted-foreground" className="text-center">
             Edit a workout log and press create preset based off it's values
           </ThemedText>
         </View>

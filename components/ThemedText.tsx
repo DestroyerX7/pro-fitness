@@ -2,7 +2,7 @@ import React from "react";
 import { Text, TextProps } from "react-native";
 
 type Props = {
-  variant?:
+  color?:
     | "foreground"
     | "background"
     | "primary"
@@ -19,15 +19,15 @@ type Props = {
 } & TextProps;
 
 export default function ThemedText({
-  variant = "foreground",
+  color = "foreground",
   className = "",
   children,
   ...props
 }: Props) {
-  const yo = variant !== "custom" ? "text-" + variant : "";
+  const textColor = color !== "custom" ? `text-${color} ` : " ";
 
   return (
-    <Text className={yo + " " + className} {...props}>
+    <Text className={textColor + className} {...props}>
       {children}
     </Text>
   );

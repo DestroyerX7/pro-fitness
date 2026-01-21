@@ -141,7 +141,7 @@ export default function Workout() {
 
       <Pressable onPress={logWorkout} className="bg-primary p-4 rounded-full">
         <ThemedText
-          variant="primary-foreground"
+          color="primary-foreground"
           className="text-center text-lg font-bold"
         >
           Log Workout

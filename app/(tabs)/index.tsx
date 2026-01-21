@@ -308,7 +308,7 @@ export default function Index() {
             / {user.dailyCalorieGoal}
           </ThemedText>
 
-          <View className="h-8 bg-muted rounded-full">
+          <View className="h-8 bg-border rounded-full">
             <View
               className="h-full bg-[#30d030] rounded-full"
               style={{
@@ -349,7 +349,7 @@ export default function Index() {
             / {user.dailyWorkoutGoal}
           </ThemedText>
 
-          <View className="h-8 bg-muted rounded-full">
+          <View className="h-8 bg-border rounded-full">
             <View
               className="h-full bg-primary rounded-full"
               style={{
@@ -408,11 +408,11 @@ export default function Index() {
               <Card className="flex-row gap-4" key={calorieLog.id}>
                 {calorieLog.imageUrl !== null ? (
                   <Image
-                    className="w-16 h-16 rounded-md"
+                    className="w-16 h-16 rounded-xl"
                     source={{ uri: calorieLog.imageUrl }}
                   />
                 ) : (
-                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
+                  <View className="w-16 h-16 border rounded-xl border-border items-center justify-center">
                     <MaterialCommunityIcons
                       name="food"
                       size={32}
@@ -426,7 +426,7 @@ export default function Index() {
                     {calorieLog.name}
                   </ThemedText>
 
-                  <ThemedText variant="muted-foreground">
+                  <ThemedText color="muted-foreground">
                     {calorieLog.calories}
                   </ThemedText>
                 </View>
@@ -454,10 +454,10 @@ export default function Index() {
               </ThemedText>
 
               <Pressable
-                className="bg-secondary p-4 rounded-lg"
+                className="bg-secondary p-4 rounded-xl"
                 onPress={() => router.push("/(tabs)/log/calories")}
               >
-                <ThemedText variant="secondary-foreground">
+                <ThemedText color="secondary-foreground">
                   Log calories
                 </ThemedText>
               </Pressable>
@@ -480,7 +480,7 @@ export default function Index() {
                     {workoutLog.name}
                   </ThemedText>
 
-                  <ThemedText variant="muted-foreground">
+                  <ThemedText color="muted-foreground">
                     {workoutLog.duration} minutes
                   </ThemedText>
                 </View>
@@ -509,12 +509,10 @@ export default function Index() {
             </ThemedText>
 
             <Pressable
-              className="bg-secondary p-4 rounded-lg"
+              className="bg-secondary p-4 rounded-xl"
               onPress={() => router.push("/(tabs)/log/workout")}
             >
-              <ThemedText variant="secondary-foreground">
-                Log workout
-              </ThemedText>
+              <ThemedText color="secondary-foreground">Log workout</ThemedText>
             </Pressable>
           </View>
         )}
