@@ -1,11 +1,16 @@
 import Card from "@/components/Card";
+import ThemedText from "@/components/ThemedText";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useColorScheme } from "nativewind";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 
 export default function Index() {
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
+
   return (
     <View className="flex-1 p-4 gap-4">
       <Pressable onPress={() => router.push("/(tabs)/log/calories")}>
@@ -13,13 +18,11 @@ export default function Index() {
           <MaterialCommunityIcons
             name="food"
             size={64}
-            color={colors.foreground}
+            color={theme.foreground}
           />
 
           <View className="gap-1 flex-1">
-            <Text className="text-2xl text-foreground font-bold">
-              Log Calories
-            </Text>
+            <ThemedText className="text-2xl font-bold">Log Calories</ThemedText>
 
             <Text className="text-muted-foreground">
               Add food or drinks you have consumed to log their calories
@@ -33,13 +36,11 @@ export default function Index() {
           <MaterialCommunityIcons
             name="run"
             size={64}
-            color={colors.foreground}
+            color={theme.foreground}
           />
 
           <View className="gap-1 flex-1">
-            <Text className="text-2xl text-foreground font-bold">
-              Log Workout
-            </Text>
+            <ThemedText className="text-2xl font-bold">Log Workout</ThemedText>
 
             <Text className="text-muted-foreground">
               Enter a workout to log its duration
@@ -53,13 +54,11 @@ export default function Index() {
           <MaterialCommunityIcons
             name="barcode-scan"
             size={64}
-            color={colors.foreground}
+            color={theme.foreground}
           />
 
           <View className="gap-1 flex-1">
-            <Text className="text-2xl text-foreground font-bold">
-              Scan Barcode
-            </Text>
+            <ThemedText className="text-2xl font-bold">Scan Barcode</ThemedText>
 
             <Text className="text-muted-foreground">
               Use your camera to scan a barcode and log its calories
@@ -73,11 +72,11 @@ export default function Index() {
           <MaterialCommunityIcons
             name="tune"
             size={64}
-            color={colors.foreground}
+            color={theme.foreground}
           />
 
           <View className="gap-1 flex-1">
-            <Text className="text-2xl text-foreground font-bold">Presets</Text>
+            <ThemedText className="text-2xl font-bold">Presets</ThemedText>
 
             <Text className="text-muted-foreground">
               Quickly log calories or workouts by using one of your saved
@@ -92,11 +91,11 @@ export default function Index() {
           <MaterialCommunityIcons
             name="test-tube"
             size={64}
-            color={colors.foreground}
+            color={theme.foreground}
           />
 
           <View className="gap-1 flex-1">
-            <Text className="text-2xl text-foreground font-bold">Test</Text>
+            <ThemedText className="text-2xl font-bold">Test</ThemedText>
 
             <Text className="text-muted-foreground">Test</Text>
           </View>

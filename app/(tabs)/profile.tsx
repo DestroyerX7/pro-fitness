@@ -4,6 +4,7 @@ import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
+import { useColorScheme } from "nativewind";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,6 +14,9 @@ export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
 
   const { data } = useAuth();
+
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   useEffect(() => {
     const getUser = async () => {
@@ -60,7 +64,7 @@ export default function Profile() {
           Welcome {user.name}
         </Text>
 
-        <Text className="text-secondaryForeground">{user.email}</Text>
+        <Text className="text-muted-foreground">{user.email}</Text>
       </View>
 
       <View className="gap-4 bg-background p-8 rounded-[32px]">
@@ -111,7 +115,7 @@ export default function Profile() {
         <MaterialCommunityIcons
           name="logout"
           size={24}
-          color={colors.background}
+          color={theme.background}
         />
         <Text className="text-background">Log out</Text>
       </Pressable>
@@ -123,7 +127,7 @@ export default function Profile() {
         <MaterialCommunityIcons
           name="trash-can"
           size={24}
-          color={colors.destructive}
+          color={theme.destructive}
         />
         <Text className="text-destructive">Delete Account</Text>
       </Pressable>

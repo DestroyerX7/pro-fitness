@@ -5,6 +5,7 @@ import { colors } from "@/lib/colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
+import { useColorScheme } from "nativewind";
 import React, { useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { iconLibraries } from "./workout";
@@ -41,6 +42,9 @@ export default function Favorites() {
   );
 
   const { data } = useAuth();
+
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   useEffect(() => {
     const getCalorieLogPresets = async () => {
@@ -138,7 +142,7 @@ export default function Favorites() {
                     <MaterialCommunityIcons
                       name="food"
                       size={32}
-                      color={colors.foreground}
+                      color={theme.foreground}
                     />
                   </View>
                 )}
@@ -157,7 +161,7 @@ export default function Favorites() {
                   <Ionicons
                     name="ellipsis-horizontal"
                     size={24}
-                    color={colors.foreground}
+                    color={theme.foreground}
                   />
                 </Pressable>
               </Card>
@@ -168,7 +172,7 @@ export default function Favorites() {
             <MaterialCommunityIcons
               name="tune"
               size={64}
-              color={colors.foreground}
+              color={theme.foreground}
             />
 
             <Text className="text-foreground text-2xl font-bold">
@@ -193,7 +197,7 @@ export default function Favorites() {
                 <IconComponent
                   name={workoutLogPreset.iconName as any}
                   size={48}
-                  color={colors.foreground}
+                  color={theme.foreground}
                 />
 
                 <View className="flex-1 gap-1">
@@ -209,7 +213,7 @@ export default function Favorites() {
                   <Ionicons
                     name="ellipsis-horizontal"
                     size={24}
-                    color={colors.foreground}
+                    color={theme.foreground}
                   />
                 </Pressable>
               </Card>
@@ -221,7 +225,7 @@ export default function Favorites() {
           <MaterialCommunityIcons
             name="tune"
             size={64}
-            color={colors.foreground}
+            color={theme.foreground}
           />
 
           <Text className="text-foreground text-2xl font-bold">

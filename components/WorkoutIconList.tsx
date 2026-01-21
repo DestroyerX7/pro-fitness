@@ -1,5 +1,6 @@
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 
@@ -51,6 +52,9 @@ export default function WorkoutIconList({
 }: Props) {
   const [selectedIcon, setSelectedIcon] = useState<Icon>(defaultSelected);
 
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
+
   const select = (icon: Icon) => {
     onSelect(icon);
     setSelectedIcon(icon);
@@ -74,7 +78,7 @@ export default function WorkoutIconList({
                 selectedIcon.name === icon.name && {
                   borderWidth: 2,
                   borderRadius: 8,
-                  borderColor: colors.foreground,
+                  borderColor: theme.foreground,
                 },
             ]}
             onPress={() => select(icon)}
@@ -82,7 +86,7 @@ export default function WorkoutIconList({
             <IconComponent
               name={icon.name as any}
               size={iconSize}
-              color={colors.foreground}
+              color={theme.foreground}
             />
           </Pressable>
         );

@@ -1,12 +1,18 @@
 import { colors } from "@/lib/colors";
 import { Stack } from "expo-router";
+import { useColorScheme } from "nativewind";
 
 export default function LogLayout() {
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
+
   return (
     <Stack
       screenOptions={{
         headerBackButtonDisplayMode: "minimal",
-        contentStyle: { backgroundColor: colors.background },
+        contentStyle: { backgroundColor: theme.background },
+        headerStyle: { backgroundColor: theme.background },
+        headerTitleStyle: { color: theme.foreground },
       }}
     >
       <Stack.Screen name="index" options={{ title: "Log Item" }} />

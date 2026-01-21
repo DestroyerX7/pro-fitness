@@ -1,4 +1,6 @@
 import { useAuth } from "@/components/AuthProvider";
+import ThemedText from "@/components/ThemedText";
+import ThemedTextInput from "@/components/ThemedTextInput";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -6,8 +8,9 @@ import axios from "axios";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
+import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
-import { Image, Pressable, Text, TextInput, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 
 export default function Calories() {
   const [name, setName] = useState("");
@@ -15,6 +18,9 @@ export default function Calories() {
   const [image, setImage] = useState<string | null>(null);
 
   const { data } = useAuth();
+
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   const logCalories = async () => {
     const trimmedName = name.trim();
@@ -72,10 +78,9 @@ export default function Calories() {
   return (
     <View className="p-4 gap-4">
       <View className="gap-1">
-        <Text className="font-bold text-foreground">Name</Text>
+        <ThemedText className="font-bold">Name</ThemedText>
 
-        <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+        <ThemedTextInput
           placeholder="Name"
           value={name}
           onChangeText={(text) => setName(text)}
@@ -83,10 +88,9 @@ export default function Calories() {
       </View>
 
       <View className="gap-1">
-        <Text className="font-bold text-foreground">Calories</Text>
+        <ThemedText className="font-bold">Calories</ThemedText>
 
-        <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+        <ThemedTextInput
           placeholder="Calories"
           keyboardType="number-pad"
           value={calories}
@@ -95,17 +99,16 @@ export default function Calories() {
       </View>
 
       <View className="gap-1">
-        <Text className="font-bold text-foreground">Date</Text>
+        <ThemedText className="font-bold">Date</ThemedText>
 
-        <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+        <ThemedTextInput
           placeholder="Date"
           value={new Date().toLocaleDateString()}
         />
       </View>
 
       <View className="gap-1">
-        <Text className="font-bold text-foreground">Image</Text>
+        <ThemedText className="font-bold">Image</ThemedText>
 
         <Pressable className="w-full aspect-square" onPress={takePicture}>
           {image !== null ? (
@@ -114,18 +117,18 @@ export default function Calories() {
               style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
             />
           ) : (
-            <View className="border border-border rounded-2xl h-full items-center justify-center">
+            <View className="border border-border rounded-2xl h-full items-center justify-center dark:border-border-dark">
               <MaterialCommunityIcons
                 name="camera"
                 size={128}
-                color={colors.foreground}
+                color={theme.foreground}
               />
 
-              <Text className="text-2xl font-bold text-foreground">
+              <ThemedText className="text-2xl font-bold">
                 No picture taken
-              </Text>
+              </ThemedText>
 
-              <Text className="text-muted-foreground">
+              <Text className="text-muted-foreground dark:text-muted-foreground-dark">
                 Tap to take a picture
               </Text>
             </View>

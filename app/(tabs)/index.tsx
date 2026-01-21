@@ -2,6 +2,7 @@ import { useAuth } from "@/components/AuthProvider";
 import Card from "@/components/Card";
 import EditCalorieLogModal from "@/components/EditCalorieLogModal";
 import EditWorkoutLogModal from "@/components/EditWorkoutLogModal";
+import ThemedText from "@/components/ThemedText";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import {
@@ -12,6 +13,7 @@ import {
 import axios from "axios";
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
+import { useColorScheme } from "nativewind";
 import React, { useCallback, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -65,6 +67,9 @@ export default function Index() {
   );
 
   const { data } = useAuth();
+
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   useFocusEffect(
     useCallback(() => {
@@ -274,7 +279,7 @@ export default function Index() {
         />
       )}
 
-      <Text className="text-4xl font-bold text-foreground pt-4 px-4">Home</Text>
+      <ThemedText className="text-4xl font-bold pt-4 px-4">Home</ThemedText>
 
       <ScrollView
         className="flex-1"
@@ -283,25 +288,25 @@ export default function Index() {
       >
         <Card className="gap-4">
           <View className="flex-row justify-between">
-            <Text className="text-2xl font-bold text-foreground">
+            <ThemedText className="text-2xl font-bold">
               Today's Calories
-            </Text>
+            </ThemedText>
 
             <Pressable onPress={() => editDailyCalorieGoal(user)}>
               <MaterialIcons
                 name="mode-edit"
                 size={24}
-                color={colors.foreground}
+                color={theme.foreground}
               />
             </Pressable>
           </View>
 
-          <Text className="text-foreground">
+          <ThemedText>
             <Text className="text-4xl font-bold">{loggedCalories}</Text> /{" "}
             {user.dailyCalorieGoal}
-          </Text>
+          </ThemedText>
 
-          <View className="h-8 bg-secondary rounded-full">
+          <View className="h-8 bg-muted rounded-full dark:bg-muted-dark">
             <View
               className="h-full bg-[#30d030] rounded-full"
               style={{
@@ -311,38 +316,36 @@ export default function Index() {
           </View>
 
           <View className="flex-row justify-between">
-            <Text className="text-foreground">
+            <ThemedText>
               {Math.max(user.dailyCalorieGoal - loggedCalories, 0)} calories
               remaining
-            </Text>
+            </ThemedText>
 
-            <Text className="text-foreground">
+            <ThemedText>
               {((loggedCalories / user.dailyCalorieGoal) * 100).toFixed(2)}%
-            </Text>
+            </ThemedText>
           </View>
         </Card>
 
         <Card className="gap-4">
           <View className="flex-row justify-between">
-            <Text className="text-2xl font-bold text-foreground">
-              Workout Time
-            </Text>
+            <ThemedText className="text-2xl font-bold">Workout Time</ThemedText>
 
             <Pressable onPress={() => editDailyWorkoutGoal(user)}>
               <MaterialIcons
                 name="mode-edit"
                 size={24}
-                color={colors.foreground}
+                color={theme.foreground}
               />
             </Pressable>
           </View>
 
-          <Text className="text-foreground">
+          <ThemedText>
             <Text className="text-4xl font-bold">{loggedWorkoutTime}</Text> /{" "}
             {user.dailyWorkoutGoal}
-          </Text>
+          </ThemedText>
 
-          <View className="h-8 bg-secondary rounded-full">
+          <View className="h-8 bg-muted rounded-full dark:bg-muted-dark">
             <View
               className="h-full bg-primary rounded-full"
               style={{
@@ -352,14 +355,14 @@ export default function Index() {
           </View>
 
           <View className="flex-row justify-between">
-            <Text className="text-foreground">
+            <ThemedText>
               {Math.max(user.dailyWorkoutGoal - loggedWorkoutTime, 0)} mins
               remaining
-            </Text>
+            </ThemedText>
 
-            <Text className="text-foreground">
+            <ThemedText>
               {((loggedWorkoutTime / user.dailyWorkoutGoal) * 100).toFixed(2)}%
-            </Text>
+            </ThemedText>
           </View>
         </Card>
 
@@ -367,31 +370,31 @@ export default function Index() {
           <Pressable
             className={`border-b-2 ${
               activeTab === "calories"
-                ? "border-foreground"
+                ? "border-foreground dark:border-foreground-dark"
                 : "border-transparent"
             }`}
             onPress={() => setActiveTab("calories")}
           >
-            <Text
-              className={`text-2xl text-foreground ${activeTab === "calories" ? "font-bold" : ""}`}
+            <ThemedText
+              className={`text-2xl ${activeTab === "calories" ? "font-bold" : ""}`}
             >
               Calories
-            </Text>
+            </ThemedText>
           </Pressable>
 
           <Pressable
             className={`border-b-2 ${
               activeTab === "workouts"
-                ? "border-foreground"
+                ? "border-foreground dark:border-foreground-dark"
                 : "border-transparent"
             }`}
             onPress={() => setActiveTab("workouts")}
           >
-            <Text
-              className={`text-2xl text-foreground ${activeTab === "workouts" ? "font-bold" : ""}`}
+            <ThemedText
+              className={`text-2xl ${activeTab === "workouts" ? "font-bold" : ""}`}
             >
               Workouts
-            </Text>
+            </ThemedText>
           </Pressable>
         </View>
 
@@ -405,21 +408,21 @@ export default function Index() {
                     source={{ uri: calorieLog.imageUrl }}
                   />
                 ) : (
-                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
+                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center dark:border-border-dark">
                     <MaterialCommunityIcons
                       name="food"
                       size={32}
-                      color={colors.foreground}
+                      color={theme.foreground}
                     />
                   </View>
                 )}
 
                 <View className="flex-1 gap-1">
-                  <Text className="text-lg font-bold text-foreground">
+                  <ThemedText className="text-lg font-bold">
                     {calorieLog.name}
-                  </Text>
+                  </ThemedText>
 
-                  <Text className="text-muted-foreground">
+                  <Text className="text-muted-foreground dark:text-muted-foreground-dark">
                     {calorieLog.calories}
                   </Text>
                 </View>
@@ -428,7 +431,7 @@ export default function Index() {
                   <Ionicons
                     name="ellipsis-horizontal"
                     size={24}
-                    color={colors.foreground}
+                    color={theme.foreground}
                   />
                 </Pressable>
               </Card>
@@ -438,19 +441,21 @@ export default function Index() {
               <MaterialCommunityIcons
                 name="food"
                 size={64}
-                color={colors.foreground}
+                color={theme.foreground}
               />
 
-              <Text className="text-foreground text-center text-xl w-3/4">
+              <ThemedText className="text-center text-xl w-3/4">
                 Your calorie logs will appear here, showing the things you have
                 logged today.
-              </Text>
+              </ThemedText>
 
               <Pressable
-                className="bg-secondary p-4 rounded-lg"
+                className="bg-secondary p-4 rounded-lg dark:bg-secondary-dark"
                 onPress={() => router.push("/(tabs)/log/calories")}
               >
-                <Text className="text-secondary-foreground">Log calories</Text>
+                <Text className="text-secondary-foreground dark:text-secondary-foreground-dark">
+                  Log calories
+                </Text>
               </Pressable>
             </View>
           )
@@ -463,14 +468,15 @@ export default function Index() {
                 <IconComponent
                   name={workoutLog.iconName as any}
                   size={48}
-                  color={colors.foreground}
+                  color={theme.foreground}
                 />
 
                 <View className="flex-1 gap-1">
-                  <Text className="text-lg font-bold text-foreground">
+                  <ThemedText className="text-lg font-bold">
                     {workoutLog.name}
-                  </Text>
-                  <Text className="text-muted-foreground">
+                  </ThemedText>
+
+                  <Text className="text-muted-foreground dark:text-muted-foreground-dark">
                     {workoutLog.duration} minutes
                   </Text>
                 </View>
@@ -479,7 +485,7 @@ export default function Index() {
                   <Ionicons
                     name="ellipsis-horizontal"
                     size={24}
-                    color={colors.foreground}
+                    color={theme.foreground}
                   />
                 </Pressable>
               </Card>
@@ -490,19 +496,21 @@ export default function Index() {
             <MaterialCommunityIcons
               name="run"
               size={64}
-              color={colors.foreground}
+              color={theme.foreground}
             />
 
-            <Text className="text-foreground text-center text-xl w-3/4">
+            <ThemedText className="text-center text-xl w-3/4">
               Your workout logs will appear here, showing the things you have
               logged today.
-            </Text>
+            </ThemedText>
 
             <Pressable
-              className="bg-secondary p-4 rounded-lg"
+              className="bg-secondary p-4 rounded-lg dark:bg-secondary-dark"
               onPress={() => router.push("/(tabs)/log/workout")}
             >
-              <Text className="text-secondary-foreground">Log workout</Text>
+              <Text className="text-secondary-foreground dark:text-secondary-foreground-dark">
+                Log workout
+              </Text>
             </Pressable>
           </View>
         )}

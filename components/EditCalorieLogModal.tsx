@@ -4,6 +4,7 @@ import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
+import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
 import {
   Alert,
@@ -15,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import ThemedText from "./ThemedText";
 
 type Props = {
   calorieLog: CalorieLog;
@@ -31,6 +33,9 @@ export default function EditCalorieLogModal({
 }: Props) {
   const [name, setName] = useState(calorieLog.name);
   const [calories, setCalories] = useState(calorieLog.calories.toString());
+
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   const showConfirmDeleteCalorieLog = async (calorieLog: CalorieLog) => {
     Alert.alert(
@@ -82,9 +87,11 @@ export default function EditCalorieLogModal({
         <SafeAreaView className="flex-1">
           <Pressable className="flex-1" onPress={close} />
 
-          <View className="bg-background gap-4 rounded-t-[64px] pt-8 px-8 border-t border-x border-border">
+          <View className="bg-background gap-4 rounded-t-[64px] pt-8 px-8 border-t border-x border-border dark:bg-background-dark dark:border-border-dark">
             <View className="flex-row justify-between items-center">
-              <Text className="text-2xl font-bold">Edit Calorie Log</Text>
+              <ThemedText className="text-2xl font-bold">
+                Edit Calorie Log
+              </ThemedText>
 
               <Pressable
                 className="p-2 border border-border bg-background rounded-lg justify-center items-center flex-row gap-2"
@@ -93,7 +100,7 @@ export default function EditCalorieLogModal({
                 <MaterialCommunityIcons
                   name="tune"
                   size={24}
-                  color={colors.foreground}
+                  color={theme.foreground}
                 />
 
                 <Text className="text-foreground">Create Preset</Text>
@@ -149,7 +156,7 @@ export default function EditCalorieLogModal({
                     <MaterialCommunityIcons
                       name="food"
                       size={256}
-                      color={colors.foreground}
+                      color={theme.foreground}
                     />
                   </View>
                 )}
@@ -164,7 +171,7 @@ export default function EditCalorieLogModal({
                 <MaterialCommunityIcons
                   name="trash-can"
                   size={24}
-                  color={colors.destructive}
+                  color={theme.destructive}
                 />
               </Pressable>
 

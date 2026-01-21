@@ -5,6 +5,7 @@ import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
+import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
 import { Alert, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -29,6 +30,9 @@ export default function EditWorkoutLogModal({
     library: "MaterialCommunityIcons",
     name: "run",
   });
+
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   const showConfirmDeleteWorkoutLog = async (workoutLog: WorkoutLog) => {
     Alert.alert(
@@ -94,7 +98,7 @@ export default function EditWorkoutLogModal({
                 <MaterialCommunityIcons
                   name="tune"
                   size={24}
-                  color={colors.foreground}
+                  color={theme.foreground}
                 />
 
                 <Text className="text-foreground">Create Preset</Text>
@@ -151,7 +155,7 @@ export default function EditWorkoutLogModal({
                 <MaterialCommunityIcons
                   name="trash-can"
                   size={24}
-                  color={colors.destructive}
+                  color={theme.destructive}
                 />
               </Pressable>
 

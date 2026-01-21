@@ -9,7 +9,7 @@ export default function Card({ className, children }: Props) {
   return (
     <View
       className={
-        "border border-border bg-card-background rounded-xl p-4 " +
+        "border border-border bg-card-background rounded-xl p-4 dark:bg-card-background-dark dark:border-border-dark " +
         (className || "")
       }
     >

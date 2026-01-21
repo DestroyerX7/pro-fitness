@@ -1,4 +1,6 @@
 import { useAuth } from "@/components/AuthProvider";
+import ThemedText from "@/components/ThemedText";
+import ThemedTextInput from "@/components/ThemedTextInput";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import {
@@ -9,6 +11,7 @@ import {
 import axios from "axios";
 import { BarcodeScanningResult, CameraView } from "expo-camera";
 import * as Haptics from "expo-haptics";
+import { useColorScheme } from "nativewind";
 import { useRef, useState } from "react";
 import { Image, Pressable, Text, TextInput, View } from "react-native";
 
@@ -39,6 +42,9 @@ export default function Scan() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const { data } = useAuth();
+
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   const handleBarcodeScanned = (scanningResult: BarcodeScanningResult) => {
     if (isLoadingRef.current || product !== null) {
@@ -129,7 +135,7 @@ export default function Scan() {
           <MaterialCommunityIcons
             name="refresh"
             size={24}
-            color={colors.primaryForeground}
+            color={theme.primaryForeground}
           />
 
           <Text className="text-primaryForeground text-center text-lg font-bold">
@@ -138,7 +144,7 @@ export default function Scan() {
         </Pressable>
 
         <View className="flex-row gap-2 items-center justify-center">
-          <MaterialIcons name="error" size={32} color={colors.foreground} />
+          <MaterialIcons name="error" size={32} color={theme.foreground} />
           <Text className="text-2xl">{error}</Text>
         </View>
       </View>
@@ -152,7 +158,7 @@ export default function Scan() {
           className="animate-spin"
           name="loading-3-quarters"
           size={64}
-          color={colors.foreground}
+          color={theme.foreground}
         />
 
         <Text>Loading...</Text>
@@ -181,16 +187,16 @@ export default function Scan() {
   return (
     <View className="p-4 gap-4">
       <Pressable
-        className="bg-secondaryForeground p-4 rounded-full flex-row items-center justify-center gap-2"
+        className="bg-secondary p-4 rounded-full flex-row items-center justify-center gap-2 dark:bg-secondary-dark"
         onPress={rescan}
       >
         <MaterialCommunityIcons
           name="refresh"
           size={24}
-          color={colors.primaryForeground}
+          color={theme.secondaryForeground}
         />
 
-        <Text className="text-primaryForeground text-center text-lg font-bold">
+        <Text className="text-secondary-foreground text-center text-lg font-bold dark:text-secondary-foreground-dark">
           Rescan
         </Text>
       </Pressable>
@@ -208,7 +214,7 @@ export default function Scan() {
           <MaterialCommunityIcons
             name="image"
             size={64}
-            color={colors.foreground}
+            color={theme.foreground}
           />
 
           <Text className="text-foreground font-bold text-2xl">
@@ -221,11 +227,12 @@ export default function Scan() {
         </View>
       )}
 
-      <View className="gap-1">
-        <Text className="font-bold">Name</Text>
+      {/* Work on border above */}
 
-        <TextInput
-          className="p-4 border border-border rounded-lg placeholder:text-muted-foreground"
+      <View className="gap-1">
+        <ThemedText className="font-bold">Name</ThemedText>
+
+        <ThemedTextInput
           placeholder="Name"
           value={name}
           onChangeText={(text) => setName(text)}

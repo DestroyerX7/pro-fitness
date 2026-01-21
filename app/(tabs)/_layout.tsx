@@ -1,15 +1,25 @@
 import { colors } from "@/lib/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { useColorScheme } from "nativewind";
 
 export default function TabsLayout() {
+  const { colorScheme } = useColorScheme();
+  const theme = colorScheme === "light" ? colors.light : colors.dark;
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
-        sceneStyle: { backgroundColor: colors.background },
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.mutedForeground,
+        sceneStyle: {
+          backgroundColor: theme.background,
+        },
+        tabBarStyle: {
+          backgroundColor: theme.background,
+          borderColor: theme.border,
+        },
       }}
     >
       <Tabs.Screen
@@ -39,7 +49,9 @@ export default function TabsLayout() {
           tabBarIcon: ({ size, color }) => (
             <Ionicons name="person-circle" size={size} color={color} />
           ),
-          sceneStyle: { backgroundColor: colors.secondary },
+          // sceneStyle: {
+          //   backgroundColor: theme.secondary,
+          // },
         }}
       />
     </Tabs>
