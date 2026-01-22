@@ -15,6 +15,7 @@ type Props = {
     | "accent-foreground"
     | "destructive"
     | "destructive-foreground"
+    | "destructive-accent"
     | "custom";
 } & TextProps;
 

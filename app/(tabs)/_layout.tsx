@@ -2,6 +2,7 @@ import { colors } from "@/lib/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { useColorScheme } from "nativewind";
+import { View } from "react-native";
 
 export default function TabsLayout() {
   const { colorScheme } = useColorScheme();
@@ -35,9 +36,15 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="log"
         options={{
-          title: "Log",
-          tabBarIcon: ({ size, color }) => (
-            <Ionicons name="add-circle" size={size} color={color} />
+          tabBarLabel: () => null,
+          tabBarIcon: ({ size }) => (
+            <View className="bg-primary w-16 h-16 rounded-full items-center justify-center">
+              <Ionicons
+                name="add"
+                size={size}
+                color={theme.primaryForeground}
+              />
+            </View>
           ),
         }}
       />
@@ -49,9 +56,6 @@ export default function TabsLayout() {
           tabBarIcon: ({ size, color }) => (
             <Ionicons name="person-circle" size={size} color={color} />
           ),
-          // sceneStyle: {
-          //   backgroundColor: theme.secondary,
-          // },
         }}
       />
     </Tabs>

@@ -1,4 +1,5 @@
 import { useAuth } from "@/components/AuthProvider";
+import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
 import { authClient } from "@/lib/auth-client";
 import { baseUrl } from "@/lib/backend";
@@ -66,7 +67,7 @@ export default function Profile() {
         <ThemedText color="muted-foreground">{user.email}</ThemedText>
       </View>
 
-      <View className="gap-4 bg-card-background p-4 rounded-xl border border-border">
+      <Card className="gap-4">
         <ThemedText className="text-2xl font-bold">Profile Info</ThemedText>
 
         <View className="flex-row justify-between">
@@ -111,10 +112,10 @@ export default function Profile() {
             {new Date(user.createdAt.toString()).toLocaleDateString()}
           </ThemedText>
         </View>
-      </View>
+      </Card>
 
       <Pressable
-        className="bg-foreground p-4 rounded-xl flex-row gap-2 items-center"
+        className="bg-foreground p-4 rounded-xl flex-row gap-2 items-center border"
         onPress={async () => await authClient.signOut()}
       >
         <MaterialCommunityIcons
@@ -127,7 +128,7 @@ export default function Profile() {
       </Pressable>
 
       <Pressable
-        className="bg-muted p-4 rounded-xl flex-row gap-2 items-center"
+        className="bg-destructive-accent p-4 rounded-xl flex-row gap-2 items-center border border-destructive"
         onPress={showConfirmDeleteUser}
       >
         <MaterialCommunityIcons
@@ -135,7 +136,7 @@ export default function Profile() {
           size={24}
           color={theme.destructive}
         />
-        <ThemedText color="muted-foreground">Delete Account</ThemedText>
+        <ThemedText color="foreground">Delete Account</ThemedText>
       </Pressable>
     </SafeAreaView>
   );
