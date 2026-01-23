@@ -64,7 +64,7 @@ export default function Profile() {
       <View>
         <ThemedText className="text-4xl font-bold">{user.name}</ThemedText>
 
-        <ThemedText color="muted-foreground">{user.email}</ThemedText>
+        <ThemedText color="text-muted-foreground">{user.email}</ThemedText>
       </View>
 
       <Card className="gap-4">
@@ -72,7 +72,7 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Name</ThemedText>
-          <ThemedText color="muted-foreground" className="text-xl">
+          <ThemedText color="text-muted-foreground" className="text-xl">
             {user.name}
           </ThemedText>
         </View>
@@ -81,7 +81,7 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Email</ThemedText>
-          <ThemedText color="muted-foreground" className="text-xl">
+          <ThemedText color="text-muted-foreground" className="text-xl">
             {user.email}
           </ThemedText>
         </View>
@@ -90,7 +90,7 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Daily Calorie Goal</ThemedText>
-          <ThemedText color="muted-foreground" className="text-xl">
+          <ThemedText color="text-muted-foreground" className="text-xl">
             {user.dailyCalorieGoal} calories
           </ThemedText>
         </View>
@@ -99,7 +99,7 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Daily Workout Goal</ThemedText>
-          <ThemedText color="muted-foreground" className="text-xl">
+          <ThemedText color="text-muted-foreground" className="text-xl">
             {user.dailyWorkoutGoal} minutes
           </ThemedText>
         </View>
@@ -108,7 +108,7 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Account Created</ThemedText>
-          <ThemedText color="muted-foreground" className="text-xl">
+          <ThemedText color="text-muted-foreground" className="text-xl">
             {new Date(user.createdAt.toString()).toLocaleDateString()}
           </ThemedText>
         </View>
@@ -124,7 +124,7 @@ export default function Profile() {
           color={theme.background}
         />
 
-        <ThemedText color="background">Log out</ThemedText>
+        <ThemedText color="text-background">Log out</ThemedText>
       </Pressable>
 
       <Pressable
@@ -136,7 +136,7 @@ export default function Profile() {
           size={24}
           color={theme.destructive}
         />
-        <ThemedText color="foreground">Delete Account</ThemedText>
+        <ThemedText>Delete Account</ThemedText>
       </Pressable>
     </SafeAreaView>
   );

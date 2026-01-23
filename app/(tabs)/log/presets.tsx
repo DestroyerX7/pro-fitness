@@ -153,7 +153,7 @@ export default function Favorites() {
                     {calorieLogPreset.name}
                   </ThemedText>
 
-                  <ThemedText color="muted-foreground">
+                  <ThemedText color="text-muted-foreground">
                     {calorieLogPreset.calories}
                   </ThemedText>
                 </View>
@@ -180,7 +180,7 @@ export default function Favorites() {
               No saved calorie presets
             </ThemedText>
 
-            <ThemedText color="muted-foreground" className="text-center">
+            <ThemedText color="text-muted-foreground" className="text-center">
               Edit a calorie log and press create preset based off it's values
             </ThemedText>
           </View>
@@ -206,7 +206,7 @@ export default function Favorites() {
                     {workoutLogPreset.name}
                   </ThemedText>
 
-                  <ThemedText color="muted-foreground">
+                  <ThemedText color="text-muted-foreground">
                     {workoutLogPreset.duration} minutes
                   </ThemedText>
                 </View>
@@ -234,7 +234,7 @@ export default function Favorites() {
             No saved workout presets
           </ThemedText>
 
-          <ThemedText color="muted-foreground" className="text-center">
+          <ThemedText color="text-muted-foreground" className="text-center">
             Edit a workout log and press create preset based off it's values
           </ThemedText>
         </View>

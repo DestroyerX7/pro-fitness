@@ -63,7 +63,7 @@ export default function Login() {
       />
 
       <Pressable className="p-4 bg-primary rounded-xl" onPress={handleLogin}>
-        <ThemedText color="primary-foreground">Login</ThemedText>
+        <ThemedText color="text-primary-foreground">Login</ThemedText>
       </Pressable>
 
       <View className="h-[1px] bg-border " />
@@ -93,7 +93,7 @@ export default function Login() {
       <ThemedText className="text-center text-xl">
         Don't have an account?{" "}
         <Link href="/(auth)/sign-up">
-          <ThemedText color="primary" className="underline">
+          <ThemedText color="text-primary" className="underline">
             Sign Up
           </ThemedText>
         </Link>

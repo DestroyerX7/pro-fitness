@@ -128,7 +128,7 @@ export default function Calories() {
                 No picture taken
               </ThemedText>
 
-              <ThemedText color="muted-foreground">
+              <ThemedText color="text-muted-foreground">
                 Tap to take a picture
               </ThemedText>
             </View>
@@ -138,7 +138,7 @@ export default function Calories() {
 
       <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
         <ThemedText
-          color="primary-foreground"
+          color="text-primary-foreground"
           className="text-center text-lg font-bold"
         >
           Log Calories

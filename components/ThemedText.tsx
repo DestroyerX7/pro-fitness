@@ -3,32 +3,29 @@ import { Text, TextProps } from "react-native";
 
 type Props = {
   color?:
-    | "foreground"
-    | "background"
-    | "primary"
-    | "primary-foreground"
-    | "secondary"
-    | "secondary-foreground"
-    | "muted"
-    | "muted-foreground"
-    | "accent"
-    | "accent-foreground"
-    | "destructive"
-    | "destructive-foreground"
-    | "destructive-accent"
-    | "custom";
+    | "text-foreground"
+    | "text-background"
+    | "text-primary"
+    | "text-primary-foreground"
+    | "text-secondary"
+    | "text-secondary-foreground"
+    | "text-muted"
+    | "text-muted-foreground"
+    | "text-accent"
+    | "text-accent-foreground"
+    | "text-destructive"
+    | "text-destructive-foreground"
+    | "text-destructive-accent"
+    | "";
 } & TextProps;
-
 export default function ThemedText({
-  color = "foreground",
+  color = "text-foreground",
   className = "",
   children,
   ...props
 }: Props) {
-  const textColor = color !== "custom" ? `text-${color} ` : " ";
-
   return (
-    <Text className={textColor + className} {...props}>
+    <Text className={`${color} ${className}`} {...props}>
       {children}
     </Text>
   );

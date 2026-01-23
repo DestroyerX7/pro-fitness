@@ -176,7 +176,7 @@ export default function EditCalorieLogModal({
                 className="bg-primary p-4 rounded-xl flex-1 items-center justify-center"
                 onPress={save}
               >
-                <ThemedText color="primary-foreground">Save</ThemedText>
+                <ThemedText color="text-primary-foreground">Save</ThemedText>
               </Pressable>
             </View>
           </View>

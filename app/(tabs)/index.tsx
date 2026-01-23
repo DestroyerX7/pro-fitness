@@ -426,7 +426,7 @@ export default function Index() {
                     {calorieLog.name}
                   </ThemedText>
 
-                  <ThemedText color="muted-foreground">
+                  <ThemedText color="text-muted-foreground">
                     {calorieLog.calories}
                   </ThemedText>
                 </View>
@@ -457,7 +457,7 @@ export default function Index() {
                 className="bg-secondary p-4 rounded-xl"
                 onPress={() => router.push("/(tabs)/log/calories")}
               >
-                <ThemedText color="secondary-foreground">
+                <ThemedText color="text-secondary-foreground">
                   Log calories
                 </ThemedText>
               </Pressable>
@@ -480,7 +480,7 @@ export default function Index() {
                     {workoutLog.name}
                   </ThemedText>
 
-                  <ThemedText color="muted-foreground">
+                  <ThemedText color="text-muted-foreground">
                     {workoutLog.duration} minutes
                   </ThemedText>
                 </View>
@@ -512,7 +512,9 @@ export default function Index() {
               className="bg-secondary p-4 rounded-xl"
               onPress={() => router.push("/(tabs)/log/workout")}
             >
-              <ThemedText color="secondary-foreground">Log workout</ThemedText>
+              <ThemedText color="text-secondary-foreground">
+                Log workout
+              </ThemedText>
             </Pressable>
           </View>
         )}

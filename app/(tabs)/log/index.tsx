@@ -24,7 +24,7 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Log Calories</ThemedText>
 
-            <ThemedText color="muted-foreground">
+            <ThemedText color="text-muted-foreground">
               Add food or drinks you have consumed to log their calories
             </ThemedText>
           </View>
@@ -42,7 +42,7 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Log Workout</ThemedText>
 
-            <ThemedText color="muted-foreground">
+            <ThemedText color="text-muted-foreground">
               Enter a workout to log its duration
             </ThemedText>
           </View>
@@ -60,7 +60,7 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Scan Barcode</ThemedText>
 
-            <ThemedText color="muted-foreground">
+            <ThemedText color="text-muted-foreground">
               Use your camera to scan a barcode and log its calories
             </ThemedText>
           </View>
@@ -78,7 +78,7 @@ export default function Index() {
           <View className="gap-1 flex-1">
             <ThemedText className="text-2xl font-bold">Presets</ThemedText>
 
-            <ThemedText color="muted-foreground">
+            <ThemedText color="text-muted-foreground">
               Quickly log calories or workouts by using one of your saved
               presets
             </ThemedText>
