@@ -68,7 +68,7 @@ export default function WorkoutIconList({
         return (
           <Pressable
             key={index}
-            className="items-center justify-center"
+            className="items-center justify-center rounded-md"
             style={[
               {
                 width: buttonWidth,
@@ -77,7 +77,6 @@ export default function WorkoutIconList({
               selectedIcon.library === icon.library &&
                 selectedIcon.name === icon.name && {
                   borderWidth: 2,
-                  borderRadius: 8,
                   borderColor: theme.foreground,
                 },
             ]}

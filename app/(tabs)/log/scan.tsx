@@ -254,26 +254,28 @@ export default function Scan() {
         />
       </View>
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Calories per serving</ThemedText>
+      <View className="flex-row gap-4 items-end">
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Calories per serving</ThemedText>
 
-        <ThemedTextInput
-          placeholder="Calories per serving"
-          keyboardType="number-pad"
-          value={caloriesPerServing}
-          onChangeText={(text) => setCaloriesPerServing(text)}
-        />
-      </View>
+          <ThemedTextInput
+            placeholder="Calories per serving"
+            keyboardType="number-pad"
+            value={caloriesPerServing}
+            onChangeText={(text) => setCaloriesPerServing(text)}
+          />
+        </View>
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Number of servings</ThemedText>
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Number of servings</ThemedText>
 
-        <ThemedTextInput
-          placeholder="Number of servings"
-          keyboardType="number-pad"
-          value={numberOfServings}
-          onChangeText={(text) => setNumberOfServings(text)}
-        />
+          <ThemedTextInput
+            placeholder="Number of servings"
+            keyboardType="number-pad"
+            value={numberOfServings}
+            onChangeText={(text) => setNumberOfServings(text)}
+          />
+        </View>
       </View>
 
       <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>

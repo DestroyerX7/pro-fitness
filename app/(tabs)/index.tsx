@@ -408,11 +408,11 @@ export default function Index() {
               <Card className="flex-row gap-4" key={calorieLog.id}>
                 {calorieLog.imageUrl !== null ? (
                   <Image
-                    className="w-16 h-16 rounded-xl"
+                    className="w-16 h-16 rounded-md"
                     source={{ uri: calorieLog.imageUrl }}
                   />
                 ) : (
-                  <View className="w-16 h-16 border rounded-xl border-border items-center justify-center">
+                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
                     <MaterialCommunityIcons
                       name="food"
                       size={32}

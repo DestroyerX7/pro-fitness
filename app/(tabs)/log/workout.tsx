@@ -77,25 +77,27 @@ export default function Workout() {
 
   return (
     <View className="p-4 gap-4">
-      <View className="gap-1">
-        <ThemedText className="font-bold">Name</ThemedText>
+      <View className="flex-row gap-4 items-end">
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Name</ThemedText>
 
-        <ThemedTextInput
-          placeholder="Name"
-          value={name}
-          onChangeText={(text) => setName(text)}
-        />
-      </View>
+          <ThemedTextInput
+            placeholder="Name"
+            value={name}
+            onChangeText={(text) => setName(text)}
+          />
+        </View>
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Duration</ThemedText>
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Duration</ThemedText>
 
-        <ThemedTextInput
-          placeholder="Duration"
-          keyboardType="number-pad"
-          value={duration}
-          onChangeText={(text) => setDuration(text)}
-        />
+          <ThemedTextInput
+            placeholder="Duration"
+            keyboardType="number-pad"
+            value={duration}
+            onChangeText={(text) => setDuration(text)}
+          />
+        </View>
       </View>
 
       <View className="gap-1">
@@ -110,19 +112,18 @@ export default function Workout() {
       <View className="gap-1">
         <ThemedText className="font-bold">Icon</ThemedText>
 
-        <View className="flex-row gap-4 flex-wrap">
+        <View className="flex-row gap-4 flex-wrap p-4 bg-muted border rounded-xl border-border">
           {icons.map((icon, index) => {
             const IconComponent = iconLibraries[icon.library];
 
             return (
               <Pressable
                 key={index}
-                className="w-16 h-16 items-center justify-center"
+                className="w-16 h-16 items-center justify-center rounded-md"
                 style={[
                   selectedIcon.library === icon.library &&
                     selectedIcon.name === icon.name && {
                       borderWidth: 2,
-                      borderRadius: 8,
                       borderColor: theme.foreground,
                     },
                 ]}

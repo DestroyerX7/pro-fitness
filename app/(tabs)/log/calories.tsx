@@ -77,25 +77,27 @@ export default function Calories() {
 
   return (
     <View className="p-4 gap-4">
-      <View className="gap-1">
-        <ThemedText className="font-bold">Name</ThemedText>
+      <View className="flex-row gap-4 items-end">
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Name</ThemedText>
 
-        <ThemedTextInput
-          placeholder="Name"
-          value={name}
-          onChangeText={(text) => setName(text)}
-        />
-      </View>
+          <ThemedTextInput
+            placeholder="Name"
+            value={name}
+            onChangeText={(text) => setName(text)}
+          />
+        </View>
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Calories</ThemedText>
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Calories</ThemedText>
 
-        <ThemedTextInput
-          placeholder="Calories"
-          keyboardType="number-pad"
-          value={calories}
-          onChangeText={(text) => setCalories(text)}
-        />
+          <ThemedTextInput
+            placeholder="Calories"
+            keyboardType="number-pad"
+            value={calories}
+            onChangeText={(text) => setCalories(text)}
+          />
+        </View>
       </View>
 
       <View className="gap-1">
@@ -117,7 +119,7 @@ export default function Calories() {
               style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
             />
           ) : (
-            <View className="border border-border rounded-xl h-full items-center justify-center">
+            <View className="border border-border rounded-xl h-full items-center justify-center bg-muted">
               <MaterialCommunityIcons
                 name="camera"
                 size={128}
