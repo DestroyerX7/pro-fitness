@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useState } from "react";
-import { Image, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
@@ -72,11 +72,10 @@ export default function Login() {
         className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"
         onPress={loginWithGoogle}
       >
-        <Image
-          className="w-8 h-8"
-          source={{
-            uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/500px-Google_%22G%22_logo.svg.png",
-          }}
+        <MaterialCommunityIcons
+          name="google"
+          size={32}
+          color={theme.foreground}
         />
         <ThemedText>Login with Google</ThemedText>
       </Pressable>

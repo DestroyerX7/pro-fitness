@@ -21,7 +21,7 @@ type GetProductByBarcodeResponse = {
 
 type Product = {
   code: string;
-  product_name: string;
+  product_name?: string;
   serving_size?: string;
   nutriments: {
     "energy-kcal_100g"?: number;
@@ -80,7 +80,7 @@ export default function Scan() {
       });
 
       setProduct(response.data.product);
-      setName(product_name);
+      setName(product_name || "");
       setCaloriesPerServing(
         Math.round(nutriments["energy-kcal_serving"] || 0).toString(),
       );
