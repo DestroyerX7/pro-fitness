@@ -85,6 +85,24 @@ export default function Index() {
           </View>
         </Card>
       </Pressable>
+
+      <Pressable onPress={() => router.push("/(tabs)/log/goal")}>
+        <Card className="flex-row gap-4">
+          <MaterialCommunityIcons
+            name="bullseye-arrow"
+            size={64}
+            color={theme.foreground}
+          />
+
+          <View className="gap-1 flex-1">
+            <ThemedText className="text-2xl font-bold">Create Goal</ThemedText>
+
+            <ThemedText color="text-muted-foreground">
+              Add a goal you want to accomplish
+            </ThemedText>
+          </View>
+        </Card>
+      </Pressable>
     </View>
   );
 }

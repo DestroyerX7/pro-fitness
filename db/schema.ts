@@ -41,7 +41,7 @@ export const session = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
-  (table) => [index("session_userId_idx").on(table.userId)]
+  (table) => [index("session_userId_idx").on(table.userId)],
 );
 
 export const account = pgTable(
@@ -65,7 +65,7 @@ export const account = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("account_userId_idx").on(table.userId)]
+  (table) => [index("account_userId_idx").on(table.userId)],
 );
 
 export const verification = pgTable(
@@ -81,7 +81,7 @@ export const verification = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("verification_identifier_idx").on(table.identifier)]
+  (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -91,6 +91,7 @@ export const userRelations = relations(user, ({ many }) => ({
   workoutLogs: many(workoutLog),
   calorieLogPresets: many(calorieLogPreset),
   workoutLogPresets: many(workoutLogPreset),
+  goals: many(goal),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -124,7 +125,7 @@ export const calorieLog = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("calorie_log_userId_idx").on(table.userId)]
+  (table) => [index("calorie_log_userId_idx").on(table.userId)],
 );
 
 export const workoutLog = pgTable(
@@ -145,7 +146,7 @@ export const workoutLog = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("workout_log_userId_idx").on(table.userId)]
+  (table) => [index("workout_log_userId_idx").on(table.userId)],
 );
 
 export const calorieLogRelations = relations(calorieLog, ({ one }) => ({
@@ -178,7 +179,7 @@ export const calorieLogPreset = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("calorie_log_preset_userId_idx").on(table.userId)]
+  (table) => [index("calorie_log_preset_userId_idx").on(table.userId)],
 );
 
 export const workoutLogPreset = pgTable(
@@ -198,7 +199,7 @@ export const workoutLogPreset = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("workout_log_preset_userId_idx").on(table.userId)]
+  (table) => [index("workout_log_preset_userId_idx").on(table.userId)],
 );
 
 export const calorieLogPresetRelations = relations(
@@ -208,7 +209,7 @@ export const calorieLogPresetRelations = relations(
       fields: [calorieLogPreset.userId],
       references: [user.id],
     }),
-  })
+  }),
 );
 
 export const workoutLogPresetRelations = relations(
@@ -218,5 +219,31 @@ export const workoutLogPresetRelations = relations(
       fields: [workoutLogPreset.userId],
       references: [user.id],
     }),
-  })
+  }),
 );
+
+export const goal = pgTable(
+  "goal",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    description: text("description"),
+    completed: boolean("completed").default(false).notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index("goal_userId_idx").on(table.userId)],
+);
+
+export const goalRelations = relations(goal, ({ one }) => ({
+  user: one(user, {
+    fields: [goal.userId],
+    references: [user.id],
+  }),
+}));
