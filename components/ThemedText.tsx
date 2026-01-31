@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import React from "react";
 import { Text, TextProps } from "react-native";
 
@@ -25,7 +26,7 @@ export default function ThemedText({
   ...props
 }: Props) {
   return (
-    <Text className={`${color} ${className}`} {...props}>
+    <Text className={cn(color, className)} {...props}>
       {children}
     </Text>
   );

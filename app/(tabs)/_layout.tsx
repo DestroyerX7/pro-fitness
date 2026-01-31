@@ -1,5 +1,5 @@
 import { colors } from "@/lib/colors";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { View } from "react-native";
@@ -34,6 +34,20 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
+        name="goals"
+        options={{
+          title: "Goals",
+          tabBarIcon: ({ size, color }) => (
+            <MaterialCommunityIcons
+              name="bullseye-arrow"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="log"
         options={{
           tabBarLabel: () => null,
@@ -52,7 +66,6 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          href: null,
           title: "History",
           tabBarIcon: ({ size, color }) => (
             <Ionicons name="time" size={size} color={color} />

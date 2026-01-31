@@ -5,14 +5,14 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 
 export default function Index() {
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   return (
-    <View className="flex-1 p-4 gap-4">
+    <ScrollView contentContainerStyle={{ flex: 1, padding: 16, gap: 16 }}>
       <Pressable onPress={() => router.push("/(tabs)/log/calories")}>
         <Card className="flex-row gap-4">
           <MaterialCommunityIcons
@@ -103,6 +103,6 @@ export default function Index() {
           </View>
         </Card>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }

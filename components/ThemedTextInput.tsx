@@ -1,4 +1,5 @@
 import { colors } from "@/lib/colors";
+import { cn } from "@/lib/utils";
 import { useColorScheme } from "nativewind";
 import React from "react";
 import { TextInput, TextInputProps } from "react-native";
@@ -12,10 +13,10 @@ export default function ThemedTextInput({
 
   return (
     <TextInput
-      className={
-        "text-foreground p-4 border border-border rounded-xl bg-muted " +
-        className
-      }
+      className={cn(
+        "text-foreground p-4 border border-border rounded-xl bg-muted",
+        className,
+      )}
       placeholderTextColor={theme.mutedForeground}
       {...props}
     />

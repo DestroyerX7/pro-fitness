@@ -50,10 +50,19 @@ export type WorkoutLog = {
   userId: string;
 };
 
+export type Goal = {
+  id: string;
+  name: string;
+  description: string;
+  completed: boolean;
+  userId: string;
+};
+
 export default function Index() {
   const [user, setUser] = useState<User | null>(null);
   const [calorieLogs, setCalorieLogs] = useState<CalorieLog[]>([]);
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
 
   const [editingCalorieLog, setEditingCalorieLog] = useState<CalorieLog | null>(
     null,
@@ -62,7 +71,7 @@ export default function Index() {
     null,
   );
 
-  const [activeTab, setActiveTab] = useState<"calories" | "workouts">(
+  const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
     "calories",
   );
 
@@ -121,9 +130,18 @@ export default function Index() {
         );
       };
 
+      const getGoals = async () => {
+        const response = await axios.get(
+          `${baseUrl}/api/get-goals/${data?.user.id}`,
+        );
+
+        setGoals(response.data.goals);
+      };
+
       getUser();
       getCalorieLogs();
       getWorkoutLogs();
+      getGoals();
     }, []),
   );
 
@@ -252,12 +270,21 @@ export default function Index() {
     setEditingWorkoutLog(null);
   };
 
+  const toggleGoalCompleted = (id: string) => {
+    setGoals(
+      goals.map((goal) =>
+        goal.id === id ? { ...goal, completed: !goal.completed } : goal,
+      ),
+    );
+  };
+
   if (user === null) {
     return;
   }
 
   const loggedCalories = calorieLogs.reduce((a, b) => a + b.calories, 0);
   const loggedWorkoutTime = workoutLogs.reduce((a, b) => a + b.duration, 0);
+  const goalsCompleted = goals.filter((g) => g.completed).length;
 
   return (
     <SafeAreaView className="flex-1" edges={["top"]}>
@@ -328,7 +355,6 @@ export default function Index() {
             </ThemedText>
           </View>
         </Card>
-
         <Card className="gap-4">
           <View className="flex-row justify-between">
             <ThemedText className="text-2xl font-bold">Workout Time</ThemedText>
@@ -369,7 +395,6 @@ export default function Index() {
             </ThemedText>
           </View>
         </Card>
-
         <View className="flex-row gap-4 items-center">
           <Pressable
             className={`border-b-2 ${
@@ -400,10 +425,23 @@ export default function Index() {
               Workouts
             </ThemedText>
           </Pressable>
+
+          <Pressable
+            className={`border-b-2 ${
+              activeTab === "goals" ? "border-foreground" : "border-transparent"
+            }`}
+            onPress={() => setActiveTab("goals")}
+          >
+            <ThemedText
+              className={`text-2xl ${activeTab === "goals" ? "font-bold" : ""}`}
+            >
+              Goals
+            </ThemedText>
+          </Pressable>
         </View>
 
-        {activeTab === "calories" ? (
-          calorieLogs.length > 0 ? (
+        {activeTab === "calories" &&
+          (calorieLogs.length > 0 ? (
             calorieLogs.map((calorieLog) => (
               <Card className="flex-row gap-4" key={calorieLog.id}>
                 {calorieLog.imageUrl !== null ? (
@@ -462,62 +500,137 @@ export default function Index() {
                 </ThemedText>
               </Pressable>
             </View>
-          )
-        ) : workoutLogs.length > 0 ? (
-          workoutLogs.map((workoutLog) => {
-            const IconComponent = iconLibraries[workoutLog.iconLibrary];
+          ))}
 
-            return (
-              <Card className="flex-row gap-4" key={workoutLog.id}>
-                <IconComponent
-                  name={workoutLog.iconName as any}
-                  size={48}
-                  color={theme.foreground}
-                />
+        {activeTab === "workouts" &&
+          (workoutLogs.length > 0 ? (
+            workoutLogs.map((workoutLog) => {
+              const IconComponent = iconLibraries[workoutLog.iconLibrary];
 
-                <View className="flex-1 gap-1">
-                  <ThemedText className="text-lg font-bold">
-                    {workoutLog.name}
-                  </ThemedText>
-
-                  <ThemedText color="text-muted-foreground">
-                    {workoutLog.duration} minutes
-                  </ThemedText>
-                </View>
-
-                <Pressable onPress={() => editWorkoutLog(workoutLog)}>
-                  <Ionicons
-                    name="ellipsis-horizontal"
-                    size={24}
+              return (
+                <Card className="flex-row gap-4" key={workoutLog.id}>
+                  <IconComponent
+                    name={workoutLog.iconName as any}
+                    size={48}
                     color={theme.foreground}
                   />
-                </Pressable>
-              </Card>
-            );
-          })
-        ) : (
-          <View className="gap-4 items-center p-4">
-            <MaterialCommunityIcons
-              name="run"
-              size={64}
-              color={theme.foreground}
-            />
 
-            <ThemedText className="text-center text-xl w-3/4">
-              Your workout logs will appear here, showing the things you have
-              logged today.
-            </ThemedText>
+                  <View className="flex-1 gap-1">
+                    <ThemedText className="text-lg font-bold">
+                      {workoutLog.name}
+                    </ThemedText>
 
-            <Pressable
-              className="bg-secondary p-4 rounded-xl"
-              onPress={() => router.push("/(tabs)/log/workout")}
-            >
-              <ThemedText color="text-secondary-foreground">
-                Log workout
+                    <ThemedText color="text-muted-foreground">
+                      {workoutLog.duration} minutes
+                    </ThemedText>
+                  </View>
+
+                  <Pressable onPress={() => editWorkoutLog(workoutLog)}>
+                    <Ionicons
+                      name="ellipsis-horizontal"
+                      size={24}
+                      color={theme.foreground}
+                    />
+                  </Pressable>
+                </Card>
+              );
+            })
+          ) : (
+            <View className="gap-4 items-center p-4">
+              <MaterialCommunityIcons
+                name="run"
+                size={64}
+                color={theme.foreground}
+              />
+
+              <ThemedText className="text-center text-xl w-3/4">
+                Your workout logs will appear here, showing the things you have
+                logged today.
               </ThemedText>
-            </Pressable>
-          </View>
-        )}
+
+              <Pressable
+                className="bg-secondary p-4 rounded-xl"
+                onPress={() => router.push("/(tabs)/log/workout")}
+              >
+                <ThemedText color="text-secondary-foreground">
+                  Log workout
+                </ThemedText>
+              </Pressable>
+            </View>
+          ))}
+
+        {activeTab === "goals" &&
+          (goals.length > 0 ? (
+            <>
+              <ThemedText className="text-2xl font-bold">
+                ({goalsCompleted}/{goals.length}) Completed
+              </ThemedText>
+
+              {goals.map((goal) => (
+                <Pressable
+                  key={goal.id}
+                  onPress={() => toggleGoalCompleted(goal.id)}
+                >
+                  <Card key={goal.id} className="flex-row">
+                    <View className="flex-row flex-1 gap-4">
+                      <View className="w-16 h-16 rounded-full items-center justify-center bg-border">
+                        {goal.completed && (
+                          <MaterialCommunityIcons
+                            name="check"
+                            color={theme.foreground}
+                            size={32}
+                          />
+                        )}
+                      </View>
+
+                      <View className="gap-1 flex-1">
+                        <ThemedText className="text-lg font-bold">
+                          {goal.name}
+                        </ThemedText>
+
+                        <ThemedText
+                          color="text-muted-foreground"
+                          className="flex-wrap"
+                        >
+                          {goal.description}
+                        </ThemedText>
+                      </View>
+                    </View>
+
+                    <Pressable>
+                      <Ionicons
+                        name="ellipsis-horizontal"
+                        size={24}
+                        color={theme.foreground}
+                      />
+                    </Pressable>
+                  </Card>
+                </Pressable>
+              ))}
+            </>
+          ) : (
+            <View className="gap-4 items-center p-4">
+              <MaterialCommunityIcons
+                name="run"
+                size={64}
+                color={theme.foreground}
+              />
+
+              <ThemedText className="text-center text-xl w-3/4">
+                Your workout logs will appear here, showing the things you have
+                logged today.
+              </ThemedText>
+
+              <Pressable
+                className="bg-secondary p-4 rounded-xl"
+                onPress={() => router.push("/(tabs)/log/workout")}
+              >
+                <ThemedText color="text-secondary-foreground">
+                  Log workout
+                </ThemedText>
+              </Pressable>
+            </View>
+          ))}
       </ScrollView>
     </SafeAreaView>
   );
