@@ -538,6 +538,7 @@ export default function Index() {
                   onPress={() => toggleGoalCompleted(goal.id)}
                 >
                   <GoalItem
+                    id={goal.id}
                     name={goal.name}
                     description={goal.description}
                     completed={goal.completed}

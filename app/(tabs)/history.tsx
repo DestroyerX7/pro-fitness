@@ -141,12 +141,18 @@ export default function History() {
             return (
               <View
                 key={date}
-                className="w-16 h-16 rounded"
+                className="w-16 h-16 rounded items-center justify-center"
                 style={{
                   backgroundColor:
-                    totalCalories >= user.dailyCalorieGoal ? "green" : "gray",
+                    totalCalories >= user.dailyCalorieGoal
+                      ? "#30d030"
+                      : theme.secondary,
                 }}
-              />
+              >
+                <ThemedText>
+                  {((totalCalories / user.dailyCalorieGoal) * 100).toFixed(0)}%
+                </ThemedText>
+              </View>
             );
           })}
         </View>

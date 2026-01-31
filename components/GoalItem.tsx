@@ -6,17 +6,21 @@ import Card from "./Card";
 import ThemedText from "./ThemedText";
 
 type Props = {
+  id: string;
   name: string;
   completed: boolean;
   description: string;
   colorScheme: "light" | "dark" | undefined;
+  onEdit?: (id: string) => void;
 };
 
 export default function GoalItem({
+  id,
   name,
   completed,
   description,
   colorScheme,
+  onEdit,
 }: Props) {
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
@@ -42,13 +46,15 @@ export default function GoalItem({
         </View>
       </View>
 
-      <Pressable>
-        <Ionicons
-          name="ellipsis-horizontal"
-          size={24}
-          color={theme.foreground}
-        />
-      </Pressable>
+      {onEdit !== undefined && (
+        <Pressable>
+          <Ionicons
+            name="ellipsis-horizontal"
+            size={24}
+            color={theme.foreground}
+          />
+        </Pressable>
+      )}
     </Card>
   );
 }
