@@ -1,6 +1,6 @@
 import { WorkoutLog } from "@/app/(tabs)";
 import { Icon } from "@/app/(tabs)/log/workout";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -57,7 +57,7 @@ export default function EditWorkoutLogModal({
   };
 
   const createWorkoutLogPreset = async (workoutLog: WorkoutLog) => {
-    await axios.post(`${baseUrl}/api/create-workout-log-preset`, {
+    await axios.post(`${backendUrl}/api/create-workout-log-preset`, {
       userId: workoutLog.userId,
       name: workoutLog.name,
       duration: workoutLog.duration,

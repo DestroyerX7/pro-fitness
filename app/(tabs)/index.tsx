@@ -6,7 +6,7 @@ import EditWorkoutLogModal from "@/components/EditWorkoutLogModal";
 import GoalItem from "@/components/GoalItem";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -82,7 +82,7 @@ export default function Index() {
     useCallback(() => {
       const getUser = async () => {
         const response: { data: { user: User } } = await axios.get(
-          `${baseUrl}/api/get-user/${data?.user.id}`,
+          `${backendUrl}/api/get-user/${data?.user.id}`,
         );
 
         setUser(response.data.user);
@@ -90,7 +90,9 @@ export default function Index() {
 
       const getCalorieLogs = async () => {
         const response: { data: { calorieLogs: CalorieLog[] } } =
-          await axios.get(`${baseUrl}/api/get-calorie-logs/${data?.user.id}`);
+          await axios.get(
+            `${backendUrl}/api/get-calorie-logs/${data?.user.id}`,
+          );
 
         setCalorieLogs(
           response.data.calorieLogs
@@ -110,7 +112,9 @@ export default function Index() {
 
       const getWorkoutLogs = async () => {
         const response: { data: { workoutLogs: WorkoutLog[] } } =
-          await axios.get(`${baseUrl}/api/get-workout-logs/${data?.user.id}`);
+          await axios.get(
+            `${backendUrl}/api/get-workout-logs/${data?.user.id}`,
+          );
 
         setWorkoutLogs(
           response.data.workoutLogs
@@ -130,7 +134,7 @@ export default function Index() {
 
       const getGoals = async () => {
         const response = await axios.get(
-          `${baseUrl}/api/get-goals/${data?.user.id}`,
+          `${backendUrl}/api/get-goals/${data?.user.id}`,
         );
 
         setGoals(response.data.goals);
@@ -149,7 +153,7 @@ export default function Index() {
       "Update your daily calorie goal",
       async (text) => {
         const response: { data: { user: User } } = await axios.patch(
-          `${baseUrl}/api/update-daily-calorie-goal/${user.id}`,
+          `${backendUrl}/api/update-daily-calorie-goal/${user.id}`,
           {
             dailyCalorieGoal: Number(text),
           },
@@ -171,7 +175,7 @@ export default function Index() {
       "Update your daily workout goal",
       async (text) => {
         const response: { data: { user: User } } = await axios.patch(
-          `${baseUrl}/api/update-daily-workout-goal/${user.id}`,
+          `${backendUrl}/api/update-daily-workout-goal/${user.id}`,
           {
             dailyWorkoutGoal: Number(text),
           },
@@ -216,7 +220,7 @@ export default function Index() {
     }
 
     await axios.put(
-      `${baseUrl}/api/update-calorie-log/${editedCalorieLog.id}`,
+      `${backendUrl}/api/update-calorie-log/${editedCalorieLog.id}`,
       {
         name: editedCalorieLog.name,
         calories: editedCalorieLog.calories,
@@ -244,7 +248,7 @@ export default function Index() {
     }
 
     await axios.put(
-      `${baseUrl}/api/update-workout-log/${editedWorkoutLog.id}`,
+      `${backendUrl}/api/update-workout-log/${editedWorkoutLog.id}`,
       {
         name: editedWorkoutLog.name,
         duration: editedWorkoutLog.duration,
@@ -267,14 +271,14 @@ export default function Index() {
   };
 
   const deleteCalorieLog = async (calorieLogId: string) => {
-    await axios.delete(`${baseUrl}/api/delete-calorie-log/${calorieLogId}`);
+    await axios.delete(`${backendUrl}/api/delete-calorie-log/${calorieLogId}`);
 
     setCalorieLogs(calorieLogs.filter((c) => c.id !== calorieLogId));
     setEditingCalorieLog(null);
   };
 
   const deleteWorkoutLog = async (workoutLogId: string) => {
-    await axios.delete(`${baseUrl}/api/delete-workout-log/${workoutLogId}`);
+    await axios.delete(`${backendUrl}/api/delete-workout-log/${workoutLogId}`);
 
     setWorkoutLogs(workoutLogs.filter((w) => w.id !== workoutLogId));
     setEditingWorkoutLog(null);

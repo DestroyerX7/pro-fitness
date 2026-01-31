@@ -1,7 +1,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import {
   AntDesign,
@@ -106,7 +106,7 @@ export default function Scan() {
       return;
     }
 
-    await axios.post(`${baseUrl}/api/log-calories`, {
+    await axios.post(`${backendUrl}/api/log-calories`, {
       userId: data?.user.id,
       name: trimmedName,
       calories: caloriesPerServingNum * numberOfServingsNum,

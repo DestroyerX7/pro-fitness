@@ -1,7 +1,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import axios from "axios";
 import { useColorScheme } from "nativewind";
@@ -18,7 +18,7 @@ export default function Goal() {
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   const createGoal = async () => {
-    await axios.post(`${baseUrl}/api/create-goal`, {
+    await axios.post(`${backendUrl}/api/create-goal`, {
       userId: data?.user.id,
       name,
       description,

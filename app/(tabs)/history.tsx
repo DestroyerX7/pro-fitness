@@ -1,7 +1,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
 import ThemedText from "@/components/ThemedText";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import axios from "axios";
 import { useFocusEffect } from "expo-router";
@@ -51,7 +51,7 @@ export default function History() {
     useCallback(() => {
       const getUser = async () => {
         const response: { data: { user: User } } = await axios.get(
-          `${baseUrl}/api/get-user/${data?.user.id}`,
+          `${backendUrl}/api/get-user/${data?.user.id}`,
         );
 
         setUser(response.data.user);
@@ -59,7 +59,9 @@ export default function History() {
 
       const getCalorieLogs = async () => {
         const response: { data: { calorieLogs: CalorieLog[] } } =
-          await axios.get(`${baseUrl}/api/get-calorie-logs/${data?.user.id}`);
+          await axios.get(
+            `${backendUrl}/api/get-calorie-logs/${data?.user.id}`,
+          );
 
         setYo(
           response.data.calorieLogs.reduce<Record<string, CalorieLog[]>>(
@@ -78,7 +80,7 @@ export default function History() {
 
       const getGoals = async () => {
         const response = await axios.get(
-          `${baseUrl}/api/get-goals/${data?.user.id}`,
+          `${backendUrl}/api/get-goals/${data?.user.id}`,
         );
 
         setGoals(response.data.goals);
@@ -86,7 +88,9 @@ export default function History() {
 
       const getWorkoutLogs = async () => {
         const response: { data: { workoutLogs: WorkoutLog[] } } =
-          await axios.get(`${baseUrl}/api/get-workout-logs/${data?.user.id}`);
+          await axios.get(
+            `${backendUrl}/api/get-workout-logs/${data?.user.id}`,
+          );
 
         setWorkoutLogs(
           response.data.workoutLogs

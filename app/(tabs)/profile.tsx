@@ -2,7 +2,7 @@ import { useAuth } from "@/components/AuthProvider";
 import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
 import { authClient } from "@/lib/auth-client";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -23,7 +23,7 @@ export default function Profile() {
   useEffect(() => {
     const getUser = async () => {
       const response: { data: { user: User } } = await axios.get(
-        `${baseUrl}/api/get-user/${data?.user.id}`,
+        `${backendUrl}/api/get-user/${data?.user.id}`,
       );
 
       setUser(response.data.user);
@@ -51,7 +51,7 @@ export default function Profile() {
   };
 
   const deleteUser = async () => {
-    await axios.delete(`${baseUrl}/api/delete-user/${data?.user.id}`);
+    await axios.delete(`${backendUrl}/api/delete-user/${data?.user.id}`);
     await authClient.signOut();
   };
 

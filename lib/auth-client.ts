@@ -1,10 +1,10 @@
 import { expoClient } from "@better-auth/expo/client";
 import { createAuthClient } from "better-auth/react";
 import * as SecureStore from "expo-secure-store";
-import { baseUrl } from "./backend";
+import { backendUrl } from "./backend";
 
 export const authClient = createAuthClient({
-  baseURL: baseUrl,
+  baseURL: backendUrl,
   plugins: [
     expoClient({
       scheme: "profitness",

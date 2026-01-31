@@ -1,7 +1,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -38,14 +38,14 @@ export default function Calories() {
       });
       const fileData = `data:image/jpeg;base64,${base64}`;
 
-      const response = await axios.post(`${baseUrl}/api/upload-image`, {
+      const response = await axios.post(`${backendUrl}/api/upload-image`, {
         file: fileData,
       });
 
       imageUrl = response.data.url;
     }
 
-    await axios.post(`${baseUrl}/api/log-calories`, {
+    await axios.post(`${backendUrl}/api/log-calories`, {
       userId: data?.user.id,
       name: trimmedName,
       calories: caloriesNum,

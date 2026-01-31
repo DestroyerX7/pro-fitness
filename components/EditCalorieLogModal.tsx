@@ -1,5 +1,5 @@
 import { CalorieLog } from "@/app/(tabs)";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -51,7 +51,7 @@ export default function EditCalorieLogModal({
   };
 
   const createCalorieLogPreset = async (calorieLog: CalorieLog) => {
-    await axios.post(`${baseUrl}/api/create-calorie-log-preset`, {
+    await axios.post(`${backendUrl}/api/create-calorie-log-preset`, {
       userId: calorieLog.userId,
       name: calorieLog.name,
       calories: calorieLog.calories,

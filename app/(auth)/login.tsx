@@ -26,6 +26,7 @@ export default function Login() {
         },
         onError: (ctx) => {
           console.log(ctx.error.message);
+          console.log(ctx);
         },
       },
     });
@@ -40,6 +41,7 @@ export default function Login() {
         },
         onError: (ctx) => {
           console.log(ctx.error.message);
+          console.log(ctx);
         },
       },
     });

@@ -2,7 +2,7 @@ import { useAuth } from "@/components/AuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -55,7 +55,7 @@ export default function Favorites() {
       }
 
       const response = await axios.get(
-        `${baseUrl}/api/get-calorie-log-presets/${data.user.id}`,
+        `${backendUrl}/api/get-calorie-log-presets/${data.user.id}`,
       );
 
       setCalorieLogPresets(response.data.calorieLogPresets);
@@ -67,7 +67,7 @@ export default function Favorites() {
       }
 
       const response = await axios.get(
-        `${baseUrl}/api/get-workout-log-presets/${data.user.id}`,
+        `${backendUrl}/api/get-workout-log-presets/${data.user.id}`,
       );
 
       setWorkoutLogPresets(response.data.workoutLogPresets);
@@ -82,7 +82,7 @@ export default function Favorites() {
       return;
     }
 
-    await axios.post(`${baseUrl}/api/log-calories`, {
+    await axios.post(`${backendUrl}/api/log-calories`, {
       userId: data.user.id,
       name: calorieLogPreset.name,
       calories: calorieLogPreset.calories,
@@ -93,7 +93,7 @@ export default function Favorites() {
   };
 
   const logWorkout = async (workoutLogPreset: WorkoutLogPreset) => {
-    await axios.post(`${baseUrl}/api/log-workout`, {
+    await axios.post(`${backendUrl}/api/log-workout`, {
       userId: data?.user.id,
       name: workoutLogPreset.name,
       duration: workoutLogPreset.duration,
