@@ -1,14 +1,13 @@
 import { useAuth } from "@/components/AuthProvider";
-import Card from "@/components/Card";
+import CalorieLogItem from "@/components/CalorieLogItem";
 import ThemedText from "@/components/ThemedText";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import { useFocusEffect } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useCallback, useState } from "react";
-import { Image, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CalorieLog, Goal, User, WorkoutLog } from ".";
 
@@ -159,31 +158,14 @@ export default function History() {
               <ThemedText>{date}</ThemedText>
 
               {calorieLogs.map((calorieLog) => (
-                <Card className="flex-row gap-4" key={calorieLog.id}>
-                  {calorieLog.imageUrl !== null ? (
-                    <Image
-                      className="w-16 h-16 rounded"
-                      source={{ uri: calorieLog.imageUrl }}
-                    />
-                  ) : (
-                    <View className="w-16 h-16 items-center justify-center border border-border rounded">
-                      <MaterialCommunityIcons
-                        name="food"
-                        size={32}
-                        color={theme.foreground}
-                      />
-                    </View>
-                  )}
-
-                  <View className="flex-1 gap-1">
-                    <ThemedText className="text-lg font-bold">
-                      {calorieLog.name}
-                    </ThemedText>
-                    <ThemedText color="text-muted-foreground">
-                      {calorieLog.calories}
-                    </ThemedText>
-                  </View>
-                </Card>
+                <CalorieLogItem
+                  key={calorieLog.id}
+                  id={calorieLog.id}
+                  name={calorieLog.name}
+                  calories={calorieLog.calories}
+                  imageUrl={calorieLog.imageUrl}
+                  colorScheme={colorScheme}
+                />
               ))}
             </View>
           ))}

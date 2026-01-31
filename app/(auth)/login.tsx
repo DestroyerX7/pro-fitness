@@ -24,6 +24,9 @@ export default function Login() {
         onSuccess: () => {
           router.replace("/(tabs)");
         },
+        onError: (ctx) => {
+          console.log(ctx.error.message);
+        },
       },
     });
   };

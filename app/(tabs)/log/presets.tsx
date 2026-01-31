@@ -1,14 +1,15 @@
 import { useAuth } from "@/components/AuthProvider";
-import Card from "@/components/Card";
+import CalorieLogItem from "@/components/CalorieLogItem";
 import ThemedText from "@/components/ThemedText";
+import WorkoutLogItem from "@/components/WorkoutLogItem";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useEffect, useState } from "react";
-import { Image, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { iconLibraries } from "./workout";
 
 export type CalorieLogPreset = {
@@ -49,16 +50,24 @@ export default function Favorites() {
 
   useEffect(() => {
     const getCalorieLogPresets = async () => {
+      if (data === null) {
+        return;
+      }
+
       const response = await axios.get(
-        `${baseUrl}/api/get-calorie-log-presets/${data?.user.id}`,
+        `${baseUrl}/api/get-calorie-log-presets/${data.user.id}`,
       );
 
       setCalorieLogPresets(response.data.calorieLogPresets);
     };
 
     const getWorkoutLogPresets = async () => {
+      if (data === null) {
+        return;
+      }
+
       const response = await axios.get(
-        `${baseUrl}/api/get-workout-log-presets/${data?.user.id}`,
+        `${baseUrl}/api/get-workout-log-presets/${data.user.id}`,
       );
 
       setWorkoutLogPresets(response.data.workoutLogPresets);
@@ -69,8 +78,12 @@ export default function Favorites() {
   });
 
   const logCalories = async (calorieLogPreset: CalorieLogPreset) => {
+    if (data === null) {
+      return;
+    }
+
     await axios.post(`${baseUrl}/api/log-calories`, {
-      userId: data?.user.id,
+      userId: data.user.id,
       name: calorieLogPreset.name,
       calories: calorieLogPreset.calories,
       imageUrl: calorieLogPreset.imageUrl,
@@ -132,40 +145,13 @@ export default function Favorites() {
               onPress={() => logCalories(calorieLogPreset)}
               key={calorieLogPreset.id}
             >
-              <Card className="flex-row gap-4">
-                {calorieLogPreset.imageUrl !== null ? (
-                  <Image
-                    className="w-16 h-16 rounded-md"
-                    source={{ uri: calorieLogPreset.imageUrl }}
-                  />
-                ) : (
-                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
-                    <MaterialCommunityIcons
-                      name="food"
-                      size={32}
-                      color={theme.foreground}
-                    />
-                  </View>
-                )}
-
-                <View className="flex-1 gap-1">
-                  <ThemedText className="text-lg font-bold">
-                    {calorieLogPreset.name}
-                  </ThemedText>
-
-                  <ThemedText color="text-muted-foreground">
-                    {calorieLogPreset.calories}
-                  </ThemedText>
-                </View>
-
-                <Pressable>
-                  <Ionicons
-                    name="ellipsis-horizontal"
-                    size={24}
-                    color={theme.foreground}
-                  />
-                </Pressable>
-              </Card>
+              <CalorieLogItem
+                id={calorieLogPreset.id}
+                name={calorieLogPreset.name}
+                imageUrl={calorieLogPreset.imageUrl}
+                calories={calorieLogPreset.calories}
+                colorScheme={colorScheme}
+              />
             </Pressable>
           ))
         ) : (
@@ -194,31 +180,14 @@ export default function Favorites() {
               onPress={() => logWorkout(workoutLogPreset)}
               key={workoutLogPreset.id}
             >
-              <Card className="flex-row gap-4">
-                <IconComponent
-                  name={workoutLogPreset.iconName as any}
-                  size={48}
-                  color={theme.foreground}
-                />
-
-                <View className="flex-1 gap-1">
-                  <ThemedText className="text-lg font-bold">
-                    {workoutLogPreset.name}
-                  </ThemedText>
-
-                  <ThemedText color="text-muted-foreground">
-                    {workoutLogPreset.duration} minutes
-                  </ThemedText>
-                </View>
-
-                <Pressable>
-                  <Ionicons
-                    name="ellipsis-horizontal"
-                    size={24}
-                    color={theme.foreground}
-                  />
-                </Pressable>
-              </Card>
+              <WorkoutLogItem
+                id={workoutLogPreset.id}
+                name={workoutLogPreset.name}
+                duration={workoutLogPreset.duration}
+                colorScheme={colorScheme}
+                iconLibrary={workoutLogPreset.iconLibrary}
+                iconName={workoutLogPreset.iconName}
+              />
             </Pressable>
           );
         })

@@ -1,23 +1,21 @@
 import { useAuth } from "@/components/AuthProvider";
+import CalorieLogItem from "@/components/CalorieLogItem";
 import Card from "@/components/Card";
 import EditCalorieLogModal from "@/components/EditCalorieLogModal";
 import EditWorkoutLogModal from "@/components/EditWorkoutLogModal";
+import GoalItem from "@/components/GoalItem";
 import ThemedText from "@/components/ThemedText";
+import WorkoutLogItem from "@/components/WorkoutLogItem";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
-import {
-  Ionicons,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
 import { useColorScheme } from "nativewind";
 import React, { useCallback, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, View } from "react-native";
+import { Alert, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { iconLibraries } from "./log/workout";
 
 export type User = {
   id: string;
@@ -189,12 +187,24 @@ export default function Index() {
     await Haptics.selectionAsync();
   };
 
-  const editCalorieLog = async (calorieLog: CalorieLog) => {
+  const editCalorieLog = async (calorieLogId: string) => {
+    const calorieLog = calorieLogs.find((c) => c.id === calorieLogId);
+
+    if (calorieLog === undefined) {
+      return;
+    }
+
     setEditingCalorieLog(calorieLog);
     await Haptics.selectionAsync();
   };
 
-  const editWorkoutLog = async (workoutLog: WorkoutLog) => {
+  const editWorkoutLog = async (workoutLogId: string) => {
+    const workoutLog = workoutLogs.find((w) => w.id === workoutLogId);
+
+    if (workoutLog === undefined) {
+      return;
+    }
+
     setEditingWorkoutLog(workoutLog);
     await Haptics.selectionAsync();
   };
@@ -443,40 +453,15 @@ export default function Index() {
         {activeTab === "calories" &&
           (calorieLogs.length > 0 ? (
             calorieLogs.map((calorieLog) => (
-              <Card className="flex-row gap-4" key={calorieLog.id}>
-                {calorieLog.imageUrl !== null ? (
-                  <Image
-                    className="w-16 h-16 rounded-md"
-                    source={{ uri: calorieLog.imageUrl }}
-                  />
-                ) : (
-                  <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
-                    <MaterialCommunityIcons
-                      name="food"
-                      size={32}
-                      color={theme.foreground}
-                    />
-                  </View>
-                )}
-
-                <View className="flex-1 gap-1">
-                  <ThemedText className="text-lg font-bold">
-                    {calorieLog.name}
-                  </ThemedText>
-
-                  <ThemedText color="text-muted-foreground">
-                    {calorieLog.calories}
-                  </ThemedText>
-                </View>
-
-                <Pressable onPress={() => editCalorieLog(calorieLog)}>
-                  <Ionicons
-                    name="ellipsis-horizontal"
-                    size={24}
-                    color={theme.foreground}
-                  />
-                </Pressable>
-              </Card>
+              <CalorieLogItem
+                key={calorieLog.id}
+                id={calorieLog.id}
+                name={calorieLog.name}
+                calories={calorieLog.calories}
+                imageUrl={calorieLog.imageUrl}
+                colorScheme={colorScheme}
+                onEdit={editCalorieLog}
+              />
             ))
           ) : (
             <View className="gap-4 items-center p-4">
@@ -504,37 +489,18 @@ export default function Index() {
 
         {activeTab === "workouts" &&
           (workoutLogs.length > 0 ? (
-            workoutLogs.map((workoutLog) => {
-              const IconComponent = iconLibraries[workoutLog.iconLibrary];
-
-              return (
-                <Card className="flex-row gap-4" key={workoutLog.id}>
-                  <IconComponent
-                    name={workoutLog.iconName as any}
-                    size={48}
-                    color={theme.foreground}
-                  />
-
-                  <View className="flex-1 gap-1">
-                    <ThemedText className="text-lg font-bold">
-                      {workoutLog.name}
-                    </ThemedText>
-
-                    <ThemedText color="text-muted-foreground">
-                      {workoutLog.duration} minutes
-                    </ThemedText>
-                  </View>
-
-                  <Pressable onPress={() => editWorkoutLog(workoutLog)}>
-                    <Ionicons
-                      name="ellipsis-horizontal"
-                      size={24}
-                      color={theme.foreground}
-                    />
-                  </Pressable>
-                </Card>
-              );
-            })
+            workoutLogs.map((workoutLog) => (
+              <WorkoutLogItem
+                key={workoutLog.id}
+                id={workoutLog.id}
+                name={workoutLog.name}
+                duration={workoutLog.duration}
+                colorScheme={colorScheme}
+                iconLibrary={workoutLog.iconLibrary}
+                iconName={workoutLog.iconName}
+                onEdit={editWorkoutLog}
+              />
+            ))
           ) : (
             <View className="gap-4 items-center p-4">
               <MaterialCommunityIcons
@@ -571,40 +537,12 @@ export default function Index() {
                   key={goal.id}
                   onPress={() => toggleGoalCompleted(goal.id)}
                 >
-                  <Card key={goal.id} className="flex-row">
-                    <View className="flex-row flex-1 gap-4">
-                      <View className="w-16 h-16 rounded-full items-center justify-center bg-border">
-                        {goal.completed && (
-                          <MaterialCommunityIcons
-                            name="check"
-                            color={theme.foreground}
-                            size={32}
-                          />
-                        )}
-                      </View>
-
-                      <View className="gap-1 flex-1">
-                        <ThemedText className="text-lg font-bold">
-                          {goal.name}
-                        </ThemedText>
-
-                        <ThemedText
-                          color="text-muted-foreground"
-                          className="flex-wrap"
-                        >
-                          {goal.description}
-                        </ThemedText>
-                      </View>
-                    </View>
-
-                    <Pressable>
-                      <Ionicons
-                        name="ellipsis-horizontal"
-                        size={24}
-                        color={theme.foreground}
-                      />
-                    </Pressable>
-                  </Card>
+                  <GoalItem
+                    name={goal.name}
+                    description={goal.description}
+                    completed={goal.completed}
+                    colorScheme={colorScheme}
+                  />
                 </Pressable>
               ))}
             </>

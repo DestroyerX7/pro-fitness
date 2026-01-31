@@ -34,9 +34,12 @@ export const auth = betterAuth({
     "http://127.0.0.1:8081", // in case your browser uses 127.0.0.1
     "http://localhost:**", // wildcard port match (use ** at end)
     "http://127.0.0.1:**", // wildcard port
+    "exp://10.0.0.53:8081",
 
     // Deployed web
-    "https://pro-fitness--ewr0q95hxm.expo.app",
+    process.env.BETTER_AUTH_URL!,
+    process.env.EXPO_PUBLIC_BACKEND_BASE_URL!,
+    "https://pro-fitness--2cj349x8z9.expo.app",
 
     // Development mode - Expo's exp:// scheme with local IP ranges
     ...(process.env.NODE_ENV === "development"
