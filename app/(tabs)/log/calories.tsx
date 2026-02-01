@@ -1,9 +1,11 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import { createCalorieLog } from "@/lib/api";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
@@ -13,20 +15,31 @@ import React, { useState } from "react";
 import { Image, Pressable, View } from "react-native";
 
 export default function Calories() {
+  const { data } = useAuth();
+
+  const queryClient = useQueryClient();
+
   const [name, setName] = useState("");
   const [calories, setCalories] = useState("");
   const [image, setImage] = useState<string | null>(null);
 
-  const { data } = useAuth();
-
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
+
+  const createCalorieLogMutation = useMutation({
+    mutationFn: createCalorieLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["calorieLogs", data?.user.id],
+      });
+    },
+  });
 
   const logCalories = async () => {
     const trimmedName = name.trim();
     const caloriesNum = Number(calories);
 
-    if (trimmedName.length < 1 || caloriesNum < 1) {
+    if (data === null || trimmedName.length < 1 || caloriesNum < 1) {
       return;
     }
 
@@ -45,8 +58,8 @@ export default function Calories() {
       imageUrl = response.data.url;
     }
 
-    await axios.post(`${baseUrl}/api/log-calories`, {
-      userId: data?.user.id,
+    createCalorieLogMutation.mutate({
+      userId: data.user.id,
       name: trimmedName,
       calories: caloriesNum,
       imageUrl,

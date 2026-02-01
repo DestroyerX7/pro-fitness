@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { goal } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function PUT(
+export async function PATCH(
   request: Request,
   { goalId }: Record<string, string>,
 ) {

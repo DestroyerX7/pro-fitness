@@ -1,9 +1,8 @@
-import { WorkoutLog } from "@/app/(tabs)";
 import { Icon } from "@/app/(tabs)/log/workout";
-import { baseUrl } from "@/lib/backend";
+import { createWorkoutLogPreset, WorkoutLog } from "@/lib/api";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
@@ -26,6 +25,8 @@ export default function EditWorkoutLogModal({
   onSave,
   onDelete,
 }: Props) {
+  const queryClient = useQueryClient();
+
   const [name, setName] = useState(workoutLog.name);
   const [duration, setDuration] = useState(workoutLog.duration.toString());
   const [selectedIcon, setSelectedIcon] = useState<Icon>({
@@ -35,6 +36,15 @@ export default function EditWorkoutLogModal({
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
+
+  const createWorkoutLogPresetMutation = useMutation({
+    mutationFn: createWorkoutLogPreset,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["workoutLogPresets", workoutLog.userId],
+      });
+    },
+  });
 
   const showConfirmDeleteWorkoutLog = async (workoutLog: WorkoutLog) => {
     Alert.alert(
@@ -56,14 +66,16 @@ export default function EditWorkoutLogModal({
     await Haptics.selectionAsync();
   };
 
-  const createWorkoutLogPreset = async (workoutLog: WorkoutLog) => {
-    await axios.post(`${baseUrl}/api/create-workout-log-preset`, {
+  const handleCreateWorkoutLogPreset = async () => {
+    createWorkoutLogPresetMutation.mutate({
       userId: workoutLog.userId,
       name: workoutLog.name,
       duration: workoutLog.duration,
       iconLibrary: workoutLog.iconLibrary,
       iconName: workoutLog.iconName,
     });
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   const save = () => {
@@ -97,7 +109,7 @@ export default function EditWorkoutLogModal({
 
               <Pressable
                 className="p-2 border border-border bg-background rounded-xl justify-center items-center flex-row gap-2"
-                onPress={() => createWorkoutLogPreset(workoutLog)}
+                onPress={handleCreateWorkoutLogPreset}
               >
                 <MaterialCommunityIcons
                   name="tune"

@@ -1,38 +1,36 @@
 import { useAuth } from "@/components/AuthProvider";
 import GoalItem from "@/components/GoalItem";
 import ThemedText from "@/components/ThemedText";
-import { baseUrl } from "@/lib/backend";
-import axios from "axios";
-import { useFocusEffect } from "expo-router";
+import { getGoals } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import { useColorScheme } from "nativewind";
-import { useCallback, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Goal } from ".";
 
 export default function Goals() {
-  const [goals, setGoals] = useState<Goal[]>([]);
-
   const { data } = useAuth();
 
   const { colorScheme } = useColorScheme();
 
-  useFocusEffect(
-    useCallback(() => {
-      const getGoals = async () => {
-        if (data === null) {
-          return;
-        }
+  const {
+    data: goals,
+    isPending,
+    error,
+  } = useQuery({
+    queryKey: ["goals", data?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getGoals(userId);
+    },
+    enabled: data !== null,
+  });
 
-        const response = await axios.get(
-          `${baseUrl}/api/get-goals/${data.user.id}`,
-        );
+  if (error !== null) {
+    return <ThemedText>Error</ThemedText>;
+  }
 
-        setGoals(response.data.goals);
-      };
-
-      getGoals();
-    }, []),
-  );
+  if (isPending) {
+    return <ThemedText>Loading...</ThemedText>;
+  }
 
   return (
     <SafeAreaView className="p-4 gap-4">

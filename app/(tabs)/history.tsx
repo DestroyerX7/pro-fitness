@@ -1,6 +1,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
 import ThemedText from "@/components/ThemedText";
+import { CalorieLog, Goal, User, WorkoutLog } from "@/lib/api";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import axios from "axios";
@@ -9,7 +10,6 @@ import { useColorScheme } from "nativewind";
 import { useCallback, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { CalorieLog, Goal, User, WorkoutLog } from ".";
 
 export default function History() {
   const [user, setUser] = useState<User | null>(null);

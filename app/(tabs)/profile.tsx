@@ -1,36 +1,36 @@
 import { useAuth } from "@/components/AuthProvider";
 import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
+import { getUser } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { baseUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useColorScheme } from "nativewind";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { User } from ".";
 
 export default function Profile() {
-  const [user, setUser] = useState<User | null>(null);
-
   const { data } = useAuth();
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
-  useEffect(() => {
-    const getUser = async () => {
-      const response: { data: { user: User } } = await axios.get(
-        `${baseUrl}/api/get-user/${data?.user.id}`,
-      );
-
-      setUser(response.data.user);
-    };
-
-    getUser();
-  }, []);
+  const {
+    data: user,
+    isPending,
+    error,
+  } = useQuery({
+    queryKey: ["user", data?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getUser(userId);
+    },
+    enabled: data !== null,
+  });
 
   const showConfirmDeleteUser = () => {
     Alert.alert(
@@ -55,8 +55,12 @@ export default function Profile() {
     await authClient.signOut();
   };
 
-  if (user === null) {
-    return;
+  if (error !== null) {
+    return <ThemedText>Error</ThemedText>;
+  }
+
+  if (isPending) {
+    return <ThemedText>Loading...</ThemedText>;
   }
 
   return (

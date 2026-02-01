@@ -1,28 +1,35 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { baseUrl } from "@/lib/backend";
-import { colors } from "@/lib/colors";
-import axios from "axios";
-import { useColorScheme } from "nativewind";
+import { createGoal } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import * as Haptics from "expo-haptics";
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 
 export default function Goal() {
+  const { data } = useAuth();
+
+  const queryClient = useQueryClient();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  const { data } = useAuth();
+  const createGoalMutation = useMutation({
+    mutationFn: createGoal,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", data?.user.id] });
+    },
+  });
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const handleCreateGoal = async () => {
+    if (data === null) {
+      return;
+    }
 
-  const createGoal = async () => {
-    await axios.post(`${baseUrl}/api/create-goal`, {
-      userId: data?.user.id,
-      name,
-      description,
-    });
+    createGoalMutation.mutate({ userId: data.user.id, name, description });
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   return (
@@ -50,7 +57,10 @@ export default function Goal() {
         />
       </View>
 
-      <Pressable onPress={createGoal} className="bg-primary p-4 rounded-full">
+      <Pressable
+        onPress={handleCreateGoal}
+        className="bg-primary p-4 rounded-full"
+      >
         <ThemedText
           color="text-primary-foreground"
           className="text-center text-lg font-bold"

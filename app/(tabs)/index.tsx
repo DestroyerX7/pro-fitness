@@ -6,61 +6,36 @@ import EditWorkoutLogModal from "@/components/EditWorkoutLogModal";
 import GoalItem from "@/components/GoalItem";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
-import { baseUrl } from "@/lib/backend";
+import {
+  CalorieLog,
+  deleteCalorieLog,
+  deleteWorkoutLog,
+  getCalorieLogs,
+  getGoals,
+  getUser,
+  getWorkoutLogs,
+  updateCalorieGoal,
+  updateCalorieLog,
+  updateGoalCompleted,
+  updateWorkoutGoal,
+  updateWorkoutLog,
+  User,
+  WorkoutLog,
+} from "@/lib/api";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  image: string | null;
-  dailyCalorieGoal: number;
-  dailyWorkoutGoal: number;
-  createdAt: Date;
-};
-
-export type CalorieLog = {
-  id: string;
-  name: string;
-  calories: number;
-  date: Date;
-  imageUrl: string | null;
-  createdAt: Date;
-  userId: string;
-};
-
-export type WorkoutLog = {
-  id: string;
-  name: string;
-  duration: number;
-  date: string;
-  iconName: string;
-  iconLibrary: "MaterialIcons" | "MaterialCommunityIcons";
-  createdAt: Date;
-  userId: string;
-};
-
-export type Goal = {
-  id: string;
-  name: string;
-  description: string;
-  completed: boolean;
-  userId: string;
-};
-
 export default function Index() {
-  const [user, setUser] = useState<User | null>(null);
-  const [calorieLogs, setCalorieLogs] = useState<CalorieLog[]>([]);
-  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
+  const { data } = useAuth();
+
+  const queryClient = useQueryClient();
 
   const [editingCalorieLog, setEditingCalorieLog] = useState<CalorieLog | null>(
     null,
@@ -73,90 +48,115 @@ export default function Index() {
     "calories",
   );
 
-  const { data } = useAuth();
-
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
-  useFocusEffect(
-    useCallback(() => {
-      const getUser = async () => {
-        const response: { data: { user: User } } = await axios.get(
-          `${baseUrl}/api/get-user/${data?.user.id}`,
-        );
+  const { data: user } = useQuery({
+    queryKey: ["user", data?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getUser(userId);
+    },
+    enabled: data !== null,
+  });
 
-        setUser(response.data.user);
-      };
+  const updateCalorieGoalMutation = useMutation({
+    mutationFn: updateCalorieGoal,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", data?.user.id] });
+    },
+  });
 
-      const getCalorieLogs = async () => {
-        const response: { data: { calorieLogs: CalorieLog[] } } =
-          await axios.get(`${baseUrl}/api/get-calorie-logs/${data?.user.id}`);
+  const updateWorkoutGoalMutation = useMutation({
+    mutationFn: updateWorkoutGoal,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", data?.user.id] });
+    },
+  });
 
-        setCalorieLogs(
-          response.data.calorieLogs
-            .filter(
-              (c) =>
-                new Date(c.createdAt).toDateString() ==
-                new Date().toDateString(),
-            )
-            .slice()
-            .sort(
-              (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-            ),
-        );
-      };
+  const { data: calorieLogs } = useQuery({
+    queryKey: ["calorieLogs", data?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getCalorieLogs(userId);
+    },
+    enabled: data !== null,
+  });
 
-      const getWorkoutLogs = async () => {
-        const response: { data: { workoutLogs: WorkoutLog[] } } =
-          await axios.get(`${baseUrl}/api/get-workout-logs/${data?.user.id}`);
+  const updateCalorieLogMutaion = useMutation({
+    mutationFn: updateCalorieLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["calorieLogs", data?.user.id],
+      });
+    },
+  });
 
-        setWorkoutLogs(
-          response.data.workoutLogs
-            .filter(
-              (w) =>
-                new Date(w.createdAt).toDateString() ==
-                new Date().toDateString(),
-            )
-            .slice()
-            .sort(
-              (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-            ),
-        );
-      };
+  const deleteCalorieLogMutation = useMutation({
+    mutationFn: deleteCalorieLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["calorieLogs", data?.user.id],
+      });
+    },
+  });
 
-      const getGoals = async () => {
-        const response = await axios.get(
-          `${baseUrl}/api/get-goals/${data?.user.id}`,
-        );
+  const { data: workoutLogs } = useQuery({
+    queryKey: ["workoutLogs", data?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getWorkoutLogs(userId);
+    },
+    enabled: data !== null,
+  });
 
-        setGoals(response.data.goals);
-      };
+  const updateWorkoutLogMutaion = useMutation({
+    mutationFn: updateWorkoutLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["workoutLogs", data?.user.id],
+      });
+    },
+  });
 
-      getUser();
-      getCalorieLogs();
-      getWorkoutLogs();
-      getGoals();
-    }, []),
-  );
+  const deleteWorkoutLogMutation = useMutation({
+    mutationFn: deleteWorkoutLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["workoutLogs", data?.user.id],
+      });
+    },
+  });
+
+  const { data: goals } = useQuery({
+    queryKey: ["goals", data?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getGoals(userId);
+    },
+    enabled: data !== null,
+  });
+
+  const updateGoalCompletedMutation = useMutation({
+    mutationFn: updateGoalCompleted,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", data?.user.id] });
+    },
+  });
 
   const editDailyCalorieGoal = async (user: User) => {
+    if (data == null) {
+      return;
+    }
+
     Alert.prompt(
       "Edit calorie goal",
       "Update your daily calorie goal",
-      async (text) => {
-        const response: { data: { user: User } } = await axios.patch(
-          `${baseUrl}/api/update-daily-calorie-goal/${user.id}`,
-          {
-            dailyCalorieGoal: Number(text),
-          },
-        );
-
-        setUser(response.data.user);
-      },
+      (calorieGoalText) =>
+        updateCalorieGoalMutation.mutate({
+          calorieGoalText,
+          userId: data.user.id,
+        }),
       "plain-text",
       user.dailyCalorieGoal.toString(),
       "number-pad",
@@ -166,19 +166,18 @@ export default function Index() {
   };
 
   const editDailyWorkoutGoal = async (user: User) => {
+    if (data == null) {
+      return;
+    }
+
     Alert.prompt(
       "Edit workout goal",
       "Update your daily workout goal",
-      async (text) => {
-        const response: { data: { user: User } } = await axios.patch(
-          `${baseUrl}/api/update-daily-workout-goal/${user.id}`,
-          {
-            dailyWorkoutGoal: Number(text),
-          },
-        );
-
-        setUser(response.data.user);
-      },
+      async (workoutGoalText) =>
+        updateWorkoutGoalMutation.mutate({
+          workoutGoalText,
+          userId: data.user.id,
+        }),
       "plain-text",
       user.dailyWorkoutGoal.toString(),
       "number-pad",
@@ -188,7 +187,7 @@ export default function Index() {
   };
 
   const editCalorieLog = async (calorieLogId: string) => {
-    const calorieLog = calorieLogs.find((c) => c.id === calorieLogId);
+    const calorieLog = calorieLogs?.find((c) => c.id === calorieLogId);
 
     if (calorieLog === undefined) {
       return;
@@ -199,7 +198,7 @@ export default function Index() {
   };
 
   const editWorkoutLog = async (workoutLogId: string) => {
-    const workoutLog = workoutLogs.find((w) => w.id === workoutLogId);
+    const workoutLog = workoutLogs?.find((w) => w.id === workoutLogId);
 
     if (workoutLog === undefined) {
       return;
@@ -211,84 +210,42 @@ export default function Index() {
 
   const saveCalorieLog = async (editedCalorieLog: CalorieLog) => {
     if (editedCalorieLog === editingCalorieLog) {
-      console.log("Same");
       return;
     }
 
-    await axios.put(
-      `${baseUrl}/api/update-calorie-log/${editedCalorieLog.id}`,
-      {
-        name: editedCalorieLog.name,
-        calories: editedCalorieLog.calories,
-        date: editedCalorieLog.date,
-        imageUrl: editedCalorieLog.imageUrl,
-      },
-    );
-
-    setCalorieLogs(
-      calorieLogs.map((calorieLog) => {
-        if (calorieLog.id === editedCalorieLog.id) {
-          return editedCalorieLog;
-        }
-
-        return calorieLog;
-      }),
-    );
+    updateCalorieLogMutaion.mutate({ calorieLog: editedCalorieLog });
     setEditingCalorieLog(null);
   };
 
   const saveWorkoutLog = async (editedWorkoutLog: WorkoutLog) => {
     if (editedWorkoutLog === editingWorkoutLog) {
-      console.log("Same");
       return;
     }
 
-    await axios.put(
-      `${baseUrl}/api/update-workout-log/${editedWorkoutLog.id}`,
-      {
-        name: editedWorkoutLog.name,
-        duration: editedWorkoutLog.duration,
-        date: editedWorkoutLog.date,
-        iconLibrary: editedWorkoutLog.iconLibrary,
-        iconName: editedWorkoutLog.iconName,
-      },
-    );
-
-    setWorkoutLogs(
-      workoutLogs.map((workoutLog) => {
-        if (workoutLog.id === editedWorkoutLog.id) {
-          return editedWorkoutLog;
-        }
-
-        return workoutLog;
-      }),
-    );
+    updateWorkoutLogMutaion.mutate({ workoutLog: editedWorkoutLog });
     setEditingWorkoutLog(null);
   };
 
-  const deleteCalorieLog = async (calorieLogId: string) => {
-    await axios.delete(`${baseUrl}/api/delete-calorie-log/${calorieLogId}`);
-
-    setCalorieLogs(calorieLogs.filter((c) => c.id !== calorieLogId));
+  const handledeleteCalorieLog = async (calorieLogId: string) => {
+    deleteCalorieLogMutation.mutate(calorieLogId);
     setEditingCalorieLog(null);
   };
 
-  const deleteWorkoutLog = async (workoutLogId: string) => {
-    await axios.delete(`${baseUrl}/api/delete-workout-log/${workoutLogId}`);
-
-    setWorkoutLogs(workoutLogs.filter((w) => w.id !== workoutLogId));
+  const handleDeleteWorkoutLog = async (workoutLogId: string) => {
+    deleteWorkoutLogMutation.mutate(workoutLogId);
     setEditingWorkoutLog(null);
   };
 
-  const toggleGoalCompleted = (id: string) => {
-    setGoals(
-      goals.map((goal) =>
-        goal.id === id ? { ...goal, completed: !goal.completed } : goal,
-      ),
-    );
+  const handleUpdateGoalCompleted = (completed: boolean, goalId: string) => {
+    updateGoalCompletedMutation.mutate({ completed, goalId });
   };
 
-  if (user === null) {
+  if (
+    user === undefined ||
+    calorieLogs === undefined ||
+    workoutLogs === undefined ||
+    goals === undefined
+  ) {
     return;
   }
 
@@ -303,7 +260,7 @@ export default function Index() {
           calorieLog={editingCalorieLog}
           close={() => setEditingCalorieLog(null)}
           onSave={saveCalorieLog}
-          onDelete={deleteCalorieLog}
+          onDelete={handledeleteCalorieLog}
         />
       )}
 
@@ -312,7 +269,7 @@ export default function Index() {
           workoutLog={editingWorkoutLog}
           close={() => setEditingWorkoutLog(null)}
           onSave={saveWorkoutLog}
-          onDelete={deleteWorkoutLog}
+          onDelete={handleDeleteWorkoutLog}
         />
       )}
 
@@ -535,7 +492,9 @@ export default function Index() {
               {goals.map((goal) => (
                 <Pressable
                   key={goal.id}
-                  onPress={() => toggleGoalCompleted(goal.id)}
+                  onPress={() =>
+                    handleUpdateGoalCompleted(!goal.completed, goal.id)
+                  }
                 >
                   <GoalItem
                     id={goal.id}

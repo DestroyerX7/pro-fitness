@@ -1,10 +1,10 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { baseUrl } from "@/lib/backend";
+import { createWorkoutLog } from "@/lib/api";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
@@ -44,6 +44,10 @@ export const iconLibraries = {
 };
 
 export default function Workout() {
+  const { data } = useAuth();
+
+  const queryClient = useQueryClient();
+
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("");
   const [selectedIcon, setSelectedIcon] = useState<Icon>({
@@ -51,21 +55,28 @@ export default function Workout() {
     name: "run",
   });
 
-  const { data } = useAuth();
-
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
+
+  const createWorkoutLogMutation = useMutation({
+    mutationFn: createWorkoutLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["workoutLogs", data?.user.id],
+      });
+    },
+  });
 
   const logWorkout = async () => {
     const trimmedName = name.trim();
     const durationNum = Number(duration);
 
-    if (trimmedName.length < 1 || durationNum < 1) {
+    if (data === null || trimmedName.length < 1 || durationNum < 1) {
       return;
     }
 
-    await axios.post(`${baseUrl}/api/log-workout`, {
-      userId: data?.user.id,
+    createWorkoutLogMutation.mutate({
+      userId: data.user.id,
       name: trimmedName,
       duration: durationNum,
       iconLibrary: selectedIcon.library,

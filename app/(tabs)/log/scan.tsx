@@ -1,23 +1,20 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { baseUrl } from "@/lib/backend";
+import { createCalorieLog } from "@/lib/api";
 import { colors } from "@/lib/colors";
 import {
   AntDesign,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { BarcodeScanningResult, CameraView } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import { useRef, useState } from "react";
 import { Image, Pressable, View } from "react-native";
-
-type GetProductByBarcodeResponse = {
-  product: Product;
-};
 
 type Product = {
   code: string;
@@ -31,6 +28,10 @@ type Product = {
 };
 
 export default function Scan() {
+  const { data } = useAuth();
+
+  const queryClient = useQueryClient();
+
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,10 +42,17 @@ export default function Scan() {
   const [numberOfServings, setNumberOfServings] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const { data } = useAuth();
-
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
+
+  const createCalorieLogMutation = useMutation({
+    mutationFn: createCalorieLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["calorieLogs", data?.user.id],
+      });
+    },
+  });
 
   const handleBarcodeScanned = (scanningResult: BarcodeScanningResult) => {
     if (isLoadingRef.current || product !== null) {
@@ -63,7 +71,7 @@ export default function Scan() {
       isLoadingRef.current = true;
       setIsLoading(true);
 
-      const response: { data: GetProductByBarcodeResponse } = await axios.get(
+      const response = await axios.get<{ product: Product }>(
         `https://world.openfoodfacts.org/api/v2/product/${barcode}`,
       );
 
@@ -99,6 +107,7 @@ export default function Scan() {
     const numberOfServingsNum = Number(numberOfServings);
 
     if (
+      data === null ||
       trimmedName.length < 1 ||
       caloriesPerServingNum < 1 ||
       numberOfServingsNum < 1
@@ -106,8 +115,8 @@ export default function Scan() {
       return;
     }
 
-    await axios.post(`${baseUrl}/api/log-calories`, {
-      userId: data?.user.id,
+    createCalorieLogMutation.mutate({
+      userId: data.user.id,
       name: trimmedName,
       calories: caloriesPerServingNum * numberOfServingsNum,
       imageUrl,

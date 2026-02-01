@@ -2,79 +2,68 @@ import { useAuth } from "@/components/AuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
-import { baseUrl } from "@/lib/backend";
+import {
+  CalorieLogPreset,
+  createCalorieLog,
+  createWorkoutLog,
+  getCalorieLogPresets,
+  getWorkoutLogPresets,
+  WorkoutLogPreset,
+} from "@/lib/api";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Pressable, View } from "react-native";
-import { iconLibraries } from "./workout";
-
-export type CalorieLogPreset = {
-  id: string;
-  name: string;
-  calories: number;
-  imageUrl: string | null;
-  createdAt: Date;
-  userId: string;
-};
-
-export type WorkoutLogPreset = {
-  id: string;
-  name: string;
-  duration: number;
-  iconLibrary: "MaterialIcons" | "MaterialCommunityIcons";
-  iconName: string;
-  createdAt: Date;
-  userId: string;
-};
 
 export default function Favorites() {
-  const [calorieLogPresets, setCalorieLogPresets] = useState<
-    CalorieLogPreset[]
-  >([]);
-  const [workoutLogPresets, setWorkoutLogPresets] = useState<
-    WorkoutLogPreset[]
-  >([]);
+  const { data } = useAuth();
+
+  const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<"calories" | "workouts">(
     "calories",
   );
 
-  const { data } = useAuth();
-
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
-  useEffect(() => {
-    const getCalorieLogPresets = async () => {
-      if (data === null) {
-        return;
-      }
+  const { data: calorieLogPresets } = useQuery({
+    queryKey: ["calorieLogPresets", data?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getCalorieLogPresets(userId);
+    },
+    enabled: data !== null,
+  });
 
-      const response = await axios.get(
-        `${baseUrl}/api/get-calorie-log-presets/${data.user.id}`,
-      );
+  const createCalorieLogMutation = useMutation({
+    mutationFn: createCalorieLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["calorieLogs", data?.user.id],
+      });
+    },
+  });
 
-      setCalorieLogPresets(response.data.calorieLogPresets);
-    };
+  const { data: workoutLogPresets } = useQuery({
+    queryKey: ["workoutLogPresets", data?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getWorkoutLogPresets(userId);
+    },
+    enabled: data !== null,
+  });
 
-    const getWorkoutLogPresets = async () => {
-      if (data === null) {
-        return;
-      }
-
-      const response = await axios.get(
-        `${baseUrl}/api/get-workout-log-presets/${data.user.id}`,
-      );
-
-      setWorkoutLogPresets(response.data.workoutLogPresets);
-    };
-
-    getCalorieLogPresets();
-    getWorkoutLogPresets();
+  const createWorkoutLogMutation = useMutation({
+    mutationFn: createWorkoutLog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["workoutLogs", data?.user.id],
+      });
+    },
   });
 
   const logCalories = async (calorieLogPreset: CalorieLogPreset) => {
@@ -82,7 +71,7 @@ export default function Favorites() {
       return;
     }
 
-    await axios.post(`${baseUrl}/api/log-calories`, {
+    createCalorieLogMutation.mutate({
       userId: data.user.id,
       name: calorieLogPreset.name,
       calories: calorieLogPreset.calories,
@@ -93,8 +82,12 @@ export default function Favorites() {
   };
 
   const logWorkout = async (workoutLogPreset: WorkoutLogPreset) => {
-    await axios.post(`${baseUrl}/api/log-workout`, {
-      userId: data?.user.id,
+    if (data === null) {
+      return;
+    }
+
+    createWorkoutLogMutation.mutate({
+      userId: data.user.id,
       name: workoutLogPreset.name,
       duration: workoutLogPreset.duration,
       iconLibrary: workoutLogPreset.iconLibrary,
@@ -103,6 +96,14 @@ export default function Favorites() {
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
+
+  if (
+    data === null ||
+    calorieLogPresets === undefined ||
+    workoutLogPresets === undefined
+  ) {
+    return;
+  }
 
   return (
     <View className="p-4 gap-4">
@@ -172,25 +173,21 @@ export default function Favorites() {
           </View>
         )
       ) : workoutLogPresets.length > 0 ? (
-        workoutLogPresets.map((workoutLogPreset) => {
-          const IconComponent = iconLibraries[workoutLogPreset.iconLibrary];
-
-          return (
-            <Pressable
-              onPress={() => logWorkout(workoutLogPreset)}
-              key={workoutLogPreset.id}
-            >
-              <WorkoutLogItem
-                id={workoutLogPreset.id}
-                name={workoutLogPreset.name}
-                duration={workoutLogPreset.duration}
-                colorScheme={colorScheme}
-                iconLibrary={workoutLogPreset.iconLibrary}
-                iconName={workoutLogPreset.iconName}
-              />
-            </Pressable>
-          );
-        })
+        workoutLogPresets.map((workoutLogPreset) => (
+          <Pressable
+            onPress={() => logWorkout(workoutLogPreset)}
+            key={workoutLogPreset.id}
+          >
+            <WorkoutLogItem
+              id={workoutLogPreset.id}
+              name={workoutLogPreset.name}
+              duration={workoutLogPreset.duration}
+              colorScheme={colorScheme}
+              iconLibrary={workoutLogPreset.iconLibrary}
+              iconName={workoutLogPreset.iconName}
+            />
+          </Pressable>
+        ))
       ) : (
         <View className="p-4 border border-border rounded-xl items-center">
           <MaterialCommunityIcons

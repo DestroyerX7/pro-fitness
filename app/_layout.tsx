@@ -3,19 +3,24 @@ import { SplashScreenController } from "@/components/SplashScreenController";
 import ThemeProvider from "@/components/ThemeProvider";
 import "@/global.css";
 import { colors } from "@/lib/colors";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "nativewind";
 
+const queryClient = new QueryClient();
+
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <ThemeProvider>
-        <SplashScreenController />
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <SplashScreenController />
 
-        <StatusBar style="auto" />
-        <RootNavigator />
-      </ThemeProvider>
+          <StatusBar style="auto" />
+          <RootNavigator />
+        </ThemeProvider>
+      </QueryClientProvider>
     </AuthProvider>
   );
 }

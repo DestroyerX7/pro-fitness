@@ -1,8 +1,7 @@
-import { CalorieLog } from "@/app/(tabs)";
-import { baseUrl } from "@/lib/backend";
+import { CalorieLog, createCalorieLogPreset } from "@/lib/api";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
@@ -24,11 +23,22 @@ export default function EditCalorieLogModal({
   onSave,
   onDelete,
 }: Props) {
+  const queryClient = useQueryClient();
+
   const [name, setName] = useState(calorieLog.name);
   const [calories, setCalories] = useState(calorieLog.calories.toString());
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
+
+  const createCalorieLogPresetMutation = useMutation({
+    mutationFn: createCalorieLogPreset,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["calorieLogPresets", calorieLog.userId],
+      });
+    },
+  });
 
   const showConfirmDeleteCalorieLog = async (calorieLog: CalorieLog) => {
     Alert.alert(
@@ -50,13 +60,15 @@ export default function EditCalorieLogModal({
     await Haptics.selectionAsync();
   };
 
-  const createCalorieLogPreset = async (calorieLog: CalorieLog) => {
-    await axios.post(`${baseUrl}/api/create-calorie-log-preset`, {
+  const handleCreateCalorieLogPreset = async () => {
+    createCalorieLogPresetMutation.mutate({
       userId: calorieLog.userId,
       name: calorieLog.name,
       calories: calorieLog.calories,
       imageUrl: calorieLog.imageUrl,
     });
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   const save = () => {
@@ -88,7 +100,7 @@ export default function EditCalorieLogModal({
 
               <Pressable
                 className="p-2 border border-border bg-background rounded-xl justify-center items-center flex-row gap-2"
-                onPress={() => createCalorieLogPreset(calorieLog)}
+                onPress={handleCreateCalorieLogPreset}
               >
                 <MaterialCommunityIcons
                   name="tune"
