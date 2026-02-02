@@ -15,13 +15,22 @@ import React, { useState } from "react";
 import { Image, Pressable, View } from "react-native";
 
 export default function Calories() {
-  const { data } = useAuth();
+  const { data: authData } = useAuth();
 
   const queryClient = useQueryClient();
 
   const [name, setName] = useState("");
   const [calories, setCalories] = useState("");
   const [image, setImage] = useState<string | null>(null);
+
+  const today = new Date();
+  const formatDate = (date: Date) => {
+    const day = String(date.getDate()).padStart(2, "0"); // Add leading 0
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+  const [date, setDate] = useState(formatDate(today));
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
@@ -30,8 +39,10 @@ export default function Calories() {
     mutationFn: createCalorieLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", data?.user.id],
+        queryKey: ["calorieLogs", authData?.user.id],
       });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
@@ -39,7 +50,7 @@ export default function Calories() {
     const trimmedName = name.trim();
     const caloriesNum = Number(calories);
 
-    if (data === null || trimmedName.length < 1 || caloriesNum < 1) {
+    if (authData === null || trimmedName.length < 1 || caloriesNum < 1) {
       return;
     }
 
@@ -59,13 +70,12 @@ export default function Calories() {
     }
 
     createCalorieLogMutation.mutate({
-      userId: data.user.id,
+      userId: authData.user.id,
       name: trimmedName,
       calories: caloriesNum,
       imageUrl,
+      date: new Date().toLocaleDateString(),
     });
-
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   const takePicture = async () => {
@@ -86,6 +96,25 @@ export default function Calories() {
     }
 
     setImage(result.assets[0].uri);
+  };
+
+  const handleChange = (text: string) => {
+    // Remove non-numeric characters
+    let cleaned = text.replace(/\D/g, "");
+
+    // Insert slashes
+    if (cleaned.length >= 3 && cleaned.length <= 4) {
+      cleaned = cleaned.slice(0, 2) + "/" + cleaned.slice(2);
+    } else if (cleaned.length > 4) {
+      cleaned =
+        cleaned.slice(0, 2) +
+        "/" +
+        cleaned.slice(2, 4) +
+        "/" +
+        cleaned.slice(4, 8);
+    }
+
+    setDate(cleaned);
   };
 
   return (
@@ -117,8 +146,11 @@ export default function Calories() {
         <ThemedText className="font-bold">Date</ThemedText>
 
         <ThemedTextInput
-          placeholder="Date"
-          value={new Date().toLocaleDateString()}
+          value={date}
+          onChangeText={handleChange}
+          placeholder="MM/DD/YYYY"
+          keyboardType="number-pad"
+          maxLength={10} // MM/DD/YYYY = 10 characters
         />
       </View>
 

@@ -28,7 +28,7 @@ type Product = {
 };
 
 export default function Scan() {
-  const { data } = useAuth();
+  const { data: authData } = useAuth();
 
   const queryClient = useQueryClient();
 
@@ -49,8 +49,10 @@ export default function Scan() {
     mutationFn: createCalorieLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", data?.user.id],
+        queryKey: ["calorieLogs", authData?.user.id],
       });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
@@ -107,7 +109,7 @@ export default function Scan() {
     const numberOfServingsNum = Number(numberOfServings);
 
     if (
-      data === null ||
+      authData === null ||
       trimmedName.length < 1 ||
       caloriesPerServingNum < 1 ||
       numberOfServingsNum < 1
@@ -116,13 +118,11 @@ export default function Scan() {
     }
 
     createCalorieLogMutation.mutate({
-      userId: data.user.id,
+      userId: authData.user.id,
       name: trimmedName,
       calories: caloriesPerServingNum * numberOfServingsNum,
       imageUrl,
     });
-
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   const rescan = () => {

@@ -4,6 +4,7 @@ import {
   date,
   index,
   integer,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -128,6 +129,15 @@ export const calorieLog = pgTable(
   (table) => [index("calorie_log_userId_idx").on(table.userId)],
 );
 
+export const iconLibraries = [
+  "MaterialIcons",
+  "MaterialCommunityIcons",
+] as const;
+
+export type IconLibrary = (typeof iconLibraries)[number];
+
+export const iconLibraryEnum = pgEnum("icon_library_enum", iconLibraries);
+
 export const workoutLog = pgTable(
   "workout_log",
   {
@@ -135,7 +145,7 @@ export const workoutLog = pgTable(
     name: text("name").notNull(),
     duration: integer("duration").notNull(),
     date: date("date").defaultNow().notNull(),
-    iconLibrary: text("icon_library").notNull(),
+    iconLibrary: iconLibraryEnum("icon_library").notNull(),
     iconName: text("icon_name").notNull(),
     userId: text("user_id")
       .notNull()
@@ -188,7 +198,7 @@ export const workoutLogPreset = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
     duration: integer("duration").notNull(),
-    iconLibrary: text("icon_library").notNull(),
+    iconLibrary: iconLibraryEnum("icon_library").notNull(),
     iconName: text("icon_name").notNull(),
     userId: text("user_id")
       .notNull()
@@ -229,6 +239,7 @@ export const goal = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     completed: boolean("completed").default(false).notNull(),
+    hidden: boolean("hidden").default(false).notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

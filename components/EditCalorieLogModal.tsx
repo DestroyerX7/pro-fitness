@@ -37,6 +37,8 @@ export default function EditCalorieLogModal({
       queryClient.invalidateQueries({
         queryKey: ["calorieLogPresets", calorieLog.userId],
       });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
@@ -67,8 +69,6 @@ export default function EditCalorieLogModal({
       calories: calorieLog.calories,
       imageUrl: calorieLog.imageUrl,
     });
-
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   const save = () => {

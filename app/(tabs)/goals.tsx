@@ -1,13 +1,16 @@
 import { useAuth } from "@/components/AuthProvider";
 import GoalItem from "@/components/GoalItem";
 import ThemedText from "@/components/ThemedText";
-import { getGoals } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { getGoals, updateGoalCompleted } from "@/lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useColorScheme } from "nativewind";
+import { Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Goals() {
-  const { data } = useAuth();
+  const { data: authData } = useAuth();
+
+  const queryClient = useQueryClient();
 
   const { colorScheme } = useColorScheme();
 
@@ -16,13 +19,24 @@ export default function Goals() {
     isPending,
     error,
   } = useQuery({
-    queryKey: ["goals", data?.user.id || ""],
+    queryKey: ["goals", authData?.user.id || ""],
     queryFn: ({ queryKey }) => {
       const [, userId] = queryKey;
       return getGoals(userId);
     },
-    enabled: data !== null,
+    enabled: authData !== null,
   });
+
+  const updateGoalCompletedMutation = useMutation({
+    mutationFn: updateGoalCompleted,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
+    },
+  });
+
+  const handleUpdateGoalCompleted = (completed: boolean, goalId: string) => {
+    updateGoalCompletedMutation.mutate({ completed, goalId });
+  };
 
   if (error !== null) {
     return <ThemedText>Error</ThemedText>;
@@ -37,14 +51,18 @@ export default function Goals() {
       <ThemedText className="text-4xl font-bold">Goals</ThemedText>
 
       {goals.map((goal) => (
-        <GoalItem
-          id={goal.id}
+        <Pressable
           key={goal.id}
-          name={goal.name}
-          description={goal.description}
-          completed={goal.completed}
-          colorScheme={colorScheme}
-        />
+          onPress={() => handleUpdateGoalCompleted(!goal.completed, goal.id)}
+        >
+          <GoalItem
+            id={goal.id}
+            name={goal.name}
+            description={goal.description}
+            completed={goal.completed}
+            colorScheme={colorScheme}
+          />
+        </Pressable>
       ))}
     </SafeAreaView>
   );

@@ -43,6 +43,8 @@ export default function EditWorkoutLogModal({
       queryClient.invalidateQueries({
         queryKey: ["workoutLogPresets", workoutLog.userId],
       });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
@@ -74,8 +76,6 @@ export default function EditWorkoutLogModal({
       iconLibrary: workoutLog.iconLibrary,
       iconName: workoutLog.iconName,
     });
-
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   const save = () => {

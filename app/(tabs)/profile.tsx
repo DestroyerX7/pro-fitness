@@ -14,7 +14,7 @@ import { Alert, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
-  const { data } = useAuth();
+  const { data: authData } = useAuth();
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
@@ -24,12 +24,12 @@ export default function Profile() {
     isPending,
     error,
   } = useQuery({
-    queryKey: ["user", data?.user.id || ""],
+    queryKey: ["user", authData?.user.id || ""],
     queryFn: ({ queryKey }) => {
       const [, userId] = queryKey;
       return getUser(userId);
     },
-    enabled: data !== null,
+    enabled: authData !== null,
   });
 
   const showConfirmDeleteUser = () => {
@@ -51,7 +51,7 @@ export default function Profile() {
   };
 
   const deleteUser = async () => {
-    await axios.delete(`${baseUrl}/api/delete-user/${data?.user.id}`);
+    await axios.delete(`${baseUrl}/api/delete-user/${authData?.user.id}`);
     await authClient.signOut();
   };
 

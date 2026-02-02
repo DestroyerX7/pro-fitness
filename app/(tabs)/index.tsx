@@ -17,6 +17,7 @@ import {
   updateCalorieGoal,
   updateCalorieLog,
   updateGoalCompleted,
+  updateGoalHidden,
   updateWorkoutGoal,
   updateWorkoutLog,
   User,
@@ -33,7 +34,7 @@ import { Alert, Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
-  const { data } = useAuth();
+  const { data: authData } = useAuth();
 
   const queryClient = useQueryClient();
 
@@ -52,42 +53,42 @@ export default function Index() {
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   const { data: user } = useQuery({
-    queryKey: ["user", data?.user.id || ""],
+    queryKey: ["user", authData?.user.id || ""],
     queryFn: ({ queryKey }) => {
       const [, userId] = queryKey;
       return getUser(userId);
     },
-    enabled: data !== null,
+    enabled: authData !== null,
   });
 
-  const updateCalorieGoalMutation = useMutation({
+  const updateDailyCalorieGoalMutation = useMutation({
     mutationFn: updateCalorieGoal,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", data?.user.id] });
+      queryClient.invalidateQueries({ queryKey: ["user", authData?.user.id] });
     },
   });
 
-  const updateWorkoutGoalMutation = useMutation({
+  const updateDailyWorkoutGoalMutation = useMutation({
     mutationFn: updateWorkoutGoal,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", data?.user.id] });
+      queryClient.invalidateQueries({ queryKey: ["user", authData?.user.id] });
     },
   });
 
   const { data: calorieLogs } = useQuery({
-    queryKey: ["calorieLogs", data?.user.id || ""],
+    queryKey: ["calorieLogs", authData?.user.id || ""],
     queryFn: ({ queryKey }) => {
       const [, userId] = queryKey;
       return getCalorieLogs(userId);
     },
-    enabled: data !== null,
+    enabled: authData !== null,
   });
 
   const updateCalorieLogMutaion = useMutation({
     mutationFn: updateCalorieLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", data?.user.id],
+        queryKey: ["calorieLogs", authData?.user.id],
       });
     },
   });
@@ -96,25 +97,25 @@ export default function Index() {
     mutationFn: deleteCalorieLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", data?.user.id],
+        queryKey: ["calorieLogs", authData?.user.id],
       });
     },
   });
 
   const { data: workoutLogs } = useQuery({
-    queryKey: ["workoutLogs", data?.user.id || ""],
+    queryKey: ["workoutLogs", authData?.user.id || ""],
     queryFn: ({ queryKey }) => {
       const [, userId] = queryKey;
       return getWorkoutLogs(userId);
     },
-    enabled: data !== null,
+    enabled: authData !== null,
   });
 
   const updateWorkoutLogMutaion = useMutation({
     mutationFn: updateWorkoutLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", data?.user.id],
+        queryKey: ["workoutLogs", authData?.user.id],
       });
     },
   });
@@ -123,29 +124,36 @@ export default function Index() {
     mutationFn: deleteWorkoutLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", data?.user.id],
+        queryKey: ["workoutLogs", authData?.user.id],
       });
     },
   });
 
   const { data: goals } = useQuery({
-    queryKey: ["goals", data?.user.id || ""],
-    queryFn: ({ queryKey }) => {
+    queryKey: ["goals", authData?.user.id || ""],
+    queryFn: async ({ queryKey }) => {
       const [, userId] = queryKey;
       return getGoals(userId);
     },
-    enabled: data !== null,
+    enabled: authData !== null,
   });
 
   const updateGoalCompletedMutation = useMutation({
     mutationFn: updateGoalCompleted,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", data?.user.id] });
+      queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
+    },
+  });
+
+  const updateGoalHiddenMutation = useMutation({
+    mutationFn: updateGoalHidden,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
     },
   });
 
   const editDailyCalorieGoal = async (user: User) => {
-    if (data == null) {
+    if (authData == null) {
       return;
     }
 
@@ -153,9 +161,9 @@ export default function Index() {
       "Edit calorie goal",
       "Update your daily calorie goal",
       (calorieGoalText) =>
-        updateCalorieGoalMutation.mutate({
+        updateDailyCalorieGoalMutation.mutate({
           calorieGoalText,
-          userId: data.user.id,
+          userId: authData.user.id,
         }),
       "plain-text",
       user.dailyCalorieGoal.toString(),
@@ -166,7 +174,7 @@ export default function Index() {
   };
 
   const editDailyWorkoutGoal = async (user: User) => {
-    if (data == null) {
+    if (authData == null) {
       return;
     }
 
@@ -174,9 +182,9 @@ export default function Index() {
       "Edit workout goal",
       "Update your daily workout goal",
       async (workoutGoalText) =>
-        updateWorkoutGoalMutation.mutate({
+        updateDailyWorkoutGoalMutation.mutate({
           workoutGoalText,
-          userId: data.user.id,
+          userId: authData.user.id,
         }),
       "plain-text",
       user.dailyWorkoutGoal.toString(),
@@ -240,6 +248,10 @@ export default function Index() {
     updateGoalCompletedMutation.mutate({ completed, goalId });
   };
 
+  const handleUpdateGoalHidden = (hidden: boolean, goalId: string) => {
+    updateGoalHiddenMutation.mutate({ hidden, goalId });
+  };
+
   if (
     user === undefined ||
     calorieLogs === undefined ||
@@ -249,9 +261,39 @@ export default function Index() {
     return;
   }
 
-  const loggedCalories = calorieLogs.reduce((a, b) => a + b.calories, 0);
-  const loggedWorkoutTime = workoutLogs.reduce((a, b) => a + b.duration, 0);
-  const goalsCompleted = goals.filter((g) => g.completed).length;
+  const todaysCalorieLogs = calorieLogs
+    .filter((c) => {
+      const [year, month, day] = c.date.split("-").map(Number);
+      return (
+        new Date(year, month - 1, day).toDateString() ==
+        new Date().toDateString()
+      );
+    })
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+  const todaysWorkoutLogs = workoutLogs
+    .filter((w) => {
+      const [year, month, day] = w.date.split("-").map(Number);
+      new Date(year, month - 1, day).toDateString() ==
+        new Date().toDateString();
+    })
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+  const loggedCalories = todaysCalorieLogs.reduce((a, b) => a + b.calories, 0);
+  const loggedWorkoutTime = todaysWorkoutLogs.reduce(
+    (a, b) => a + b.duration,
+    0,
+  );
+  const goalsVisable = goals.filter((g) => !g.hidden);
+  const goalsCompleted = goalsVisable.filter((g) => g.completed).length;
 
   return (
     <SafeAreaView className="flex-1" edges={["top"]}>
@@ -273,13 +315,13 @@ export default function Index() {
         />
       )}
 
-      <ThemedText className="text-4xl font-bold pt-4 px-4">Home</ThemedText>
-
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ gap: 16, padding: 16 }}
         showsVerticalScrollIndicator={false}
       >
+        <ThemedText className="text-4xl font-bold">Home</ThemedText>
+
         <Card className="gap-4">
           <View className="flex-row justify-between">
             <ThemedText className="text-2xl font-bold">
@@ -408,8 +450,8 @@ export default function Index() {
         </View>
 
         {activeTab === "calories" &&
-          (calorieLogs.length > 0 ? (
-            calorieLogs.map((calorieLog) => (
+          (todaysCalorieLogs.length > 0 ? (
+            todaysCalorieLogs.map((calorieLog) => (
               <CalorieLogItem
                 key={calorieLog.id}
                 id={calorieLog.id}
@@ -445,8 +487,8 @@ export default function Index() {
           ))}
 
         {activeTab === "workouts" &&
-          (workoutLogs.length > 0 ? (
-            workoutLogs.map((workoutLog) => (
+          (todaysWorkoutLogs.length > 0 ? (
+            todaysWorkoutLogs.map((workoutLog) => (
               <WorkoutLogItem
                 key={workoutLog.id}
                 id={workoutLog.id}
@@ -483,17 +525,20 @@ export default function Index() {
           ))}
 
         {activeTab === "goals" &&
-          (goals.length > 0 ? (
+          (goalsVisable.length > 0 ? (
             <>
               <ThemedText className="text-2xl font-bold">
-                ({goalsCompleted}/{goals.length}) Completed
+                ({goalsCompleted}/{goalsVisable.length}) Completed
               </ThemedText>
 
-              {goals.map((goal) => (
+              {goalsVisable.map((goal) => (
                 <Pressable
                   key={goal.id}
                   onPress={() =>
                     handleUpdateGoalCompleted(!goal.completed, goal.id)
+                  }
+                  onLongPress={() =>
+                    handleUpdateGoalHidden(!goal.hidden, goal.id)
                   }
                 >
                   <GoalItem

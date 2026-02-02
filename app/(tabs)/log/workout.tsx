@@ -10,6 +10,11 @@ import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 
+export const iconComponents = {
+  MaterialIcons,
+  MaterialCommunityIcons,
+} as const;
+
 export type Icon =
   | { library: "MaterialIcons"; name: keyof typeof MaterialIcons.glyphMap }
   | {
@@ -38,18 +43,22 @@ const icons: Icon[] = [
   { library: "MaterialCommunityIcons", name: "bow-arrow" },
 ];
 
-export const iconLibraries = {
-  MaterialIcons,
-  MaterialCommunityIcons,
-};
-
 export default function Workout() {
-  const { data } = useAuth();
+  const { data: authData } = useAuth();
 
   const queryClient = useQueryClient();
-
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("");
+
+  const today = new Date();
+  const formatDate = (date: Date) => {
+    const day = String(date.getDate()).padStart(2, "0"); // Add leading 0
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+  const [date, setDate] = useState(formatDate(today));
+
   const [selectedIcon, setSelectedIcon] = useState<Icon>({
     library: "MaterialCommunityIcons",
     name: "run",
@@ -62,8 +71,10 @@ export default function Workout() {
     mutationFn: createWorkoutLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", data?.user.id],
+        queryKey: ["workoutLogs", authData?.user.id],
       });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
@@ -71,19 +82,37 @@ export default function Workout() {
     const trimmedName = name.trim();
     const durationNum = Number(duration);
 
-    if (data === null || trimmedName.length < 1 || durationNum < 1) {
+    if (authData === null || trimmedName.length < 1 || durationNum < 1) {
       return;
     }
 
     createWorkoutLogMutation.mutate({
-      userId: data.user.id,
+      userId: authData.user.id,
       name: trimmedName,
       duration: durationNum,
+      date,
       iconLibrary: selectedIcon.library,
       iconName: selectedIcon.name,
     });
+  };
 
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  const handleChange = (text: string) => {
+    // Remove non-numeric characters
+    let cleaned = text.replace(/\D/g, "");
+
+    // Insert slashes
+    if (cleaned.length >= 3 && cleaned.length <= 4) {
+      cleaned = cleaned.slice(0, 2) + "/" + cleaned.slice(2);
+    } else if (cleaned.length > 4) {
+      cleaned =
+        cleaned.slice(0, 2) +
+        "/" +
+        cleaned.slice(2, 4) +
+        "/" +
+        cleaned.slice(4, 8);
+    }
+
+    setDate(cleaned);
   };
 
   return (
@@ -115,8 +144,11 @@ export default function Workout() {
         <ThemedText className="font-bold">Date</ThemedText>
 
         <ThemedTextInput
-          placeholder="Date"
-          value={new Date().toLocaleDateString()}
+          value={date}
+          onChangeText={handleChange}
+          placeholder="MM/DD/YYYY"
+          keyboardType="number-pad"
+          maxLength={10} // MM/DD/YYYY = 10 characters
         />
       </View>
 
@@ -125,7 +157,7 @@ export default function Workout() {
 
         <View className="flex-row gap-4 flex-wrap p-4 bg-muted border rounded-xl border-border">
           {icons.map((icon, index) => {
-            const IconComponent = iconLibraries[icon.library];
+            const IconComponent = iconComponents[icon.library];
 
             return (
               <Pressable

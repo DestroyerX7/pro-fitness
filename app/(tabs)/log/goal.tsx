@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 
 export default function Goal() {
-  const { data } = useAuth();
+  const { data: authData } = useAuth();
 
   const queryClient = useQueryClient();
 
@@ -18,18 +18,18 @@ export default function Goal() {
   const createGoalMutation = useMutation({
     mutationFn: createGoal,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", data?.user.id] });
+      queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
   const handleCreateGoal = async () => {
-    if (data === null) {
+    if (authData === null) {
       return;
     }
 
-    createGoalMutation.mutate({ userId: data.user.id, name, description });
-
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    createGoalMutation.mutate({ userId: authData.user.id, name, description });
   };
 
   return (

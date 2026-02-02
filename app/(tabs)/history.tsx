@@ -1,38 +1,66 @@
 import { useAuth } from "@/components/AuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
 import ThemedText from "@/components/ThemedText";
-import { CalorieLog, Goal, User, WorkoutLog } from "@/lib/api";
-import { baseUrl } from "@/lib/backend";
+import {
+  CalorieLog,
+  getCalorieLogs,
+  getGoals,
+  getUser,
+  getWorkoutLogs,
+} from "@/lib/api";
 import { colors } from "@/lib/colors";
-import axios from "axios";
-import { useFocusEffect } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
 import { useColorScheme } from "nativewind";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function History() {
-  const [user, setUser] = useState<User | null>(null);
-  const [yo, setYo] = useState<Record<string, CalorieLog[]>>({});
-  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
-
-  const [editingCalorieLog, setEditingCalorieLog] = useState<CalorieLog | null>(
-    null,
-  );
-  const [editingWorkoutLog, setEditingWorkoutLog] = useState<WorkoutLog | null>(
-    null,
-  );
+  const { data: authData } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
     "calories",
   );
 
-  const [goals, setGoals] = useState<Goal[]>([]);
-
-  const { data } = useAuth();
-
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
+
+  const { data: user } = useQuery({
+    queryKey: ["user", authData?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getUser(userId);
+    },
+    enabled: authData !== null,
+  });
+
+  const { data: calorieLogs } = useQuery({
+    queryKey: ["calorieLogs", authData?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getCalorieLogs(userId);
+    },
+  });
+
+  const { data: workoutLogs } = useQuery({
+    queryKey: ["workoutLogs", authData?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getWorkoutLogs(userId);
+    },
+  });
+
+  const { data: goals } = useQuery({
+    queryKey: ["goals", authData?.user.id || ""],
+    queryFn: ({ queryKey }) => {
+      const [, userId] = queryKey;
+      return getGoals(userId);
+    },
+  });
+
+  if (user === undefined || calorieLogs === undefined) {
+    return;
+  }
 
   const DAYS = 31;
 
@@ -42,86 +70,21 @@ export default function History() {
     return d.toLocaleDateString("en-CA"); // YYYY-MM-DD
   });
 
+  const calorieLogsGroupedByDate = calorieLogs.reduce<
+    Record<string, CalorieLog[]>
+  >((dict, calorieLog) => {
+    if (!dict[calorieLog.date]) {
+      dict[calorieLog.date] = [];
+    }
+
+    dict[calorieLog.date].push(calorieLog);
+    return dict;
+  }, {});
+
   const filledDates = dates.map((date) => ({
     date,
-    calorieLogs: yo[date] ?? [],
+    calorieLogs: calorieLogsGroupedByDate[date] ?? [],
   }));
-
-  useFocusEffect(
-    useCallback(() => {
-      const getUser = async () => {
-        const response: { data: { user: User } } = await axios.get(
-          `${baseUrl}/api/get-user/${data?.user.id}`,
-        );
-
-        setUser(response.data.user);
-      };
-
-      const getCalorieLogs = async () => {
-        const response: { data: { calorieLogs: CalorieLog[] } } =
-          await axios.get(`${baseUrl}/api/get-calorie-logs/${data?.user.id}`);
-
-        setYo(
-          response.data.calorieLogs.reduce<Record<string, CalorieLog[]>>(
-            (dict, calorieLog) => {
-              if (!dict[calorieLog.date.toString()]) {
-                dict[calorieLog.date.toString()] = [];
-              }
-
-              dict[calorieLog.date.toString()].push(calorieLog);
-              return dict;
-            },
-            {},
-          ),
-        );
-      };
-
-      const getGoals = async () => {
-        const response = await axios.get(
-          `${baseUrl}/api/get-goals/${data?.user.id}`,
-        );
-
-        setGoals(response.data.goals);
-      };
-
-      const getWorkoutLogs = async () => {
-        const response: { data: { workoutLogs: WorkoutLog[] } } =
-          await axios.get(`${baseUrl}/api/get-workout-logs/${data?.user.id}`);
-
-        setWorkoutLogs(
-          response.data.workoutLogs
-            .filter(
-              (w) =>
-                new Date(w.createdAt).toDateString() ==
-                new Date().toDateString(),
-            )
-            .slice()
-            .sort(
-              (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-            ),
-        );
-      };
-
-      getUser();
-      getCalorieLogs();
-      getWorkoutLogs();
-      getGoals();
-    }, []),
-  );
-
-  const toggleCompleted = (id: string) => {
-    setGoals(
-      goals.map((goal) =>
-        goal.id === id ? { ...goal, completed: !goal.completed } : goal,
-      ),
-    );
-  };
-
-  if (user === null) {
-    return;
-  }
 
   return (
     <SafeAreaView edges={["top"]}>
@@ -157,24 +120,30 @@ export default function History() {
           })}
         </View>
 
-        {Object.entries(yo)
+        {Object.entries(calorieLogsGroupedByDate)
           .toReversed()
-          .map(([date, calorieLogs]) => (
-            <View key={date} className="gap-4">
-              <ThemedText>{date}</ThemedText>
+          .map(([date, calorieLogs]) => {
+            const [year, month, day] = date.split("-").map(Number);
 
-              {calorieLogs.map((calorieLog) => (
-                <CalorieLogItem
-                  key={calorieLog.id}
-                  id={calorieLog.id}
-                  name={calorieLog.name}
-                  calories={calorieLog.calories}
-                  imageUrl={calorieLog.imageUrl}
-                  colorScheme={colorScheme}
-                />
-              ))}
-            </View>
-          ))}
+            return (
+              <View key={date} className="gap-4">
+                <ThemedText>
+                  {month}/{day}/{year}
+                </ThemedText>
+
+                {calorieLogs.map((calorieLog) => (
+                  <CalorieLogItem
+                    key={calorieLog.id}
+                    id={calorieLog.id}
+                    name={calorieLog.name}
+                    calories={calorieLog.calories}
+                    imageUrl={calorieLog.imageUrl}
+                    colorScheme={colorScheme}
+                  />
+                ))}
+              </View>
+            );
+          })}
       </ScrollView>
     </SafeAreaView>
   );

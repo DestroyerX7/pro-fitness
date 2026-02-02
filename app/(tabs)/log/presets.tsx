@@ -19,7 +19,7 @@ import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 
 export default function Favorites() {
-  const { data } = useAuth();
+  const { data: authData } = useAuth();
 
   const queryClient = useQueryClient();
 
@@ -31,74 +31,74 @@ export default function Favorites() {
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   const { data: calorieLogPresets } = useQuery({
-    queryKey: ["calorieLogPresets", data?.user.id || ""],
+    queryKey: ["calorieLogPresets", authData?.user.id || ""],
     queryFn: ({ queryKey }) => {
       const [, userId] = queryKey;
       return getCalorieLogPresets(userId);
     },
-    enabled: data !== null,
+    enabled: authData !== null,
   });
 
   const createCalorieLogMutation = useMutation({
     mutationFn: createCalorieLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", data?.user.id],
+        queryKey: ["calorieLogs", authData?.user.id],
       });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
   const { data: workoutLogPresets } = useQuery({
-    queryKey: ["workoutLogPresets", data?.user.id || ""],
+    queryKey: ["workoutLogPresets", authData?.user.id || ""],
     queryFn: ({ queryKey }) => {
       const [, userId] = queryKey;
       return getWorkoutLogPresets(userId);
     },
-    enabled: data !== null,
+    enabled: authData !== null,
   });
 
   const createWorkoutLogMutation = useMutation({
     mutationFn: createWorkoutLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", data?.user.id],
+        queryKey: ["workoutLogs", authData?.user.id],
       });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
   const logCalories = async (calorieLogPreset: CalorieLogPreset) => {
-    if (data === null) {
+    if (authData === null) {
       return;
     }
 
     createCalorieLogMutation.mutate({
-      userId: data.user.id,
+      userId: authData.user.id,
       name: calorieLogPreset.name,
       calories: calorieLogPreset.calories,
       imageUrl: calorieLogPreset.imageUrl,
     });
-
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   const logWorkout = async (workoutLogPreset: WorkoutLogPreset) => {
-    if (data === null) {
+    if (authData === null) {
       return;
     }
 
     createWorkoutLogMutation.mutate({
-      userId: data.user.id,
+      userId: authData.user.id,
       name: workoutLogPreset.name,
       duration: workoutLogPreset.duration,
       iconLibrary: workoutLogPreset.iconLibrary,
       iconName: workoutLogPreset.iconName,
     });
-
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   if (
-    data === null ||
+    authData === null ||
     calorieLogPresets === undefined ||
     workoutLogPresets === undefined
   ) {

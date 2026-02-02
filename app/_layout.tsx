@@ -27,7 +27,7 @@ export default function RootLayout() {
 
 // Create a new component that can access the SessionProvider context later.
 function RootNavigator() {
-  const { data } = useAuth();
+  const { data: authData } = useAuth();
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
@@ -39,11 +39,11 @@ function RootNavigator() {
         contentStyle: { backgroundColor: theme.background },
       }}
     >
-      <Stack.Protected guard={data !== null}>
+      <Stack.Protected guard={authData !== null}>
         <Stack.Screen name="(tabs)" />
       </Stack.Protected>
 
-      <Stack.Protected guard={data == null}>
+      <Stack.Protected guard={authData == null}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
     </Stack>

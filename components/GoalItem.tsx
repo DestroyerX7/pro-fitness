@@ -1,7 +1,7 @@
 import { colors } from "@/lib/colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import Card from "./Card";
 import ThemedText from "./ThemedText";
 
@@ -9,7 +9,7 @@ type Props = {
   id: string;
   name: string;
   completed: boolean;
-  description: string;
+  description: string | null;
   colorScheme: "light" | "dark" | undefined;
   onEdit?: (id: string) => void;
 };
@@ -18,7 +18,7 @@ export default function GoalItem({
   id,
   name,
   completed,
-  description,
+  description = "",
   colorScheme,
   onEdit,
 }: Props) {
@@ -28,10 +28,16 @@ export default function GoalItem({
     <Card className="flex-row">
       <View className="flex-row flex-1 gap-4">
         <View className="w-16 h-16 rounded-full items-center justify-center bg-border">
-          {completed && (
+          {completed ? (
             <MaterialCommunityIcons
               name="check"
               color={theme.foreground}
+              size={32}
+            />
+          ) : (
+            <MaterialCommunityIcons
+              name="close"
+              color={theme.muted}
               size={32}
             />
           )}
@@ -43,6 +49,10 @@ export default function GoalItem({
           <ThemedText color="text-muted-foreground" className="flex-wrap">
             {description}
           </ThemedText>
+
+          <Text style={{ color: completed ? "#30d030" : theme.destructive }}>
+            {completed ? "Completed" : "Not completed"}
+          </Text>
         </View>
       </View>
 
