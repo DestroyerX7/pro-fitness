@@ -74,7 +74,7 @@ export default function Calories() {
       name: trimmedName,
       calories: caloriesNum,
       imageUrl,
-      date: new Date().toLocaleDateString(),
+      date,
     });
   };
 

@@ -72,7 +72,7 @@ export const createCalorieLog = async ({
   imageUrl: string | null;
 }) => {
   const response = await axios.post<{ calorieLog: CalorieLog }>(
-    `${baseUrl}/api/log-calories`,
+    `${baseUrl}/api/create-calorie-log`,
     {
       userId,
       name,
@@ -131,7 +131,7 @@ export const createWorkoutLog = async ({
   iconName: string;
 }) => {
   const response = await axios.post<{ workoutLog: WorkoutLog }>(
-    `${baseUrl}/api/log-workout`,
+    `${baseUrl}/api/create-workout-log`,
     {
       userId,
       name,
