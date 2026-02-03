@@ -2,7 +2,7 @@ import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { createCalorieLog } from "@/lib/api";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -62,7 +62,7 @@ export default function Calories() {
       });
       const fileData = `data:image/jpeg;base64,${base64}`;
 
-      const response = await axios.post(`${baseUrl}/api/upload-image`, {
+      const response = await axios.post(`${backendUrl}/api/upload-image`, {
         file: fileData,
       });
 

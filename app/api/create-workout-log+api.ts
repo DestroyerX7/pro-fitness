@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   const { userId, name, duration, date, iconLibrary, iconName } =
     await request.json();
 
-  const createdWorkoutLog = await db
+  const [createdWorkoutLog] = await db
     .insert(workoutLog)
     .values({ userId, name, duration, date, iconLibrary, iconName })
     .returning();

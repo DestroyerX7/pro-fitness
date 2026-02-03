@@ -81,10 +81,16 @@ export default function History() {
     return dict;
   }, {});
 
-  const filledDates = dates.map((date) => ({
-    date,
-    calorieLogs: calorieLogsGroupedByDate[date] ?? [],
-  }));
+  const filledDates = dates.map((date) => {
+    const datesCalorieLogs = calorieLogsGroupedByDate[date] ?? [];
+    const totalCalories = datesCalorieLogs.reduce((a, b) => a + b.calories, 0);
+
+    return {
+      date,
+      calorieLogs: datesCalorieLogs,
+      totalCalories,
+    };
+  });
 
   return (
     <SafeAreaView edges={["top"]}>
@@ -95,41 +101,40 @@ export default function History() {
         <ThemedText className="text-4xl font-bold">History</ThemedText>
 
         <View className="flex-row flex-wrap gap-4">
-          {filledDates.map(({ date, calorieLogs }) => {
-            const totalCalories = calorieLogs.reduce(
-              (a, b) => a + b.calories,
-              0,
-            );
-
-            return (
-              <View
-                key={date}
-                className="w-16 h-16 rounded items-center justify-center"
-                style={{
-                  backgroundColor:
-                    totalCalories >= user.dailyCalorieGoal
-                      ? "#30d030"
-                      : theme.secondary,
-                }}
-              >
-                <ThemedText>
-                  {((totalCalories / user.dailyCalorieGoal) * 100).toFixed(0)}%
-                </ThemedText>
-              </View>
-            );
-          })}
+          {filledDates.map(({ date, totalCalories }) => (
+            <View
+              key={date}
+              className="w-16 h-16 rounded items-center justify-center"
+              style={{
+                backgroundColor:
+                  totalCalories >= user.dailyCalorieGoal
+                    ? "#30d030"
+                    : theme.secondary,
+              }}
+            >
+              <ThemedText>
+                {((totalCalories / user.dailyCalorieGoal) * 100).toFixed(0)}%
+              </ThemedText>
+            </View>
+          ))}
         </View>
 
-        {Object.entries(calorieLogsGroupedByDate)
-          .toReversed()
-          .map(([date, calorieLogs]) => {
+        {/* Only shows the last 31 days in history */}
+
+        {filledDates
+          .filter((f) => f.totalCalories > 0)
+          .map(({ date, totalCalories, calorieLogs }) => {
             const [year, month, day] = date.split("-").map(Number);
 
             return (
               <View key={date} className="gap-4">
-                <ThemedText>
-                  {month}/{day}/{year}
-                </ThemedText>
+                <View className="flex-row justify-between">
+                  <ThemedText>
+                    {month}/{day}/{year}
+                  </ThemedText>
+
+                  <ThemedText>{totalCalories} calories</ThemedText>
+                </View>
 
                 {calorieLogs.map((calorieLog) => (
                   <CalorieLogItem

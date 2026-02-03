@@ -4,7 +4,7 @@ import { calorieLog } from "@/db/schema";
 export async function POST(request: Request) {
   const { userId, name, calories, imageUrl, date } = await request.json();
 
-  const createdCalorieLog = await db
+  const [createdCalorieLog] = await db
     .insert(calorieLog)
     .values({ userId, name, calories, imageUrl, date })
     .returning();

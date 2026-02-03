@@ -3,7 +3,7 @@ import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
 import { getUser } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
-import { baseUrl } from "@/lib/backend";
+import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -51,7 +51,7 @@ export default function Profile() {
   };
 
   const deleteUser = async () => {
-    await axios.delete(`${baseUrl}/api/delete-user/${authData?.user.id}`);
+    await axios.delete(`${backendUrl}/api/delete-user/${authData?.user.id}`);
     await authClient.signOut();
   };
 

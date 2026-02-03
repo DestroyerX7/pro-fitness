@@ -42,6 +42,15 @@ export default function Scan() {
   const [numberOfServings, setNumberOfServings] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+  const today = new Date();
+  const formatDate = (date: Date) => {
+    const day = String(date.getDate()).padStart(2, "0"); // Add leading 0
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+  const [date, setDate] = useState(formatDate(today));
+
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
@@ -53,6 +62,10 @@ export default function Scan() {
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
+    onError: (error) => {
+      console.log(error.message);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
 
@@ -122,6 +135,7 @@ export default function Scan() {
       name: trimmedName,
       calories: caloriesPerServingNum * numberOfServingsNum,
       imageUrl,
+      date,
     });
   };
 
@@ -134,11 +148,30 @@ export default function Scan() {
     setNumberOfServings("");
   };
 
+  const handleChange = (text: string) => {
+    // Remove non-numeric characters
+    let cleaned = text.replace(/\D/g, "");
+
+    // Insert slashes
+    if (cleaned.length >= 3 && cleaned.length <= 4) {
+      cleaned = cleaned.slice(0, 2) + "/" + cleaned.slice(2);
+    } else if (cleaned.length > 4) {
+      cleaned =
+        cleaned.slice(0, 2) +
+        "/" +
+        cleaned.slice(2, 4) +
+        "/" +
+        cleaned.slice(4, 8);
+    }
+
+    setDate(cleaned);
+  };
+
   if (error !== null) {
     return (
       <View className="p-4 gap-4">
         <Pressable
-          className="bg-secondaryForeground p-4 rounded-full flex-row items-center justify-center gap-2"
+          className="bg-secondary p-4 rounded-full flex-row items-center justify-center gap-2"
           onPress={rescan}
         >
           <MaterialCommunityIcons
@@ -242,8 +275,6 @@ export default function Scan() {
         </View>
       )}
 
-      {/* Work on border above */}
-
       <View className="gap-1">
         <ThemedText className="font-bold">Name</ThemedText>
 
@@ -258,8 +289,11 @@ export default function Scan() {
         <ThemedText className="font-bold">Date</ThemedText>
 
         <ThemedTextInput
-          placeholder="Date"
-          value={new Date().toLocaleDateString()}
+          value={date}
+          onChangeText={handleChange}
+          placeholder="MM/DD/YYYY"
+          keyboardType="number-pad"
+          maxLength={10} // MM/DD/YYYY = 10 characters
         />
       </View>
 
