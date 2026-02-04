@@ -34,7 +34,7 @@ export default function Profile() {
 
   const showConfirmDeleteUser = () => {
     Alert.alert(
-      `Delete account`,
+      "Delete account",
       "Are you sure you want to permanently delete your account?",
       [
         {
@@ -51,12 +51,16 @@ export default function Profile() {
   };
 
   const deleteUser = async () => {
-    await axios.delete(`${backendUrl}/api/delete-user/${authData?.user.id}`);
+    if (authData === null) {
+      return;
+    }
+
+    await axios.delete(`${backendUrl}/api/delete-user/${authData.user.id}`);
     await authClient.signOut();
   };
 
   if (error !== null) {
-    return <ThemedText>Error</ThemedText>;
+    return <ThemedText>{error.message}</ThemedText>;
   }
 
   if (isPending) {
@@ -117,7 +121,7 @@ export default function Profile() {
           <View className="flex-row justify-between">
             <ThemedText className="text-xl">Account Created</ThemedText>
             <ThemedText color="text-muted-foreground" className="text-xl">
-              {new Date(user.createdAt.toString()).toLocaleDateString()}
+              {new Date(user.createdAt).toLocaleDateString()}
             </ThemedText>
           </View>
         </Card>

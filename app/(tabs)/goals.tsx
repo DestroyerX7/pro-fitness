@@ -39,7 +39,7 @@ export default function Goals() {
   };
 
   if (error !== null) {
-    return <ThemedText>Error</ThemedText>;
+    return <ThemedText>{error.message}</ThemedText>;
   }
 
   if (isPending) {

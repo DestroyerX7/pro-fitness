@@ -68,6 +68,10 @@ export default function Favorites() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
+    onError: (error) => {
+      console.log(error.message);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
   });
 
   const logCalories = async (calorieLogPreset: CalorieLogPreset) => {
@@ -80,6 +84,7 @@ export default function Favorites() {
       name: calorieLogPreset.name,
       calories: calorieLogPreset.calories,
       imageUrl: calorieLogPreset.imageUrl,
+      date: new Date().toLocaleDateString(),
     });
   };
 
@@ -92,6 +97,7 @@ export default function Favorites() {
       userId: authData.user.id,
       name: workoutLogPreset.name,
       duration: workoutLogPreset.duration,
+      date: new Date().toLocaleDateString(),
       iconLibrary: workoutLogPreset.iconLibrary,
       iconName: workoutLogPreset.iconName,
     });

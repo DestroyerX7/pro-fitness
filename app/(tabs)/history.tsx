@@ -40,6 +40,7 @@ export default function History() {
       const [, userId] = queryKey;
       return getCalorieLogs(userId);
     },
+    enabled: authData !== null,
   });
 
   const { data: workoutLogs } = useQuery({
@@ -48,6 +49,7 @@ export default function History() {
       const [, userId] = queryKey;
       return getWorkoutLogs(userId);
     },
+    enabled: authData !== null,
   });
 
   const { data: goals } = useQuery({
@@ -56,6 +58,7 @@ export default function History() {
       const [, userId] = queryKey;
       return getGoals(userId);
     },
+    enabled: authData !== null,
   });
 
   if (user === undefined || calorieLogs === undefined) {
@@ -71,26 +74,20 @@ export default function History() {
   });
 
   const calorieLogsGroupedByDate = calorieLogs.reduce<
-    Record<string, CalorieLog[]>
+    Record<string, { calorieLogs: CalorieLog[]; totalCalories: number }>
   >((dict, calorieLog) => {
     if (!dict[calorieLog.date]) {
-      dict[calorieLog.date] = [];
+      dict[calorieLog.date] = {
+        calorieLogs: [calorieLog],
+        totalCalories: calorieLog.calories,
+      };
+    } else {
+      dict[calorieLog.date].calorieLogs.push(calorieLog);
+      dict[calorieLog.date].totalCalories += calorieLog.calories;
     }
 
-    dict[calorieLog.date].push(calorieLog);
     return dict;
   }, {});
-
-  const filledDates = dates.map((date) => {
-    const datesCalorieLogs = calorieLogsGroupedByDate[date] ?? [];
-    const totalCalories = datesCalorieLogs.reduce((a, b) => a + b.calories, 0);
-
-    return {
-      date,
-      calorieLogs: datesCalorieLogs,
-      totalCalories,
-    };
-  });
 
   return (
     <SafeAreaView edges={["top"]}>
@@ -101,29 +98,33 @@ export default function History() {
         <ThemedText className="text-4xl font-bold">History</ThemedText>
 
         <View className="flex-row flex-wrap gap-4">
-          {filledDates.map(({ date, totalCalories }) => (
+          {dates.map((date) => (
             <View
               key={date}
               className="w-16 h-16 rounded items-center justify-center"
               style={{
                 backgroundColor:
-                  totalCalories >= user.dailyCalorieGoal
+                  (calorieLogsGroupedByDate[date]?.totalCalories || 0) >=
+                  user.dailyCalorieGoal
                     ? "#30d030"
                     : theme.secondary,
               }}
             >
               <ThemedText>
-                {((totalCalories / user.dailyCalorieGoal) * 100).toFixed(0)}%
+                {(
+                  ((calorieLogsGroupedByDate[date]?.totalCalories || 0) /
+                    user.dailyCalorieGoal) *
+                  100
+                ).toFixed(0)}
+                %
               </ThemedText>
             </View>
           ))}
         </View>
 
-        {/* Only shows the last 31 days in history */}
-
-        {filledDates
-          .filter((f) => f.totalCalories > 0)
-          .map(({ date, totalCalories, calorieLogs }) => {
+        {Object.entries(calorieLogsGroupedByDate)
+          .toReversed()
+          .map(([date, { calorieLogs, totalCalories }]) => {
             const [year, month, day] = date.split("-").map(Number);
 
             return (
