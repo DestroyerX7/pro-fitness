@@ -5,7 +5,7 @@ import React from "react";
 import { TextInput, TextInputProps } from "react-native";
 
 export default function ThemedTextInput({
-  className = "",
+  className,
   ...props
 }: TextInputProps) {
   const { colorScheme } = useColorScheme();

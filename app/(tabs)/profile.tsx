@@ -1,9 +1,8 @@
 import { useAuth } from "@/components/AuthProvider";
 import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
-import { getUser } from "@/lib/api";
+import { backendUrl, getUser } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
-import { backendUrl } from "@/lib/backend";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";

@@ -81,7 +81,7 @@ export default function EditCalorieLogModal({
 
     onSave({
       ...calorieLog,
-      name,
+      name: trimmedName,
       calories: caloriesNum,
     });
   };

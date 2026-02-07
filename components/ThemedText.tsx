@@ -21,7 +21,7 @@ type Props = {
 } & TextProps;
 export default function ThemedText({
   color = "text-foreground",
-  className = "",
+  className,
   children,
   ...props
 }: Props) {

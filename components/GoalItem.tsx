@@ -57,7 +57,7 @@ export default function GoalItem({
       </View>
 
       {onEdit !== undefined && (
-        <Pressable>
+        <Pressable onPress={() => onEdit(id)}>
           <Ionicons
             name="ellipsis-horizontal"
             size={24}

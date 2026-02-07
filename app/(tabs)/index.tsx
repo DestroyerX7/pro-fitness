@@ -2,6 +2,7 @@ import { useAuth } from "@/components/AuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
 import Card from "@/components/Card";
 import EditCalorieLogModal from "@/components/EditCalorieLogModal";
+import EditGoalModal from "@/components/EditGoalModal";
 import EditWorkoutLogModal from "@/components/EditWorkoutLogModal";
 import GoalItem from "@/components/GoalItem";
 import ThemedText from "@/components/ThemedText";
@@ -14,6 +15,7 @@ import {
   getGoals,
   getUser,
   getWorkoutLogs,
+  Goal,
   updateCalorieGoal,
   updateCalorieLog,
   updateGoalCompleted,
@@ -44,6 +46,7 @@ export default function Index() {
   const [editingWorkoutLog, setEditingWorkoutLog] = useState<WorkoutLog | null>(
     null,
   );
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
 
   const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
     "calories",
@@ -315,6 +318,15 @@ export default function Index() {
         />
       )}
 
+      {editingGoal !== null && (
+        <EditGoalModal
+          goal={editingGoal}
+          close={() => setEditingGoal(null)}
+          onSave={(editedGoal: Goal) => null}
+          onDelete={(goalId: string) => null}
+        />
+      )}
+
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ gap: 16, padding: 16 }}
@@ -547,6 +559,7 @@ export default function Index() {
                     description={goal.description}
                     completed={goal.completed}
                     colorScheme={colorScheme}
+                    onEdit={() => setEditingGoal(goal)}
                   />
                 </Pressable>
               ))}

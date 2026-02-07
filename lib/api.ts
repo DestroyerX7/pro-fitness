@@ -7,14 +7,14 @@ import {
   workoutLogPreset,
 } from "@/db/schema";
 import axios from "axios";
-import { backendUrl } from "./backend";
-
 export type User = typeof user.$inferSelect;
 export type CalorieLog = typeof calorieLog.$inferSelect;
 export type WorkoutLog = typeof workoutLog.$inferSelect;
 export type Goal = typeof goal.$inferSelect;
 export type CalorieLogPreset = typeof calorieLogPreset.$inferSelect;
 export type WorkoutLogPreset = typeof workoutLogPreset.$inferSelect;
+
+export const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 export const getUser = async (userId: string) => {
   const response = await axios.get<{ user: User }>(

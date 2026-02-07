@@ -1,8 +1,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { createCalorieLog } from "@/lib/api";
-import { backendUrl } from "@/lib/backend";
+import { backendUrl, createCalorieLog } from "@/lib/api";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
