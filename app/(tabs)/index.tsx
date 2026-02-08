@@ -298,11 +298,10 @@ export default function Index() {
     .filter((c) => {
       const [year, month, day] = c.date.split("-").map(Number);
       return (
-        new Date(year, month - 1, day).toDateString() ==
+        new Date(year, month - 1, day).toDateString() ===
         new Date().toDateString()
       );
     })
-    .slice()
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -311,10 +310,11 @@ export default function Index() {
   const todaysWorkoutLogs = workoutLogs
     .filter((w) => {
       const [year, month, day] = w.date.split("-").map(Number);
-      new Date(year, month - 1, day).toDateString() ==
-        new Date().toDateString();
+      return (
+        new Date(year, month - 1, day).toDateString() ===
+        new Date().toDateString()
+      );
     })
-    .slice()
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
