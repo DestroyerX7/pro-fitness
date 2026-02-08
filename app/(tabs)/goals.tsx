@@ -1,9 +1,17 @@
 import { useAuth } from "@/components/AuthProvider";
+import EditGoalModal from "@/components/EditGoalModal";
 import GoalItem from "@/components/GoalItem";
 import ThemedText from "@/components/ThemedText";
-import { getGoals, updateGoalCompleted } from "@/lib/api";
+import {
+  deleteGoal,
+  getGoals,
+  Goal,
+  updateGoal,
+  updateGoalCompleted,
+} from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useColorScheme } from "nativewind";
+import { useState } from "react";
 import { Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -13,6 +21,8 @@ export default function Goals() {
   const queryClient = useQueryClient();
 
   const { colorScheme } = useColorScheme();
+
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
 
   const {
     data: goals,
@@ -27,6 +37,29 @@ export default function Goals() {
     enabled: authData !== null,
   });
 
+  const updateGoalMutation = useMutation({
+    mutationFn: updateGoal,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
+    },
+  });
+
+  const deleteGoalMutation = useMutation({
+    mutationFn: deleteGoal,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
+    },
+  });
+
+  const saveGoal = async (editedGoal: Goal) => {
+    if (editedGoal === editingGoal) {
+      return;
+    }
+
+    updateGoalMutation.mutate({ goal: editedGoal });
+    setEditingGoal(null);
+  };
+
   const updateGoalCompletedMutation = useMutation({
     mutationFn: updateGoalCompleted,
     onSuccess: () => {
@@ -36,6 +69,11 @@ export default function Goals() {
 
   const handleUpdateGoalCompleted = (completed: boolean, goalId: string) => {
     updateGoalCompletedMutation.mutate({ completed, goalId });
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    deleteGoalMutation.mutate({ goalId });
+    setEditingGoal(null);
   };
 
   if (error !== null) {
@@ -48,6 +86,15 @@ export default function Goals() {
 
   return (
     <SafeAreaView className="p-4 gap-4">
+      {editingGoal !== null && (
+        <EditGoalModal
+          goal={editingGoal}
+          close={() => setEditingGoal(null)}
+          onSave={saveGoal}
+          onDelete={handleDeleteGoal}
+        />
+      )}
+
       <ThemedText className="text-4xl font-bold">Goals</ThemedText>
 
       {goals.map((goal) => (
@@ -61,6 +108,7 @@ export default function Goals() {
             description={goal.description}
             completed={goal.completed}
             colorScheme={colorScheme}
+            onEdit={() => setEditingGoal(goal)}
           />
         </Pressable>
       ))}

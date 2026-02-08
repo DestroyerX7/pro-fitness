@@ -24,6 +24,8 @@ export default function EditGoalModal({
 }: Props) {
   const [name, setName] = useState(goal.name);
   const [description, setDescription] = useState(goal.description || "");
+  const [completed, setCompleted] = useState(goal.completed);
+  const [hidden, setHidden] = useState(goal.hidden);
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
@@ -60,6 +62,8 @@ export default function EditGoalModal({
       ...goal,
       name: trimmedName,
       description: trimmedDescription,
+      completed,
+      hidden,
     });
   };
 
@@ -73,14 +77,17 @@ export default function EditGoalModal({
             <View className="flex-row justify-between items-center">
               <ThemedText className="text-2xl font-bold">Edit Goal</ThemedText>
 
-              <Pressable className="p-2 border border-border bg-background rounded-xl justify-center items-center flex-row gap-2">
+              <Pressable
+                className="p-2 border border-border bg-background rounded-xl justify-center items-center flex-row gap-2"
+                onPress={() => setHidden(!hidden)}
+              >
                 <MaterialCommunityIcons
-                  name="eye-off"
+                  name={hidden ? "eye" : "eye-off"}
                   size={24}
                   color={theme.foreground}
                 />
 
-                <ThemedText>Hide</ThemedText>
+                <ThemedText>{hidden ? "Show" : "Hide"}</ThemedText>
               </Pressable>
             </View>
 
@@ -109,28 +116,30 @@ export default function EditGoalModal({
               <ThemedText className="font-bold">Status</ThemedText>
 
               <View className="flex-row gap-4 items-center">
-                <View className="w-16 h-16 rounded-full items-center justify-center bg-border">
-                  {goal.completed ? (
-                    <MaterialCommunityIcons
-                      name="check"
-                      color={theme.foreground}
-                      size={32}
-                    />
-                  ) : (
-                    <MaterialCommunityIcons
-                      name="close"
-                      color={theme.muted}
-                      size={32}
-                    />
-                  )}
-                </View>
+                <Pressable onPress={() => setCompleted(!completed)}>
+                  <View className="w-16 h-16 rounded-full items-center justify-center bg-border">
+                    {completed ? (
+                      <MaterialCommunityIcons
+                        name="check"
+                        color={theme.foreground}
+                        size={32}
+                      />
+                    ) : (
+                      <MaterialCommunityIcons
+                        name="close"
+                        color={theme.muted}
+                        size={32}
+                      />
+                    )}
+                  </View>
+                </Pressable>
 
                 <Text
                   style={{
-                    color: goal.completed ? "#30d030" : theme.destructive,
+                    color: completed ? "#30d030" : theme.destructive,
                   }}
                 >
-                  {goal.completed ? "Completed" : "Not completed"}
+                  {completed ? "Completed" : "Not completed"}
                 </Text>
               </View>
             </View>

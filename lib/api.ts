@@ -205,6 +205,20 @@ export const getGoals = async (userId: string) => {
   return response.data.goals;
 };
 
+export const updateGoal = async ({ goal }: { goal: Goal }) => {
+  const response = await axios.put<{ goal: Goal }>(
+    `${backendUrl}/api/update-goal/${goal.id}`,
+    {
+      name: goal.name,
+      description: goal.description,
+      completed: goal.completed,
+      hidden: goal.hidden,
+    },
+  );
+
+  return response.data.goal;
+};
+
 export const updateGoalCompleted = async ({
   completed,
   goalId,
@@ -234,6 +248,14 @@ export const updateGoalHidden = async ({
     {
       hidden,
     },
+  );
+
+  return response.data.goal;
+};
+
+export const deleteGoal = async ({ goalId }: { goalId: string }) => {
+  const response = await axios.delete<{ goal: Goal }>(
+    `${backendUrl}/api/delete-goal/${goalId}`,
   );
 
   return response.data.goal;

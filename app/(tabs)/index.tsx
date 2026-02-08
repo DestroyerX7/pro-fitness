@@ -10,6 +10,7 @@ import WorkoutLogItem from "@/components/WorkoutLogItem";
 import {
   CalorieLog,
   deleteCalorieLog,
+  deleteGoal,
   deleteWorkoutLog,
   getCalorieLogs,
   getGoals,
@@ -18,6 +19,7 @@ import {
   Goal,
   updateCalorieGoal,
   updateCalorieLog,
+  updateGoal,
   updateGoalCompleted,
   updateGoalHidden,
   updateWorkoutGoal,
@@ -141,6 +143,13 @@ export default function Index() {
     enabled: authData !== null,
   });
 
+  const updateGoalMutation = useMutation({
+    mutationFn: updateGoal,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
+    },
+  });
+
   const updateGoalCompletedMutation = useMutation({
     mutationFn: updateGoalCompleted,
     onSuccess: () => {
@@ -150,6 +159,13 @@ export default function Index() {
 
   const updateGoalHiddenMutation = useMutation({
     mutationFn: updateGoalHidden,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
+    },
+  });
+
+  const deleteGoalMutation = useMutation({
+    mutationFn: deleteGoal,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
     },
@@ -237,6 +253,15 @@ export default function Index() {
     setEditingWorkoutLog(null);
   };
 
+  const saveGoal = async (editedGoal: Goal) => {
+    if (editedGoal === editingGoal) {
+      return;
+    }
+
+    updateGoalMutation.mutate({ goal: editedGoal });
+    setEditingGoal(null);
+  };
+
   const handledeleteCalorieLog = async (calorieLogId: string) => {
     deleteCalorieLogMutation.mutate(calorieLogId);
     setEditingCalorieLog(null);
@@ -253,6 +278,11 @@ export default function Index() {
 
   const handleUpdateGoalHidden = (hidden: boolean, goalId: string) => {
     updateGoalHiddenMutation.mutate({ hidden, goalId });
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    deleteGoalMutation.mutate({ goalId });
+    setEditingGoal(null);
   };
 
   if (
@@ -322,8 +352,8 @@ export default function Index() {
         <EditGoalModal
           goal={editingGoal}
           close={() => setEditingGoal(null)}
-          onSave={(editedGoal: Goal) => null}
-          onDelete={(goalId: string) => null}
+          onSave={saveGoal}
+          onDelete={handleDeleteGoal}
         />
       )}
 

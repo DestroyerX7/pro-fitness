@@ -6,11 +6,11 @@ export async function PUT(
   request: Request,
   { goalId }: Record<string, string>,
 ) {
-  const { name, description, completed } = await request.json();
+  const { name, description, completed, hidden } = await request.json();
 
   const [updatedGoal] = await db
     .update(goal)
-    .set({ name, description, completed })
+    .set({ name, description, completed, hidden })
     .where(eq(goal.id, goalId))
     .returning();
 
