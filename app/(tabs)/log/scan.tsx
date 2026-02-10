@@ -10,7 +10,11 @@ import {
 } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { BarcodeScanningResult, CameraView } from "expo-camera";
+import {
+  BarcodeScanningResult,
+  CameraView,
+  useCameraPermissions,
+} from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import { useRef, useState } from "react";
@@ -31,6 +35,8 @@ export default function Scan() {
   const { data: authData } = useAuth();
 
   const queryClient = useQueryClient();
+
+  const [status, requestPermission] = useCameraPermissions();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -166,6 +172,24 @@ export default function Scan() {
 
     setDate(cleaned);
   };
+
+  if (!status) {
+    return;
+  }
+
+  if (!status.granted) {
+    return (
+      <View className="flex-1 justify-center items-center gap-4">
+        <ThemedText>We need camera permission</ThemedText>
+        <Pressable
+          className="p-4 bg-primary rounded-xl"
+          onPress={requestPermission}
+        >
+          <ThemedText>Grant Permission</ThemedText>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (error !== null) {
     return (
