@@ -16,7 +16,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 
 export default function Favorites() {
   const { data: authData } = useAuth();
@@ -112,8 +112,55 @@ export default function Favorites() {
   }
 
   return (
-    <View className="p-4 gap-4">
-      <View className="flex-row gap-4 items-center">
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ padding: 16, gap: 16 }}
+    >
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, flex: 1 }}
+      >
+        <Pressable
+          className="p-4 rounded-xl"
+          style={{
+            backgroundColor:
+              activeTab === "calories" ? theme.foreground : theme.secondary,
+          }}
+          onPress={() => setActiveTab("calories")}
+        >
+          <ThemedText
+            color={
+              activeTab === "calories"
+                ? "text-background"
+                : "text-secondary-foreground"
+            }
+          >
+            Calories
+          </ThemedText>
+        </Pressable>
+
+        <Pressable
+          className="p-4 bg-secondary rounded-xl"
+          style={{
+            backgroundColor:
+              activeTab === "workouts" ? theme.foreground : theme.secondary,
+          }}
+          onPress={() => setActiveTab("workouts")}
+        >
+          <ThemedText
+            color={
+              activeTab === "workouts"
+                ? "text-background"
+                : "text-secondary-foreground"
+            }
+          >
+            Workouts
+          </ThemedText>
+        </Pressable>
+      </ScrollView>
+
+      {/* <View className="flex-row gap-4 items-center">
         <Pressable
           className={`border-b-2 ${
             activeTab === "calories"
@@ -143,8 +190,9 @@ export default function Favorites() {
             Workouts
           </ThemedText>
         </Pressable>
-      </View>
+      </View> */}
 
+      {/* Add editing later */}
       {activeTab === "calories" ? (
         calorieLogPresets.length > 0 ? (
           calorieLogPresets.map((calorieLogPreset) => (
@@ -211,6 +259,6 @@ export default function Favorites() {
           </ThemedText>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }

@@ -446,7 +446,8 @@ export default function Index() {
             </ThemedText>
           </View>
         </Card>
-        <View className="flex-row gap-4 items-center">
+
+        {/* <View className="flex-row gap-4 items-center">
           <Pressable
             className={`border-b-2 ${
               activeTab === "calories"
@@ -489,7 +490,70 @@ export default function Index() {
               Goals
             </ThemedText>
           </Pressable>
-        </View>
+        </View> */}
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8, flex: 1 }}
+        >
+          <Pressable
+            className="p-4 rounded-xl"
+            style={{
+              backgroundColor:
+                activeTab === "calories" ? theme.foreground : theme.secondary,
+            }}
+            onPress={() => setActiveTab("calories")}
+          >
+            <ThemedText
+              color={
+                activeTab === "calories"
+                  ? "text-background"
+                  : "text-secondary-foreground"
+              }
+            >
+              Calories
+            </ThemedText>
+          </Pressable>
+
+          <Pressable
+            className="p-4 bg-secondary rounded-xl"
+            style={{
+              backgroundColor:
+                activeTab === "workouts" ? theme.foreground : theme.secondary,
+            }}
+            onPress={() => setActiveTab("workouts")}
+          >
+            <ThemedText
+              color={
+                activeTab === "workouts"
+                  ? "text-background"
+                  : "text-secondary-foreground"
+              }
+            >
+              Workouts
+            </ThemedText>
+          </Pressable>
+
+          <Pressable
+            className="p-4 bg-secondary rounded-xl"
+            style={{
+              backgroundColor:
+                activeTab === "goals" ? theme.foreground : theme.secondary,
+            }}
+            onPress={() => setActiveTab("goals")}
+          >
+            <ThemedText
+              color={
+                activeTab === "goals"
+                  ? "text-background"
+                  : "text-secondary-foreground"
+              }
+            >
+              Goals
+            </ThemedText>
+          </Pressable>
+        </ScrollView>
 
         {activeTab === "calories" &&
           (todaysCalorieLogs.length > 0 ? (

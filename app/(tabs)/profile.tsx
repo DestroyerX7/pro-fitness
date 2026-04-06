@@ -140,7 +140,7 @@ export default function Profile() {
             )}
           </Pressable>
 
-          <Pressable className="p-4 border border-border rounded-xl flex-row items-center justify-between">
+          {/* <Pressable className="p-4 border border-border rounded-xl flex-row items-center justify-between">
             <ThemedText className="text-xl">Light</ThemedText>
 
             {false && (
@@ -162,7 +162,7 @@ export default function Profile() {
                 color={theme.primary}
               />
             )}
-          </Pressable>
+          </Pressable> */}
         </Card>
 
         <Pressable

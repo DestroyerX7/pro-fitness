@@ -3,7 +3,7 @@ import ThemedTextInput from "@/components/ThemedTextInput";
 import { authClient } from "@/lib/auth-client";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useState } from "react";
 import { Alert, Image, Pressable, View } from "react-native";
@@ -18,7 +18,7 @@ export default function SignUp() {
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
-  const handleLogin = async () => {
+  const handleSignUp = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Passwords do not match.");
       return;
@@ -29,6 +29,35 @@ export default function SignUp() {
       password,
       name,
     });
+  };
+
+  const signUpWithApple = async () => {
+    const { error } = await authClient.signIn.social({
+      provider: "apple",
+      callbackURL: "/(tabs)",
+      fetchOptions: {
+        onSuccess: (ctx) => {
+          console.log(ctx.data);
+        },
+        onRequest: (ctx) => {
+          console.log(ctx);
+        },
+        onResponse: (ctx) => {
+          console.log(ctx.response);
+        },
+        onError: (ctx) => {
+          console.log(ctx.error);
+        },
+      },
+    });
+
+    console.log(error);
+
+    if (error) {
+      return;
+    }
+
+    router.replace("/(tabs)");
   };
 
   return (
@@ -66,7 +95,7 @@ export default function SignUp() {
         onChangeText={setConfirmPassword}
       />
 
-      <Pressable className="p-4 bg-primary rounded-xl" onPress={handleLogin}>
+      <Pressable className="p-4 bg-primary rounded-xl" onPress={handleSignUp}>
         <ThemedText color="text-primary-foreground">Sign Up</ThemedText>
       </Pressable>
 
@@ -82,7 +111,10 @@ export default function SignUp() {
         <ThemedText>Sign up with Google</ThemedText>
       </Pressable>
 
-      <Pressable className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4">
+      <Pressable
+        className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"
+        onPress={signUpWithApple}
+      >
         <MaterialCommunityIcons
           name="apple"
           size={32}

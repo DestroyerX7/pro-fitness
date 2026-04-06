@@ -25,26 +25,27 @@ export default function Login() {
           router.replace("/(tabs)");
         },
         onError: (ctx) => {
-          console.log(ctx.error.message);
-          console.log(ctx);
+          console.log(ctx.error);
         },
       },
     });
   };
 
   const loginWithGoogle = async () => {
-    await authClient.signIn.social({
+    const { error } = await authClient.signIn.social({
       provider: "google",
       fetchOptions: {
-        onSuccess: (ctx) => {
-          console.log(ctx.data);
-        },
         onError: (ctx) => {
-          console.log(ctx.error.message);
-          console.log(ctx);
+          console.log(ctx.error);
         },
       },
     });
+
+    if (error) {
+      return;
+    }
+
+    router.replace("/(tabs)");
   };
 
   return (
