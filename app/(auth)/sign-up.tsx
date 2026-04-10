@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useState } from "react";
-import { Alert, Image, Pressable, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUp() {
@@ -18,7 +18,7 @@ export default function SignUp() {
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
-  const handleSignUp = async () => {
+  const signUpWithEmail = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Passwords do not match.");
       return;
@@ -31,29 +31,28 @@ export default function SignUp() {
     });
   };
 
+  const signUpWithGoogle = async () => {
+    const { error } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/(tabs)",
+    });
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    router.replace("/(tabs)");
+  };
+
   const signUpWithApple = async () => {
     const { error } = await authClient.signIn.social({
       provider: "apple",
       callbackURL: "/(tabs)",
-      fetchOptions: {
-        onSuccess: (ctx) => {
-          console.log(ctx.data);
-        },
-        onRequest: (ctx) => {
-          console.log(ctx);
-        },
-        onResponse: (ctx) => {
-          console.log(ctx.response);
-        },
-        onError: (ctx) => {
-          console.log(ctx.error);
-        },
-      },
     });
 
-    console.log(error);
-
     if (error) {
+      console.log(error);
       return;
     }
 
@@ -95,18 +94,29 @@ export default function SignUp() {
         onChangeText={setConfirmPassword}
       />
 
-      <Pressable className="p-4 bg-primary rounded-xl" onPress={handleSignUp}>
+      <Pressable
+        className="p-4 bg-primary rounded-xl"
+        onPress={signUpWithEmail}
+      >
         <ThemedText color="text-primary-foreground">Sign Up</ThemedText>
       </Pressable>
 
       <View className="h-[2px] bg-border" />
 
-      <Pressable className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4">
-        <Image
+      <Pressable
+        className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"
+        onPress={signUpWithGoogle}
+      >
+        {/* <Image
           className="w-8 h-8"
           source={{
             uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/500px-Google_%22G%22_logo.svg.png",
           }}
+        /> */}
+        <MaterialCommunityIcons
+          name="google"
+          size={32}
+          color={theme.foreground}
         />
         <ThemedText>Sign up with Google</ThemedText>
       </Pressable>

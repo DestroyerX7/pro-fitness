@@ -16,7 +16,7 @@ export default function Login() {
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
-  const handleLogin = async () => {
+  const loginWithEmail = async () => {
     await authClient.signIn.email({
       email,
       password,
@@ -34,14 +34,30 @@ export default function Login() {
   const loginWithGoogle = async () => {
     const { error } = await authClient.signIn.social({
       provider: "google",
+      callbackURL: "/(tabs)",
+    });
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    router.replace("/(tabs)");
+  };
+
+  const loginWithApple = async () => {
+    const { error } = await authClient.signIn.social({
+      provider: "apple",
+      callbackURL: "/(tabs)",
       fetchOptions: {
-        onError: (ctx) => {
-          console.log(ctx.error);
+        onSuccess(context) {
+          console.log(context);
         },
       },
     });
 
     if (error) {
+      console.log(error);
       return;
     }
 
@@ -68,7 +84,7 @@ export default function Login() {
         onChangeText={setPassword}
       />
 
-      <Pressable className="p-4 bg-primary rounded-xl" onPress={handleLogin}>
+      <Pressable className="p-4 bg-primary rounded-xl" onPress={loginWithEmail}>
         <ThemedText color="text-primary-foreground">Login</ThemedText>
       </Pressable>
 
@@ -86,7 +102,10 @@ export default function Login() {
         <ThemedText>Login with Google</ThemedText>
       </Pressable>
 
-      <Pressable className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4">
+      <Pressable
+        className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"
+        onPress={loginWithApple}
+      >
         <MaterialCommunityIcons
           name="apple"
           size={32}
