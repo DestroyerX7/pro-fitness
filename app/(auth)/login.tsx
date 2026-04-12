@@ -3,6 +3,7 @@ import ThemedTextInput from "@/components/ThemedTextInput";
 import { authClient } from "@/lib/auth-client";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { Link, router } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useState } from "react";
@@ -46,13 +47,21 @@ export default function Login() {
   };
 
   const loginWithApple = async () => {
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+
+    if (credential.identityToken == null) {
+      return;
+    }
+
     const { error } = await authClient.signIn.social({
       provider: "apple",
-      callbackURL: "/(tabs)",
-      fetchOptions: {
-        onSuccess(context) {
-          console.log(context);
-        },
+      idToken: {
+        token: credential.identityToken,
       },
     });
 
