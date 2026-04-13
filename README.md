@@ -1,50 +1,98 @@
-# Welcome to your Expo app 👋
+# ProFitness
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A cross-platform fitness app built with Expo that helps you track your calories, log workout durations, and set personal health goals.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Calorie Logging** — Track your daily food intake and monitor calorie goals
+- **Workout Tracking** — Log workout sessions and durations
+- **Goal Setting** — Set and track personal fitness goals
+- **Authentication** — Email/password, Google, and Sign in with Apple
 
-   ```bash
-   npm install
-   ```
+## Getting Started
 
-2. Start the app
+### Prerequisites
 
-   ```bash
-   npx expo start
-   ```
+- Node.js 18+
+- Expo CLI
+- An [Apple Developer account](https://developer.apple.com/) (for Sign in with Apple)
+- A [Google Cloud Console](https://console.cloud.google.com/) project (for Google Sign-In)
+- A PostgreSQL database
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Installation
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Environment Variables
 
-## Learn more
+Create a `.env` file in the root of the project with the following variables:
 
-To learn more about developing your project with Expo, look at the following resources:
+```dotenv
+# App
+BETTER_AUTH_URL=https://yourdomain.com
+EXPO_PUBLIC_BACKEND_URL=https://yourdomain.com
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# Database
+DATABASE_URL=postgresql://user:password@host:5432/dbname
 
-## Join the community
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 
-Join our community of developers creating universal apps.
+# Apple OAuth
+# Service ID from Apple Developer Portal (e.g. com.yourcompany.yourapp.si)
+APPLE_CLIENT_ID=com.yourcompany.yourapp.si
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# Pre-generated JWT — see "Apple Client Secret" section below
+APPLE_CLIENT_SECRET=eyJhbGciOiJFUzI1NiIsImtpZCI6Ij...
+
+# App Bundle ID (e.g. com.yourcompany.yourapp)
+APPLE_APP_BUNDLE_IDENTIFIER=com.yourcompany.yourapp
+
+# From your Apple Developer account settings
+APPLE_TEAM_ID=ABCDE12345
+
+# Key ID from the Keys page in Apple Developer Portal
+APPLE_KEY_ID=ABC123DEF4
+```
+
+## Apple Client Secret
+
+Apple requires a signed JWT as the client secret instead of a static string. **This JWT expires every 6 months** — you must regenerate it before it expires or Sign in with Apple will stop working.
+
+### Generating the Secret
+
+1. Download your `.p8` private key from the [Apple Developer Portal](https://developer.apple.com/account/resources/authkeys/list)
+2. Run the generation script:
+
+```bash
+npx tsx scripts/generate-apple-secret.ts
+```
+
+3. Copy the output JWT and set it as `APPLE_CLIENT_SECRET` in your `.env`
+
+> ⚠️ **Set a calendar reminder for 5 months** after generating the secret so you have time to rotate it before it expires.
+
+## Deployment
+
+### Deploy API Routes
+
+```bash
+npx expo export --platform web --no-ssg
+eas deploy --alias live
+```
+
+### Make a Development Build (iOS)
+
+```bash
+eas build --platform ios --profile development
+```
+
+## Tech Stack
+
+- [Expo](https://expo.dev/) — Cross-platform React Native framework
+- [Better Auth](https://better-auth.com/) — Authentication
+- [Drizzle ORM](https://orm.drizzle.team/) — Database ORM
+- [PostgreSQL](https://www.postgresql.org/) — Database
