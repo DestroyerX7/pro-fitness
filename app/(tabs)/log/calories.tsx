@@ -1,10 +1,15 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
+import {
+  /*backendUrl,*/ createCalorieLog,
+  uploadToCloudinary,
+} from "@/lib/api";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+// import axios from "axios";
+// import * as FileSystem from "expo-file-system/legacy";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useColorScheme } from "nativewind";
@@ -51,22 +56,7 @@ export default function Calories() {
       return;
     }
 
-    let imageUrl = null;
-
-    if (image !== null) {
-      imageUrl = await uploadToCloudinary(image);
-
-      // const base64 = await FileSystem.readAsStringAsync(image, {
-      //   encoding: FileSystem.EncodingType.Base64,
-      // });
-      // const fileData = `data:image/jpeg;base64,${base64}`;
-
-      // const response = await axios.post(`${backendUrl}/api/upload-image`, {
-      //   file: fileData,
-      // });
-
-      // imageUrl = response.data.url;
-    }
+    const imageUrl = image !== null ? await uploadToCloudinary(image) : null;
 
     createCalorieLogMutation.mutate({
       userId: authData.user.id,

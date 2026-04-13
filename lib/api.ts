@@ -327,15 +327,12 @@ type SignatureResponse = {
 };
 
 export const uploadToCloudinary = async (imageUri: string) => {
-  // Step 1: get signature from your server
-  console.log(`${backendUrl}/api/sign-cloudinary-upload`);
   const signResponse = await axios.post<SignatureResponse>(
     `${backendUrl}/api/sign-cloudinary-upload`,
   );
 
   const { signature, timestamp, apiKey, cloudName, folder } = signResponse.data;
 
-  // Step 2: upload directly to Cloudinary
   const formData = new FormData();
 
   formData.append("file", {
