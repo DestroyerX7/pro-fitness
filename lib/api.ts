@@ -317,3 +317,42 @@ export const getWorkoutLogPresets = async (userId: string) => {
 
   return response.data.workoutLogPresets;
 };
+
+type SignatureResponse = {
+  signature: string;
+  timestamp: number;
+  apiKey: string;
+  cloudName: string;
+  folder: string;
+};
+
+export const uploadToCloudinary = async (imageUri: string) => {
+  // Step 1: get signature from your server
+  console.log(`${backendUrl}/api/sign-cloudinary-upload`);
+  const signResponse = await axios.post<SignatureResponse>(
+    `${backendUrl}/api/sign-cloudinary-upload`,
+  );
+
+  const { signature, timestamp, apiKey, cloudName, folder } = signResponse.data;
+
+  // Step 2: upload directly to Cloudinary
+  const formData = new FormData();
+
+  formData.append("file", {
+    uri: imageUri,
+    type: "image/jpeg",
+    name: "photo.jpg",
+  } as any);
+
+  formData.append("signature", signature);
+  formData.append("timestamp", timestamp.toString());
+  formData.append("api_key", apiKey);
+  formData.append("folder", folder);
+
+  const uploadResponse = await axios.post<{ secure_url: string }>(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    formData,
+  );
+
+  return uploadResponse.data.secure_url;
+};
