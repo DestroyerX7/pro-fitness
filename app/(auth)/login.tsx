@@ -35,7 +35,7 @@ export default function Login() {
   const loginWithGoogle = async () => {
     const { error } = await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/(tabs)",
+      callbackURL: "/(tabs)", // Callback url is required or it breaks
     });
 
     if (error) {

@@ -8,7 +8,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import React, { useState } from "react";
-import { Pressable, View } from "react-native";
+import {
+  Keyboard,
+  Pressable,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 export const iconComponents = {
   MaterialIcons,
@@ -116,81 +121,83 @@ export default function Workout() {
   };
 
   return (
-    <View className="p-4 gap-4">
-      <View className="flex-row gap-4 items-end">
-        <View className="gap-1 flex-1">
-          <ThemedText className="font-bold">Name</ThemedText>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View className="p-4 gap-4">
+        <View className="flex-row gap-4 items-end">
+          <View className="gap-1 flex-1">
+            <ThemedText className="font-bold">Name</ThemedText>
 
-          <ThemedTextInput
-            placeholder="Name"
-            value={name}
-            onChangeText={(text) => setName(text)}
-          />
+            <ThemedTextInput
+              placeholder="Name"
+              value={name}
+              onChangeText={(text) => setName(text)}
+            />
+          </View>
+
+          <View className="gap-1 flex-1">
+            <ThemedText className="font-bold">Duration</ThemedText>
+
+            <ThemedTextInput
+              placeholder="Duration"
+              keyboardType="number-pad"
+              value={duration}
+              onChangeText={(text) => setDuration(text)}
+            />
+          </View>
         </View>
 
-        <View className="gap-1 flex-1">
-          <ThemedText className="font-bold">Duration</ThemedText>
+        <View className="gap-1">
+          <ThemedText className="font-bold">Date</ThemedText>
 
           <ThemedTextInput
-            placeholder="Duration"
+            value={date}
+            onChangeText={handleChange}
+            placeholder="MM/DD/YYYY"
             keyboardType="number-pad"
-            value={duration}
-            onChangeText={(text) => setDuration(text)}
+            maxLength={10} // MM/DD/YYYY = 10 characters
           />
         </View>
-      </View>
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Date</ThemedText>
+        <View className="gap-1">
+          <ThemedText className="font-bold">Icon</ThemedText>
 
-        <ThemedTextInput
-          value={date}
-          onChangeText={handleChange}
-          placeholder="MM/DD/YYYY"
-          keyboardType="number-pad"
-          maxLength={10} // MM/DD/YYYY = 10 characters
-        />
-      </View>
+          <View className="flex-row gap-4 flex-wrap p-4 bg-muted border rounded-xl border-border">
+            {icons.map((icon, index) => {
+              const IconComponent = iconComponents[icon.library];
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Icon</ThemedText>
-
-        <View className="flex-row gap-4 flex-wrap p-4 bg-muted border rounded-xl border-border">
-          {icons.map((icon, index) => {
-            const IconComponent = iconComponents[icon.library];
-
-            return (
-              <Pressable
-                key={index}
-                className="w-16 h-16 items-center justify-center rounded-md"
-                style={[
-                  selectedIcon.library === icon.library &&
-                    selectedIcon.name === icon.name && {
-                      borderWidth: 2,
-                      borderColor: theme.foreground,
-                    },
-                ]}
-                onPress={() => setSelectedIcon(icon)}
-              >
-                <IconComponent
-                  name={icon.name as any}
-                  size={48}
-                  color={theme.foreground}
-                />
-              </Pressable>
-            );
-          })}
+              return (
+                <Pressable
+                  key={index}
+                  className="w-16 h-16 items-center justify-center rounded-md"
+                  style={[
+                    selectedIcon.library === icon.library &&
+                      selectedIcon.name === icon.name && {
+                        borderWidth: 2,
+                        borderColor: theme.foreground,
+                      },
+                  ]}
+                  onPress={() => setSelectedIcon(icon)}
+                >
+                  <IconComponent
+                    name={icon.name as any}
+                    size={48}
+                    color={theme.foreground}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
-      </View>
 
-      <Pressable onPress={logWorkout} className="bg-primary p-4 rounded-full">
-        <ThemedText
-          color="text-primary-foreground"
-          className="text-center text-lg font-bold"
-        >
-          Log Workout
-        </ThemedText>
-      </Pressable>
-    </View>
+        <Pressable onPress={logWorkout} className="bg-primary p-4 rounded-full">
+          <ThemedText
+            color="text-primary-foreground"
+            className="text-center text-lg font-bold"
+          >
+            Log Workout
+          </ThemedText>
+        </Pressable>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }

@@ -18,7 +18,13 @@ import {
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
 import { useRef, useState } from "react";
-import { Image, Pressable, View } from "react-native";
+import {
+  Image,
+  Keyboard,
+  Pressable,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 type Product = {
   code: string;
@@ -254,105 +260,110 @@ export default function Scan() {
   }
 
   return (
-    <View className="p-4 gap-4">
-      <Pressable
-        className="bg-secondary p-4 rounded-full flex-row items-center justify-center gap-2"
-        onPress={rescan}
-      >
-        <MaterialCommunityIcons
-          name="refresh"
-          size={24}
-          color={theme.secondaryForeground}
-        />
-
-        <ThemedText
-          color="text-secondary-foreground"
-          className="text-center text-lg font-bold"
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View className="p-4 gap-4">
+        <Pressable
+          className="bg-secondary p-4 rounded-full flex-row items-center justify-center gap-2"
+          onPress={rescan}
         >
-          Rescan
-        </ThemedText>
-      </Pressable>
-
-      {imageUrl !== null ? (
-        <Image
-          className="h-64"
-          style={{ objectFit: "contain" }}
-          source={{
-            uri: imageUrl,
-          }}
-        />
-      ) : (
-        <View className="items-center border border-border p-4 rounded-xl h-64 justify-center">
           <MaterialCommunityIcons
-            name="image"
-            size={64}
-            color={theme.foreground}
+            name="refresh"
+            size={24}
+            color={theme.secondaryForeground}
           />
 
-          <ThemedText className="font-bold text-2xl">
-            Product image not found
+          <ThemedText
+            color="text-secondary-foreground"
+            className="text-center text-lg font-bold"
+          >
+            Rescan
           </ThemedText>
+        </Pressable>
 
-          <ThemedText color="text-muted-foreground">
-            Tap to take your own picture
-          </ThemedText>
-        </View>
-      )}
+        {imageUrl !== null ? (
+          <Image
+            className="h-64"
+            style={{ objectFit: "contain" }}
+            source={{
+              uri: imageUrl,
+            }}
+          />
+        ) : (
+          <View className="items-center border border-border p-4 rounded-xl h-64 justify-center">
+            <MaterialCommunityIcons
+              name="image"
+              size={64}
+              color={theme.foreground}
+            />
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Name</ThemedText>
+            <ThemedText className="font-bold text-2xl">
+              Product image not found
+            </ThemedText>
 
-        <ThemedTextInput
-          placeholder="Name"
-          value={name}
-          onChangeText={(text) => setName(text)}
-        />
-      </View>
+            <ThemedText color="text-muted-foreground">
+              Tap to take your own picture
+            </ThemedText>
+          </View>
+        )}
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Date</ThemedText>
-
-        <ThemedTextInput
-          value={date}
-          onChangeText={handleChange}
-          placeholder="MM/DD/YYYY"
-          keyboardType="number-pad"
-          maxLength={10} // MM/DD/YYYY = 10 characters
-        />
-      </View>
-
-      <View className="flex-row gap-4 items-end">
-        <View className="gap-1 flex-1">
-          <ThemedText className="font-bold">Calories per serving</ThemedText>
+        <View className="gap-1">
+          <ThemedText className="font-bold">Name</ThemedText>
 
           <ThemedTextInput
-            placeholder="Calories per serving"
-            keyboardType="number-pad"
-            value={caloriesPerServing}
-            onChangeText={(text) => setCaloriesPerServing(text)}
+            placeholder="Name"
+            value={name}
+            onChangeText={(text) => setName(text)}
           />
         </View>
 
-        <View className="gap-1 flex-1">
-          <ThemedText className="font-bold">Number of servings</ThemedText>
+        <View className="gap-1">
+          <ThemedText className="font-bold">Date</ThemedText>
 
           <ThemedTextInput
-            placeholder="Number of servings"
+            value={date}
+            onChangeText={handleChange}
+            placeholder="MM/DD/YYYY"
             keyboardType="number-pad"
-            value={numberOfServings}
-            onChangeText={(text) => setNumberOfServings(text)}
+            maxLength={10} // MM/DD/YYYY = 10 characters
           />
         </View>
-      </View>
 
-      <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
-        <ThemedText
-          color="text-primary-foreground"
-          className="text-center text-lg font-bold"
+        <View className="flex-row gap-4 items-end">
+          <View className="gap-1 flex-1">
+            <ThemedText className="font-bold">Calories per serving</ThemedText>
+
+            <ThemedTextInput
+              placeholder="Calories per serving"
+              keyboardType="number-pad"
+              value={caloriesPerServing}
+              onChangeText={(text) => setCaloriesPerServing(text)}
+            />
+          </View>
+
+          <View className="gap-1 flex-1">
+            <ThemedText className="font-bold">Number of servings</ThemedText>
+
+            <ThemedTextInput
+              placeholder="Number of servings"
+              keyboardType="number-pad"
+              value={numberOfServings}
+              onChangeText={(text) => setNumberOfServings(text)}
+            />
+          </View>
+        </View>
+
+        <Pressable
+          className="bg-primary p-4 rounded-full"
+          onPress={logCalories}
         >
-          Log Calories
-        </ThemedText>
-      </Pressable>
-    </View>
+          <ThemedText
+            color="text-primary-foreground"
+            className="text-center text-lg font-bold"
+          >
+            Log Calories
+          </ThemedText>
+        </Pressable>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }

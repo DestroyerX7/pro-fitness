@@ -25,17 +25,27 @@ export default function SignUp() {
       return;
     }
 
-    await authClient.signUp.email({
-      email,
-      password,
-      name,
-    });
+    await authClient.signUp.email(
+      {
+        email,
+        password,
+        name,
+      },
+      {
+        onSuccess: () => {
+          router.replace("/(tabs)");
+        },
+        onError: (ctx) => {
+          console.log(ctx.error);
+        },
+      },
+    );
   };
 
   const signUpWithGoogle = async () => {
     const { error } = await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/(tabs)",
+      callbackURL: "/(tabs)", // Callback url is required or it breaks
     });
 
     if (error) {

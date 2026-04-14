@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "nativewind";
+import Toast from "react-native-toast-message";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,8 @@ export default function RootLayout() {
 
           <StatusBar style="auto" />
           <RootNavigator />
+
+          <Toast />
         </ThemeProvider>
       </QueryClientProvider>
     </AuthProvider>

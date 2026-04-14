@@ -108,7 +108,6 @@ export default function EditGoalModal({
                 placeholder="Description"
                 value={description}
                 onChangeText={(text) => setDescription(text)}
-                keyboardType="number-pad"
               />
             </View>
 

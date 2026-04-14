@@ -16,6 +16,14 @@ export type WorkoutLogPreset = typeof workoutLogPreset.$inferSelect;
 
 export const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
 
+type SignatureResponse = {
+  signature: string;
+  timestamp: number;
+  apiKey: string;
+  cloudName: string;
+  folder: string;
+};
+
 export const getUser = async (userId: string) => {
   const response = await axios.get<{ user: User }>(
     `${backendUrl}/api/get-user/${userId}`,
@@ -316,14 +324,6 @@ export const getWorkoutLogPresets = async (userId: string) => {
   );
 
   return response.data.workoutLogPresets;
-};
-
-type SignatureResponse = {
-  signature: string;
-  timestamp: number;
-  apiKey: string;
-  cloudName: string;
-  folder: string;
 };
 
 export const uploadToCloudinary = async (imageUri: string) => {
