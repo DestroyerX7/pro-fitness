@@ -4,6 +4,9 @@ import ThemedTextInput from "@/components/ThemedTextInput";
 import { createWorkoutLog } from "@/lib/api";
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
@@ -55,14 +58,7 @@ export default function Workout() {
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("");
 
-  const today = new Date();
-  const formatDate = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, "0"); // Add leading 0
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  };
-  const [date, setDate] = useState(formatDate(today));
+  const [date, setDate] = useState(new Date());
 
   const [selectedIcon, setSelectedIcon] = useState<Icon>({
     library: "MaterialCommunityIcons",
@@ -91,33 +87,22 @@ export default function Workout() {
       return;
     }
 
+    const dateString = date.toDateString();
+
     createWorkoutLogMutation.mutate({
       userId: authData.user.id,
       name: trimmedName,
       duration: durationNum,
-      date,
+      date: dateString,
       iconLibrary: selectedIcon.library,
       iconName: selectedIcon.name,
     });
   };
 
-  const handleChange = (text: string) => {
-    // Remove non-numeric characters
-    let cleaned = text.replace(/\D/g, "");
-
-    // Insert slashes
-    if (cleaned.length >= 3 && cleaned.length <= 4) {
-      cleaned = cleaned.slice(0, 2) + "/" + cleaned.slice(2);
-    } else if (cleaned.length > 4) {
-      cleaned =
-        cleaned.slice(0, 2) +
-        "/" +
-        cleaned.slice(2, 4) +
-        "/" +
-        cleaned.slice(4, 8);
-    }
-
-    setDate(cleaned);
+  const onChange = (_: DateTimePickerEvent, selectedDate?: Date) => {
+    const currentDate = selectedDate ?? date;
+    // setShow(Platform.OS === "ios"); // Keep open on iOS, close on Android
+    setDate(currentDate);
   };
 
   return (
@@ -149,13 +134,14 @@ export default function Workout() {
         <View className="gap-1">
           <ThemedText className="font-bold">Date</ThemedText>
 
-          <ThemedTextInput
-            value={date}
-            onChangeText={handleChange}
-            placeholder="MM/DD/YYYY"
-            keyboardType="number-pad"
-            maxLength={10} // MM/DD/YYYY = 10 characters
-          />
+          <View className="text-foreground py-4 border border-border rounded-xl bg-muted">
+            <DateTimePicker
+              value={date}
+              mode="datetime" // 'date' | 'time' | 'datetime'
+              display="default" // 'default' | 'spinner' | 'calendar' | 'clock'
+              onChange={onChange}
+            />
+          </View>
         </View>
 
         <View className="gap-1">
