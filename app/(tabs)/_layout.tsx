@@ -1,87 +1,61 @@
+import { AuthenticatedAuthProvider } from "@/components/AuthenticatedAuthProvider";
 import { colors } from "@/lib/colors";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
-import { useColorScheme } from "nativewind";
-import { View } from "react-native";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { DynamicColorIOS } from "react-native";
 
 export default function TabsLayout() {
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
-
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: theme.mutedForeground,
-        sceneStyle: {
-          backgroundColor: theme.background,
-        },
-        tabBarStyle: {
-          backgroundColor: theme.background,
-          borderColor: theme.border,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ size, color }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
+    <AuthenticatedAuthProvider>
+      <NativeTabs
+        labelStyle={{
+          // For the text color
+          color: DynamicColorIOS({
+            dark: colors.dark.primary,
+            light: colors.light.primary,
+          }),
         }}
-      />
+        // For the selected icon color
+        tintColor={DynamicColorIOS({
+          dark: colors.dark.primary,
+          light: colors.light.primary,
+        })}
+      >
+        <NativeTabs.Trigger name="home">
+          <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon
+            sf={{ default: "house", selected: "house.fill" }}
+            md={{ default: "home", selected: "home_filled" }}
+          />
+        </NativeTabs.Trigger>
 
-      <Tabs.Screen
-        name="goals"
-        options={{
-          title: "Goals",
-          tabBarIcon: ({ size, color }) => (
-            <MaterialCommunityIcons
-              name="bullseye-arrow"
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
+        <NativeTabs.Trigger name="goals">
+          <NativeTabs.Trigger.Icon
+            sf={{ default: "target", selected: "target" }}
+          />
+          <NativeTabs.Trigger.Label>Goals</NativeTabs.Trigger.Label>
+        </NativeTabs.Trigger>
 
-      <Tabs.Screen
-        name="log"
-        options={{
-          tabBarLabel: () => null,
-          tabBarIcon: ({ size }) => (
-            <View className="bg-primary w-16 h-16 rounded-full items-center justify-center">
-              <Ionicons
-                name="add"
-                size={size}
-                color={theme.primaryForeground}
-              />
-            </View>
-          ),
-        }}
-      />
+        <NativeTabs.Trigger name="log">
+          <NativeTabs.Trigger.Icon
+            sf={{ default: "plus.circle", selected: "plus.circle.fill" }}
+          />
+          <NativeTabs.Trigger.Label>Log</NativeTabs.Trigger.Label>
+        </NativeTabs.Trigger>
 
-      <Tabs.Screen
-        name="history"
-        options={{
-          title: "History",
-          tabBarIcon: ({ size, color }) => (
-            <Ionicons name="time" size={size} color={color} />
-          ),
-        }}
-      />
+        <NativeTabs.Trigger name="history">
+          <NativeTabs.Trigger.Icon
+            sf={{ default: "calendar", selected: "calendar" }}
+          />
+          <NativeTabs.Trigger.Label>History</NativeTabs.Trigger.Label>
+        </NativeTabs.Trigger>
 
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ size, color }) => (
-            <Ionicons name="person-circle" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+        <NativeTabs.Trigger name="profile">
+          <NativeTabs.Trigger.Icon
+            sf={{ default: "person", selected: "person.fill" }}
+          />
+          <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
+        </NativeTabs.Trigger>
+      </NativeTabs>
+    </AuthenticatedAuthProvider>
   );
 }

@@ -1,10 +1,11 @@
 import { CalorieLog, createCalorieLogPreset } from "@/lib/api";
 import { colors } from "@/lib/colors";
+import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Alert, Image, Modal, Pressable, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ThemedText from "./ThemedText";
@@ -27,6 +28,10 @@ export default function EditCalorieLogModal({
 
   const [name, setName] = useState(calorieLog.name);
   const [calories, setCalories] = useState(calorieLog.calories.toString());
+
+  const [consumedAt, setConsumedAt] = useState(
+    new Date(calorieLog.consumedAt.toString()),
+  );
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
@@ -134,12 +139,17 @@ export default function EditCalorieLogModal({
             </View>
 
             <View className="gap-1">
-              <ThemedText className="font-bold">Date</ThemedText>
+              <ThemedText className="font-bold">Consumed At</ThemedText>
 
-              <ThemedTextInput
-                placeholder="Calories"
-                defaultValue={calorieLog.date.toString()}
-              />
+              <View className="text-foreground py-4 border border-border rounded-xl bg-muted">
+                <DateTimePicker
+                  value={consumedAt}
+                  mode="datetime"
+                  onValueChange={(_, selectedDate) => {
+                    setConsumedAt(selectedDate);
+                  }}
+                />
+              </View>
             </View>
 
             <View className="gap-1">

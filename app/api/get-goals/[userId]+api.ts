@@ -9,5 +9,5 @@ export async function GET(_: Request, { userId }: Record<string, string>) {
     .where(eq(goal.userId, userId))
     .orderBy(desc(goal.createdAt));
 
-  return Response.json({ goals });
+  return Response.json(goals);
 }

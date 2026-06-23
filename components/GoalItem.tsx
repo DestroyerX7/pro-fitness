@@ -1,16 +1,15 @@
 import { colors } from "@/lib/colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import React from "react";
 import { Pressable, Text, View } from "react-native";
 import Card from "./Card";
 import ThemedText from "./ThemedText";
+import useTheme from "@/hooks/useTheme";
 
 type Props = {
   id: string;
   name: string;
   completed: boolean;
   description: string | null;
-  colorScheme: "light" | "dark" | undefined;
   onEdit?: (id: string) => void;
 };
 
@@ -19,10 +18,9 @@ export default function GoalItem({
   name,
   completed,
   description = "",
-  colorScheme,
   onEdit,
 }: Props) {
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
 
   return (
     <Card className="flex-row">

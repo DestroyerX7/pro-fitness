@@ -9,5 +9,5 @@ export async function POST(request: Request) {
     .values({ userId, name, calories, imageUrl })
     .returning();
 
-  return Response.json({ calorieLogPreset: createdCalorieLogPreset });
+  return Response.json(createdCalorieLogPreset);
 }

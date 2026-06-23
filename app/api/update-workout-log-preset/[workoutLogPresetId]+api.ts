@@ -14,5 +14,5 @@ export async function PUT(
     .where(eq(workoutLogPreset.id, workoutLogPresetId))
     .returning();
 
-  return Response.json({ calorieLogPreset: updatedWorkoutLogPreset });
+  return Response.json(updatedWorkoutLogPreset);
 }

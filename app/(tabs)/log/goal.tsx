@@ -4,13 +4,8 @@ import ThemedTextInput from "@/components/ThemedTextInput";
 import { createGoal } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import React, { useState } from "react";
-import {
-  Keyboard,
-  Pressable,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { useState } from "react";
+import { Pressable, ScrollView, View } from "react-native";
 
 export default function Goal() {
   const { data: authData } = useAuth();
@@ -38,43 +33,45 @@ export default function Goal() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View className="p-4 gap-4">
-        <View className="gap-1">
-          <ThemedText className="font-bold">Name</ThemedText>
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="p-4 gap-4"
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="gap-1">
+        <ThemedText className="font-bold">Name</ThemedText>
 
-          <ThemedTextInput
-            placeholder="Name"
-            value={name}
-            onChangeText={(text) => setName(text)}
-          />
-        </View>
-
-        <View className="gap-1">
-          <ThemedText className="font-bold">Description</ThemedText>
-
-          <ThemedTextInput
-            className="h-32"
-            placeholder="Description..."
-            value={description}
-            onChangeText={(text) => setDescription(text)}
-            textAlignVertical="top"
-            multiline
-          />
-        </View>
-
-        <Pressable
-          onPress={handleCreateGoal}
-          className="bg-primary p-4 rounded-full"
-        >
-          <ThemedText
-            color="text-primary-foreground"
-            className="text-center text-lg font-bold"
-          >
-            Create Goal
-          </ThemedText>
-        </Pressable>
+        <ThemedTextInput
+          placeholder="Name"
+          value={name}
+          onChangeText={(text) => setName(text)}
+        />
       </View>
-    </TouchableWithoutFeedback>
+
+      <View className="gap-1">
+        <ThemedText className="font-bold">Description</ThemedText>
+
+        <ThemedTextInput
+          className="h-32"
+          placeholder="Description..."
+          value={description}
+          onChangeText={(text) => setDescription(text)}
+          textAlignVertical="top"
+          multiline
+        />
+      </View>
+
+      <Pressable
+        onPress={handleCreateGoal}
+        className="bg-primary p-4 rounded-full"
+      >
+        <ThemedText
+          color="text-primary-foreground"
+          className="text-center text-lg font-bold"
+        >
+          Create Goal
+        </ThemedText>
+      </Pressable>
+    </ScrollView>
   );
 }

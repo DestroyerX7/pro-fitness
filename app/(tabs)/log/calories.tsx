@@ -3,22 +3,15 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
 import { colors } from "@/lib/colors";
+import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useColorScheme } from "nativewind";
-import React, { useState } from "react";
-import {
-  Image,
-  Keyboard,
-  Pressable,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { useState } from "react";
+import { Image, Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 export default function Calories() {
@@ -30,51 +23,59 @@ export default function Calories() {
   const [calories, setCalories] = useState("");
   const [image, setImage] = useState<string | null>(null);
 
-  const [date, setDate] = useState(new Date());
+  const [consumedAt, setConsumedAt] = useState(new Date());
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
+  const insets = useSafeAreaInsets();
+
   const createCalorieLogMutation = useMutation({
     mutationFn: createCalorieLog,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["calorieLogs", authData?.user.id],
       });
 
+      Toast.show({
+        type: "loggedFood",
+        text1: "Logged!",
+        text2: `${data.name} • ${data.calories} cal`,
+        topOffset: insets.top + 16,
+      });
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error.message,
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
 
   const logCalories = async () => {
-    // Toast.show({ type: "info", text1: "Logging..." });
-
     const trimmedName = name.trim();
     const caloriesNum = Number(calories);
 
     if (authData === null || trimmedName.length < 1 || caloriesNum < 1) {
-      Toast.show({
-        type: "error",
-        text1: "Invalid name or calories",
-        visibilityTime: 3000,
-        position: "top",
-      });
-
       return;
     }
 
     const imageUrl = image !== null ? await uploadToCloudinary(image) : null;
-    const dateString = date.toDateString();
+    const consumedAtString = consumedAt.toISOString();
 
     createCalorieLogMutation.mutate({
       userId: authData.user.id,
       name: trimmedName,
       calories: caloriesNum,
       imageUrl,
-      date: dateString,
+      consumedAt: consumedAtString,
     });
-
-    // Toast.hide();
   };
 
   const takePicture = async () => {
@@ -97,92 +98,86 @@ export default function Calories() {
     setImage(result.assets[0].uri);
   };
 
-  const onChange = (_: DateTimePickerEvent, selectedDate?: Date) => {
-    const currentDate = selectedDate ?? date;
-    // setShow(Platform.OS === "ios"); // Keep open on iOS, close on Android
-    setDate(currentDate);
-  };
-
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View className="p-4 gap-4">
-        <View className="flex-row gap-4 items-end">
-          <View className="gap-1 flex-1">
-            <ThemedText className="font-bold">Name</ThemedText>
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="p-4 gap-4"
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="flex-row gap-4 items-end">
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Name</ThemedText>
 
-            <ThemedTextInput
-              placeholder="Name"
-              value={name}
-              onChangeText={(text) => setName(text)}
-            />
-          </View>
-
-          <View className="gap-1 flex-1">
-            <ThemedText className="font-bold">Calories</ThemedText>
-
-            <ThemedTextInput
-              placeholder="Calories"
-              keyboardType="number-pad"
-              value={calories}
-              onChangeText={(text) => setCalories(text)}
-            />
-          </View>
+          <ThemedTextInput
+            placeholder="Name"
+            value={name}
+            onChangeText={(text) => setName(text)}
+          />
         </View>
 
-        <View className="gap-1">
-          <ThemedText className="font-bold">Date</ThemedText>
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Calories</ThemedText>
 
-          <View className="text-foreground py-4 border border-border rounded-xl bg-muted">
-            <DateTimePicker
-              value={date}
-              mode="datetime" // 'date' | 'time' | 'datetime'
-              display="default" // 'default' | 'spinner' | 'calendar' | 'clock'
-              onChange={onChange}
-            />
-          </View>
+          <ThemedTextInput
+            placeholder="Calories"
+            keyboardType="number-pad"
+            value={calories}
+            onChangeText={(text) => setCalories(text)}
+          />
         </View>
+      </View>
 
-        <View className="gap-1">
-          <ThemedText className="font-bold">Image</ThemedText>
+      <View className="gap-1">
+        <ThemedText className="font-bold">Comsumed At</ThemedText>
 
-          <Pressable className="w-full aspect-square" onPress={takePicture}>
-            {image !== null ? (
-              <Image
-                source={{ uri: image }}
-                style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
+        <View className="text-foreground p-4 border border-border rounded-xl bg-muted">
+          <DateTimePicker
+            value={consumedAt}
+            mode="datetime"
+            onValueChange={(_, selectedDate) => {
+              setConsumedAt(selectedDate);
+            }}
+          />
+        </View>
+      </View>
+
+      <View className="gap-1">
+        <ThemedText className="font-bold">Image</ThemedText>
+
+        <Pressable className="w-full aspect-square" onPress={takePicture}>
+          {image !== null ? (
+            <Image
+              source={{ uri: image }}
+              style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
+            />
+          ) : (
+            <View className="border border-border rounded-xl h-full items-center justify-center bg-muted">
+              <MaterialCommunityIcons
+                name="camera"
+                size={128}
+                color={theme.foreground}
               />
-            ) : (
-              <View className="border border-border rounded-xl h-full items-center justify-center bg-muted">
-                <MaterialCommunityIcons
-                  name="camera"
-                  size={128}
-                  color={theme.foreground}
-                />
 
-                <ThemedText className="text-2xl font-bold">
-                  No picture taken
-                </ThemedText>
+              <ThemedText className="text-2xl font-bold">
+                No picture taken
+              </ThemedText>
 
-                <ThemedText color="text-muted-foreground">
-                  Tap to take a picture
-                </ThemedText>
-              </View>
-            )}
-          </Pressable>
-        </View>
-
-        <Pressable
-          className="bg-primary p-4 rounded-full"
-          onPress={logCalories}
-        >
-          <ThemedText
-            color="text-primary-foreground"
-            className="text-center text-lg font-bold"
-          >
-            Log Calories
-          </ThemedText>
+              <ThemedText color="text-muted-foreground">
+                Tap to take a picture
+              </ThemedText>
+            </View>
+          )}
         </Pressable>
       </View>
-    </TouchableWithoutFeedback>
+
+      <Pressable className="bg-primary p-4 rounded-full" onPress={logCalories}>
+        <ThemedText
+          color="text-primary-foreground"
+          className="text-center text-lg font-bold"
+        >
+          Log Calories
+        </ThemedText>
+      </Pressable>
+    </ScrollView>
   );
 }

@@ -8,5 +8,5 @@ export async function GET(_: Request, { userId }: Record<string, string>) {
     .from(workoutLog)
     .where(eq(workoutLog.userId, userId));
 
-  return Response.json({ workoutLogs });
+  return Response.json(workoutLogs);
 }

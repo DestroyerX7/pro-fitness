@@ -3,20 +3,13 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { createWorkoutLog } from "@/lib/api";
 import { colors } from "@/lib/colors";
+import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
-import React, { useState } from "react";
-import {
-  Keyboard,
-  Pressable,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { useState } from "react";
+import { Pressable, ScrollView, View } from "react-native";
 
 export const iconComponents = {
   MaterialIcons,
@@ -58,7 +51,7 @@ export default function Workout() {
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("");
 
-  const [date, setDate] = useState(new Date());
+  const [performedAt, setPerformedAt] = useState(new Date());
 
   const [selectedIcon, setSelectedIcon] = useState<Icon>({
     library: "MaterialCommunityIcons",
@@ -87,103 +80,100 @@ export default function Workout() {
       return;
     }
 
-    const dateString = date.toDateString();
+    const performedAtString = performedAt.toISOString();
 
     createWorkoutLogMutation.mutate({
       userId: authData.user.id,
       name: trimmedName,
       duration: durationNum,
-      date: dateString,
+      performedAt: performedAtString,
       iconLibrary: selectedIcon.library,
       iconName: selectedIcon.name,
     });
   };
 
-  const onChange = (_: DateTimePickerEvent, selectedDate?: Date) => {
-    const currentDate = selectedDate ?? date;
-    // setShow(Platform.OS === "ios"); // Keep open on iOS, close on Android
-    setDate(currentDate);
-  };
-
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View className="p-4 gap-4">
-        <View className="flex-row gap-4 items-end">
-          <View className="gap-1 flex-1">
-            <ThemedText className="font-bold">Name</ThemedText>
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="p-4 gap-4"
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="flex-row gap-4 items-end">
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Name</ThemedText>
 
-            <ThemedTextInput
-              placeholder="Name"
-              value={name}
-              onChangeText={(text) => setName(text)}
-            />
-          </View>
-
-          <View className="gap-1 flex-1">
-            <ThemedText className="font-bold">Duration</ThemedText>
-
-            <ThemedTextInput
-              placeholder="Duration"
-              keyboardType="number-pad"
-              value={duration}
-              onChangeText={(text) => setDuration(text)}
-            />
-          </View>
+          <ThemedTextInput
+            placeholder="Name"
+            value={name}
+            onChangeText={(text) => setName(text)}
+          />
         </View>
 
-        <View className="gap-1">
-          <ThemedText className="font-bold">Date</ThemedText>
+        <View className="gap-1 flex-1">
+          <ThemedText className="font-bold">Duration</ThemedText>
 
-          <View className="text-foreground py-4 border border-border rounded-xl bg-muted">
-            <DateTimePicker
-              value={date}
-              mode="datetime" // 'date' | 'time' | 'datetime'
-              display="default" // 'default' | 'spinner' | 'calendar' | 'clock'
-              onChange={onChange}
-            />
-          </View>
+          <ThemedTextInput
+            placeholder="Duration"
+            keyboardType="number-pad"
+            value={duration}
+            onChangeText={(text) => setDuration(text)}
+          />
         </View>
-
-        <View className="gap-1">
-          <ThemedText className="font-bold">Icon</ThemedText>
-
-          <View className="flex-row gap-4 flex-wrap p-4 bg-muted border rounded-xl border-border">
-            {icons.map((icon, index) => {
-              const IconComponent = iconComponents[icon.library];
-
-              return (
-                <Pressable
-                  key={index}
-                  className="w-16 h-16 items-center justify-center rounded-md"
-                  style={[
-                    selectedIcon.library === icon.library &&
-                      selectedIcon.name === icon.name && {
-                        borderWidth: 2,
-                        borderColor: theme.foreground,
-                      },
-                  ]}
-                  onPress={() => setSelectedIcon(icon)}
-                >
-                  <IconComponent
-                    name={icon.name as any}
-                    size={48}
-                    color={theme.foreground}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        <Pressable onPress={logWorkout} className="bg-primary p-4 rounded-full">
-          <ThemedText
-            color="text-primary-foreground"
-            className="text-center text-lg font-bold"
-          >
-            Log Workout
-          </ThemedText>
-        </Pressable>
       </View>
-    </TouchableWithoutFeedback>
+
+      <View className="gap-1">
+        <ThemedText className="font-bold">Performed At</ThemedText>
+
+        <View className="text-foreground py-4 border border-border rounded-xl bg-muted">
+          <DateTimePicker
+            value={performedAt}
+            mode="datetime"
+            onValueChange={(_, selectedDate) => {
+              setPerformedAt(selectedDate);
+            }}
+          />
+        </View>
+      </View>
+
+      <View className="gap-1">
+        <ThemedText className="font-bold">Icon</ThemedText>
+
+        <View className="flex-row gap-4 flex-wrap p-4 bg-muted border rounded-xl border-border">
+          {icons.map((icon, index) => {
+            const IconComponent = iconComponents[icon.library];
+
+            return (
+              <Pressable
+                key={index}
+                className="w-16 h-16 items-center justify-center rounded-md"
+                style={[
+                  selectedIcon.library === icon.library &&
+                    selectedIcon.name === icon.name && {
+                      borderWidth: 2,
+                      borderColor: theme.foreground,
+                    },
+                ]}
+                onPress={() => setSelectedIcon(icon)}
+              >
+                <IconComponent
+                  name={icon.name as any}
+                  size={48}
+                  color={theme.foreground}
+                />
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
+      <Pressable onPress={logWorkout} className="bg-primary p-4 rounded-full">
+        <ThemedText
+          color="text-primary-foreground"
+          className="text-center text-lg font-bold"
+        >
+          Log Workout
+        </ThemedText>
+      </Pressable>
+    </ScrollView>
   );
 }

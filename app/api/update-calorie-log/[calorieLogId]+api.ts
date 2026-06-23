@@ -6,13 +6,13 @@ export async function PUT(
   request: Request,
   { calorieLogId }: Record<string, string>,
 ) {
-  const { name, calories, date, imageUrl } = await request.json();
+  const { name, calories, consumedAt, imageUrl } = await request.json();
 
   const [updatedCalorieLog] = await db
     .update(calorieLog)
-    .set({ name, calories, date, imageUrl })
+    .set({ name, calories, consumedAt: new Date(consumedAt), imageUrl })
     .where(eq(calorieLog.id, calorieLogId))
     .returning();
 
-  return Response.json({ calorieLog: updatedCalorieLog });
+  return Response.json(updatedCalorieLog);
 }

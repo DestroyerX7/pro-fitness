@@ -1,4 +1,9 @@
 import { colors } from "@/lib/colors";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider as ExpoRouterThemeProvider,
+} from "expo-router";
 import { useColorScheme, vars } from "nativewind";
 import { PropsWithChildren } from "react";
 import { View } from "react-native";
@@ -48,9 +53,36 @@ export default function ThemeProvider({ children }: PropsWithChildren) {
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "dark" ? themes.dark : themes.light;
 
+  const navigationTheme =
+    colorScheme === "dark"
+      ? {
+          ...DarkTheme,
+          colors: {
+            ...DarkTheme.colors,
+            background: colors.dark.background,
+            primary: colors.dark.primary,
+            card: colors.dark.cardBackground,
+            text: colors.dark.foreground,
+            border: colors.dark.border,
+          },
+        }
+      : {
+          ...DefaultTheme,
+          colors: {
+            ...DefaultTheme.colors,
+            background: colors.light.background,
+            primary: colors.light.primary,
+            card: colors.light.cardBackground,
+            text: colors.light.foreground,
+            border: colors.light.border,
+          },
+        };
+
   return (
-    <View className="flex-1" style={theme}>
-      {children}
-    </View>
+    <ExpoRouterThemeProvider value={navigationTheme}>
+      <View className="flex-1" style={theme}>
+        {children}
+      </View>
+    </ExpoRouterThemeProvider>
   );
 }

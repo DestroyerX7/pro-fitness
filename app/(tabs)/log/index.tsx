@@ -4,7 +4,6 @@ import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColorScheme } from "nativewind";
-import React from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 export default function Index() {
@@ -12,7 +11,11 @@ export default function Index() {
   const theme = colorScheme === "light" ? colors.light : colors.dark;
 
   return (
-    <ScrollView contentContainerStyle={{ flex: 1, padding: 16, gap: 16 }}>
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="p-4 gap-4"
+      showsVerticalScrollIndicator={false}
+    >
       <Pressable onPress={() => router.push("/(tabs)/log/calories")}>
         <Card className="flex-row gap-4">
           <MaterialCommunityIcons

@@ -10,5 +10,5 @@ export async function POST(request: Request) {
     .values({ userId, name, duration, iconLibrary, iconName })
     .returning();
 
-  return Response.json({ workoutLogPreset: createdWorkoutLogPreset });
+  return Response.json(createdWorkoutLogPreset);
 }

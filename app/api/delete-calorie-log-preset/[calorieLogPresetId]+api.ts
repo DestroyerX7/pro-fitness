@@ -11,5 +11,5 @@ export async function DELETE(
     .where(eq(calorieLogPreset.id, calorieLogPresetId))
     .returning();
 
-  return Response.json({ calorieLogPreset: deletedCalorieLogPreset });
+  return Response.json(deletedCalorieLogPreset);
 }

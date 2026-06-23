@@ -1,13 +1,14 @@
 import { Icon } from "@/app/(tabs)/log/workout";
 import { createWorkoutLogPreset, WorkoutLog } from "@/lib/api";
 import { colors } from "@/lib/colors";
+import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Alert, Modal, Pressable, View } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ThemedText from "./ThemedText";
 import ThemedTextInput from "./ThemedTextInput";
 import WorkoutIconList from "./WorkoutIconList";
@@ -29,6 +30,9 @@ export default function EditWorkoutLogModal({
 
   const [name, setName] = useState(workoutLog.name);
   const [duration, setDuration] = useState(workoutLog.duration.toString());
+  const [performedAt, setPerformedAt] = useState(
+    new Date(workoutLog.performedAt.toString()),
+  );
   const [selectedIcon, setSelectedIcon] = useState<Icon>({
     library: "MaterialCommunityIcons",
     name: "run",
@@ -36,6 +40,8 @@ export default function EditWorkoutLogModal({
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
+
+  const insets = useSafeAreaInsets();
 
   const createWorkoutLogPresetMutation = useMutation({
     mutationFn: createWorkoutLogPreset,
@@ -97,98 +103,102 @@ export default function EditWorkoutLogModal({
 
   return (
     <Modal animationType="slide" transparent={true}>
-      <SafeAreaProvider>
-        <SafeAreaView className="flex-1">
-          <Pressable className="flex-1" onPress={close} />
+      <Pressable className="flex-1" onPress={close} />
 
-          <View className="bg-background gap-4 rounded-t-[64px] pt-8 px-8 border-t border-x border-border">
-            <View className="flex-row justify-between items-center">
-              <ThemedText className="text-2xl font-bold">
-                Edit Workout Log
-              </ThemedText>
+      <View
+        className="bg-background gap-4 rounded-t-[64px] pt-8 px-8 border-t border-x border-border"
+        style={{ paddingBottom: insets.bottom }}
+      >
+        <View className="flex-row justify-between items-center">
+          <ThemedText className="text-2xl font-bold">
+            Edit Workout Log
+          </ThemedText>
 
-              <Pressable
-                className="p-2 border border-border bg-background rounded-xl justify-center items-center flex-row gap-2"
-                onPress={handleCreateWorkoutLogPreset}
-              >
-                <MaterialCommunityIcons
-                  name="tune"
-                  size={24}
-                  color={theme.foreground}
-                />
+          <Pressable
+            className="p-2 border border-border bg-background rounded-xl justify-center items-center flex-row gap-2"
+            onPress={handleCreateWorkoutLogPreset}
+          >
+            <MaterialCommunityIcons
+              name="tune"
+              size={24}
+              color={theme.foreground}
+            />
 
-                <ThemedText>Create Preset</ThemedText>
-              </Pressable>
-            </View>
+            <ThemedText>Create Preset</ThemedText>
+          </Pressable>
+        </View>
 
-            <View className="gap-1">
-              <ThemedText className="font-bold">Name</ThemedText>
+        <View className="gap-1">
+          <ThemedText className="font-bold">Name</ThemedText>
 
-              <ThemedTextInput
-                placeholder="Name"
-                value={name}
-                onChangeText={(text) => setName(text)}
-              />
-            </View>
+          <ThemedTextInput
+            placeholder="Name"
+            value={name}
+            onChangeText={(text) => setName(text)}
+          />
+        </View>
 
-            <View className="gap-1">
-              <ThemedText className="font-bold">Duration</ThemedText>
+        <View className="gap-1">
+          <ThemedText className="font-bold">Duration</ThemedText>
 
-              <ThemedTextInput
-                placeholder="Calories"
-                value={duration}
-                onChangeText={(text) => setDuration(text)}
-                keyboardType="number-pad"
-              />
-            </View>
+          <ThemedTextInput
+            placeholder="Calories"
+            value={duration}
+            onChangeText={(text) => setDuration(text)}
+            keyboardType="number-pad"
+          />
+        </View>
 
-            <View className="gap-1">
-              <ThemedText className="font-bold">Date</ThemedText>
+        <View className="gap-1">
+          <ThemedText className="font-bold">Performed At</ThemedText>
 
-              <ThemedTextInput
-                placeholder="Calories"
-                defaultValue={workoutLog.date.toString()}
-              />
-            </View>
-
-            <View className="gap-1">
-              <ThemedText className="font-bold">Icon</ThemedText>
-
-              <WorkoutIconList
-                defaultSelected={selectedIcon}
-                onSelect={(icon) => setSelectedIcon(icon)}
-              />
-            </View>
-
-            <View className="flex-row gap-4">
-              <Pressable
-                className="bg-destructive-accent p-4 rounded-xl items-center justify-center"
-                onPress={() => showConfirmDeleteWorkoutLog(workoutLog)}
-              >
-                <MaterialCommunityIcons
-                  name="trash-can"
-                  size={24}
-                  color={theme.destructive}
-                />
-              </Pressable>
-
-              <Pressable
-                className="bg-secondary p-4 rounded-xl flex-1 items-center justify-center"
-                onPress={close}
-              >
-                <ThemedText>Cancel</ThemedText>
-              </Pressable>
-
-              <Pressable
-                className="bg-primary p-4 rounded-xl flex-1 items-center justify-center"
-                onPress={save}
-              >
-                <ThemedText color="text-primary-foreground">Save</ThemedText>
-              </Pressable>
-            </View>
+          <View className="text-foreground py-4 border border-border rounded-xl bg-muted">
+            <DateTimePicker
+              value={performedAt}
+              mode="datetime"
+              onValueChange={(_, selectedDate) => {
+                setPerformedAt(selectedDate);
+              }}
+            />
           </View>
-        </SafeAreaView>
-      </SafeAreaProvider>
+        </View>
+
+        <View className="gap-1">
+          <ThemedText className="font-bold">Icon</ThemedText>
+
+          <WorkoutIconList
+            defaultSelected={selectedIcon}
+            onSelect={(icon) => setSelectedIcon(icon)}
+          />
+        </View>
+
+        <View className="flex-row gap-4">
+          <Pressable
+            className="bg-destructive-accent p-4 rounded-xl items-center justify-center"
+            onPress={() => showConfirmDeleteWorkoutLog(workoutLog)}
+          >
+            <MaterialCommunityIcons
+              name="trash-can"
+              size={24}
+              color={theme.destructive}
+            />
+          </Pressable>
+
+          <Pressable
+            className="bg-secondary p-4 rounded-xl flex-1 items-center justify-center"
+            onPress={close}
+          >
+            <ThemedText>Cancel</ThemedText>
+          </Pressable>
+
+          <Pressable
+            className="bg-primary p-4 rounded-xl flex-1 items-center justify-center"
+            onPress={save}
+          >
+            <ThemedText color="text-primary-foreground">Save</ThemedText>
+          </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }

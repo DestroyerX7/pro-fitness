@@ -6,13 +6,20 @@ export async function PUT(
   request: Request,
   { workoutLogId }: Record<string, string>,
 ) {
-  const { name, duration, date, iconLibrary, iconName } = await request.json();
+  const { name, duration, performedAt, iconLibrary, iconName } =
+    await request.json();
 
   const [updatedWorkoutLog] = await db
     .update(workoutLog)
-    .set({ name, duration, date, iconLibrary, iconName })
+    .set({
+      name,
+      duration,
+      performedAt: new Date(performedAt),
+      iconLibrary,
+      iconName,
+    })
     .where(eq(workoutLog.id, workoutLogId))
     .returning();
 
-  return Response.json({ workoutLog: updatedWorkoutLog });
+  return Response.json(updatedWorkoutLog);
 }

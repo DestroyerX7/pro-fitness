@@ -14,5 +14,5 @@ export async function PATCH(
     .where(eq(user.id, userId))
     .returning();
 
-  return Response.json({ user: updatedUser });
+  return Response.json(updatedUser);
 }

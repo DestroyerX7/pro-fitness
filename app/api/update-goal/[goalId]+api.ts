@@ -14,5 +14,5 @@ export async function PUT(
     .where(eq(goal.id, goalId))
     .returning();
 
-  return Response.json({ goal: updatedGoal });
+  return Response.json(updatedGoal);
 }

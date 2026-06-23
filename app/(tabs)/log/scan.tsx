@@ -3,14 +3,12 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { createCalorieLog } from "@/lib/api";
 import { colors } from "@/lib/colors";
+import DateTimePicker from "@expo/ui/community/datetime-picker";
 import {
   AntDesign,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
@@ -23,9 +21,9 @@ import { useColorScheme } from "nativewind";
 import { useRef, useState } from "react";
 import {
   Image,
-  Keyboard,
+  KeyboardAvoidingView,
   Pressable,
-  TouchableWithoutFeedback,
+  ScrollView,
   View,
 } from "react-native";
 
@@ -57,7 +55,7 @@ export default function Scan() {
   const [numberOfServings, setNumberOfServings] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const [date, setDate] = useState(new Date());
+  const [consumedAt, setConsumedAt] = useState(new Date());
 
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "light" ? colors.light : colors.dark;
@@ -138,21 +136,15 @@ export default function Scan() {
       return;
     }
 
-    const dateString = date.toString();
+    const consumedAtString = consumedAt.toISOString();
 
     createCalorieLogMutation.mutate({
       userId: authData.user.id,
       name: trimmedName,
       calories: caloriesPerServingNum * numberOfServingsNum,
       imageUrl,
-      date: dateString,
+      consumedAt: consumedAtString,
     });
-  };
-
-  const onChange = (_: DateTimePickerEvent, selectedDate?: Date) => {
-    const currentDate = selectedDate ?? date;
-    // setShow(Platform.OS === "ios"); // Keep open on iOS, close on Android
-    setDate(currentDate);
   };
 
   const rescan = () => {
@@ -245,8 +237,12 @@ export default function Scan() {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View className="p-4 gap-4">
+    <KeyboardAvoidingView behavior="padding" className="flex-1">
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="p-4 gap-4"
+        showsVerticalScrollIndicator={false}
+      >
         <Pressable
           className="bg-secondary p-4 rounded-full flex-row items-center justify-center gap-2"
           onPress={rescan}
@@ -306,10 +302,11 @@ export default function Scan() {
 
           <View className="text-foreground py-4 border border-border rounded-xl bg-muted">
             <DateTimePicker
-              value={date}
-              mode="datetime" // 'date' | 'time' | 'datetime'
-              display="default" // 'default' | 'spinner' | 'calendar' | 'clock'
-              onChange={onChange}
+              value={consumedAt}
+              mode="datetime"
+              onValueChange={(_, selectedDate) => {
+                setConsumedAt(selectedDate);
+              }}
             />
           </View>
         </View>
@@ -349,7 +346,7 @@ export default function Scan() {
             Log Calories
           </ThemedText>
         </Pressable>
-      </View>
-    </TouchableWithoutFeedback>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

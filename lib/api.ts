@@ -14,7 +14,7 @@ export type Goal = typeof goal.$inferSelect;
 export type CalorieLogPreset = typeof calorieLogPreset.$inferSelect;
 export type WorkoutLogPreset = typeof workoutLogPreset.$inferSelect;
 
-export const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
+export const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL!;
 
 type SignatureResponse = {
   signature: string;
@@ -25,11 +25,11 @@ type SignatureResponse = {
 };
 
 export const getUser = async (userId: string) => {
-  const response = await axios.get<{ user: User }>(
+  const response = await axios.get<User>(
     `${backendUrl}/api/get-user/${userId}`,
   );
 
-  return response.data.user;
+  return response.data;
 };
 
 export const updateCalorieGoal = async ({
@@ -39,14 +39,14 @@ export const updateCalorieGoal = async ({
   calorieGoalText: string;
   userId: string;
 }) => {
-  const response = await axios.patch<{ user: User }>(
+  const response = await axios.patch<User>(
     `${backendUrl}/api/update-daily-calorie-goal/${userId}`,
     {
       dailyCalorieGoal: Number(calorieGoalText),
     },
   );
 
-  return response.data.user;
+  return response.data;
 };
 
 export const updateWorkoutGoal = async ({
@@ -56,49 +56,49 @@ export const updateWorkoutGoal = async ({
   workoutGoalText: string;
   userId: string;
 }) => {
-  const response = await axios.patch<{ user: User }>(
+  const response = await axios.patch<User>(
     `${backendUrl}/api/update-daily-calorie-goal/${userId}`,
     {
       dailyCalorieGoal: Number(workoutGoalText),
     },
   );
 
-  return response.data.user;
+  return response.data;
 };
 
 export const createCalorieLog = async ({
   userId,
   name,
   calories,
-  date,
+  consumedAt,
   imageUrl,
 }: {
   userId: string;
   name: string;
   calories: number;
-  date?: string;
+  consumedAt?: string;
   imageUrl: string | null;
 }) => {
-  const response = await axios.post<{ calorieLog: CalorieLog }>(
+  const response = await axios.post<CalorieLog>(
     `${backendUrl}/api/create-calorie-log`,
     {
       userId,
       name,
       calories,
-      date,
+      consumedAt,
       imageUrl,
     },
   );
 
-  return response.data.calorieLog;
+  return response.data;
 };
 
 export const getCalorieLogs = async (userId: string) => {
-  const response = await axios.get<{ calorieLogs: CalorieLog[] }>(
+  const response = await axios.get<CalorieLog[]>(
     `${backendUrl}/api/get-calorie-logs/${userId}`,
   );
 
-  return response.data.calorieLogs;
+  return response.data;
 };
 
 export const updateCalorieLog = async ({
@@ -106,17 +106,17 @@ export const updateCalorieLog = async ({
 }: {
   calorieLog: CalorieLog;
 }) => {
-  const response = await axios.put<{ calorieLog: CalorieLog }>(
+  const response = await axios.put<CalorieLog>(
     `${backendUrl}/api/update-calorie-log/${calorieLog.id}`,
     {
       name: calorieLog.name,
       calories: calorieLog.calories,
-      date: calorieLog.date,
+      consumedAt: calorieLog.consumedAt,
       imageUrl: calorieLog.imageUrl,
     },
   );
 
-  return response.data.calorieLog;
+  return response.data;
 };
 
 export const deleteCalorieLog = async (calorieLogId: string) => {
@@ -127,38 +127,38 @@ export const createWorkoutLog = async ({
   userId,
   name,
   duration,
-  date,
+  performedAt,
   iconLibrary,
   iconName,
 }: {
   userId: string;
   name: string;
   duration: number;
-  date?: string;
+  performedAt?: string;
   iconLibrary: string;
   iconName: string;
 }) => {
-  const response = await axios.post<{ workoutLog: WorkoutLog }>(
+  const response = await axios.post<WorkoutLog>(
     `${backendUrl}/api/create-workout-log`,
     {
       userId,
       name,
       duration,
-      date,
+      performedAt,
       iconLibrary,
       iconName,
     },
   );
 
-  return response.data.workoutLog;
+  return response.data;
 };
 
 export const getWorkoutLogs = async (userId: string) => {
-  const response = await axios.get<{ workoutLogs: WorkoutLog[] }>(
+  const response = await axios.get<WorkoutLog[]>(
     `${backendUrl}/api/get-workout-logs/${userId}`,
   );
 
-  return response.data.workoutLogs;
+  return response.data;
 };
 
 export const updateWorkoutLog = async ({
@@ -166,18 +166,18 @@ export const updateWorkoutLog = async ({
 }: {
   workoutLog: WorkoutLog;
 }) => {
-  const response = await axios.put<{ workoutLog: WorkoutLog }>(
+  const response = await axios.put<WorkoutLog>(
     `${backendUrl}/api/update-workout-log/${workoutLog.id}`,
     {
       name: workoutLog.name,
       duration: workoutLog.duration,
-      date: workoutLog.date,
+      performedAt: workoutLog.performedAt,
       iconLibrary: workoutLog.iconLibrary,
       iconName: workoutLog.iconName,
     },
   );
 
-  return response.data.workoutLog;
+  return response.data;
 };
 
 export const deleteWorkoutLog = async (workoutLogId: string) => {
@@ -193,28 +193,25 @@ export const createGoal = async ({
   name: string;
   description: string;
 }) => {
-  const response = await axios.post<{ goal: Goal }>(
-    `${backendUrl}/api/create-goal`,
-    {
-      userId,
-      name,
-      description,
-    },
-  );
+  const response = await axios.post<Goal>(`${backendUrl}/api/create-goal`, {
+    userId,
+    name,
+    description,
+  });
 
-  return response.data.goal;
+  return response.data;
 };
 
 export const getGoals = async (userId: string) => {
-  const response = await axios.get<{ goals: Goal[] }>(
+  const response = await axios.get<Goal[]>(
     `${backendUrl}/api/get-goals/${userId}`,
   );
 
-  return response.data.goals;
+  return response.data;
 };
 
 export const updateGoal = async ({ goal }: { goal: Goal }) => {
-  const response = await axios.put<{ goal: Goal }>(
+  const response = await axios.put<Goal>(
     `${backendUrl}/api/update-goal/${goal.id}`,
     {
       name: goal.name,
@@ -224,7 +221,7 @@ export const updateGoal = async ({ goal }: { goal: Goal }) => {
     },
   );
 
-  return response.data.goal;
+  return response.data;
 };
 
 export const updateGoalCompleted = async ({
@@ -234,14 +231,14 @@ export const updateGoalCompleted = async ({
   completed: boolean;
   goalId: string;
 }) => {
-  const response = await axios.patch<{ goal: Goal }>(
+  const response = await axios.patch<Goal>(
     `${backendUrl}/api/update-goal-completed/${goalId}`,
     {
       completed,
     },
   );
 
-  return response.data.goal;
+  return response.data;
 };
 
 export const updateGoalHidden = async ({
@@ -251,22 +248,22 @@ export const updateGoalHidden = async ({
   hidden: boolean;
   goalId: string;
 }) => {
-  const response = await axios.patch<{ goal: Goal }>(
+  const response = await axios.patch<Goal>(
     `${backendUrl}/api/update-goal-hidden/${goalId}`,
     {
       hidden,
     },
   );
 
-  return response.data.goal;
+  return response.data;
 };
 
 export const deleteGoal = async ({ goalId }: { goalId: string }) => {
-  const response = await axios.delete<{ goal: Goal }>(
+  const response = await axios.delete<Goal>(
     `${backendUrl}/api/delete-goal/${goalId}`,
   );
 
-  return response.data.goal;
+  return response.data;
 };
 
 export const createCalorieLogPreset = async ({
@@ -289,11 +286,11 @@ export const createCalorieLogPreset = async ({
 };
 
 export const getCalorieLogPresets = async (userId: string) => {
-  const response = await axios.get<{ calorieLogPresets: CalorieLogPreset[] }>(
+  const response = await axios.get<CalorieLogPreset[]>(
     `${backendUrl}/api/get-calorie-log-presets/${userId}`,
   );
 
-  return response.data.calorieLogPresets;
+  return response.data;
 };
 
 export const createWorkoutLogPreset = async ({
@@ -319,11 +316,11 @@ export const createWorkoutLogPreset = async ({
 };
 
 export const getWorkoutLogPresets = async (userId: string) => {
-  const response = await axios.get<{ workoutLogPresets: WorkoutLogPreset[] }>(
+  const response = await axios.get<WorkoutLogPreset[]>(
     `${backendUrl}/api/get-workout-log-presets/${userId}`,
   );
 
-  return response.data.workoutLogPresets;
+  return response.data;
 };
 
 export const uploadToCloudinary = async (imageUri: string) => {

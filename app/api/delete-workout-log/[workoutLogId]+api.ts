@@ -11,5 +11,5 @@ export async function DELETE(
     .where(eq(workoutLog.id, workoutLogId))
     .returning();
 
-  return Response.json({ workoutLog: deletedWorkoutLog });
+  return Response.json(deletedWorkoutLog);
 }

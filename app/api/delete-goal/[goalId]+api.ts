@@ -8,5 +8,5 @@ export async function DELETE(_: Request, { goalId }: Record<string, string>) {
     .where(eq(goal.id, goalId))
     .returning();
 
-  return Response.json({ goal: deletedGoal });
+  return Response.json(deletedGoal);
 }

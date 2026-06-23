@@ -15,7 +15,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useColorScheme } from "nativewind";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 export default function Favorites() {
@@ -84,7 +84,7 @@ export default function Favorites() {
       name: calorieLogPreset.name,
       calories: calorieLogPreset.calories,
       imageUrl: calorieLogPreset.imageUrl,
-      date: new Date().toLocaleDateString(),
+      consumedAt: new Date().toISOString(),
     });
   };
 
@@ -97,7 +97,7 @@ export default function Favorites() {
       userId: authData.user.id,
       name: workoutLogPreset.name,
       duration: workoutLogPreset.duration,
-      date: new Date().toLocaleDateString(),
+      performedAt: new Date().toISOString(),
       iconLibrary: workoutLogPreset.iconLibrary,
       iconName: workoutLogPreset.iconName,
     });
@@ -113,8 +113,9 @@ export default function Favorites() {
 
   return (
     <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="p-4 gap-4"
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ padding: 16, gap: 16 }}
     >
       <ScrollView
         horizontal

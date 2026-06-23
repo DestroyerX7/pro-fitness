@@ -9,5 +9,5 @@ export async function POST(request: Request) {
     .values({ userId, name, description })
     .returning();
 
-  return Response.json({ goal: createdGoal });
+  return Response.json(createdGoal);
 }

@@ -50,6 +50,13 @@
       "when": 1769991495209,
       "tag": "0006_mean_argent",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782074227963,
+      "tag": "0007_condemned_micromax",
+      "breakpoints": true
     }
   ]
 }

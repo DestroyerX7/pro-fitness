@@ -1,10 +1,10 @@
 import { colors } from "@/lib/colors";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 import { Pressable, View } from "react-native";
 import Card from "./Card";
 import ThemedText from "./ThemedText";
 import { iconLibraries } from "./WorkoutIconList";
+import useTheme from "@/hooks/useTheme";
 
 type Props = {
   id: string;
@@ -12,7 +12,6 @@ type Props = {
   duration: number;
   iconLibrary: "MaterialIcons" | "MaterialCommunityIcons";
   iconName: string;
-  colorScheme: "light" | "dark" | undefined;
   onEdit?: (id: string) => void;
 };
 
@@ -22,10 +21,9 @@ export default function WorkoutLogItem({
   duration,
   iconLibrary,
   iconName,
-  colorScheme,
   onEdit,
 }: Props) {
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
   const IconComponent = iconLibraries[iconLibrary];
 
   return (
