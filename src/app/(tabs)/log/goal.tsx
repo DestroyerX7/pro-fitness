@@ -1,4 +1,4 @@
-import { useAuth } from "@/components/AuthProvider";
+import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { createGoal } from "@/lib/api";
@@ -8,28 +8,22 @@ import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 export default function Goal() {
-  const { data: authData } = useAuth();
-
   const queryClient = useQueryClient();
-
+  const { user } = useAuthenticatedAuth();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   const createGoalMutation = useMutation({
     mutationFn: createGoal,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", authData?.user.id] });
+      queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
   const handleCreateGoal = async () => {
-    if (authData === null) {
-      return;
-    }
-
-    createGoalMutation.mutate({ userId: authData.user.id, name, description });
+    createGoalMutation.mutate({ userId: user.id, name, description });
   };
 
   return (

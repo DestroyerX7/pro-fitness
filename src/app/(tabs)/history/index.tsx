@@ -1,68 +1,29 @@
-import { useAuth } from "@/components/AuthProvider";
+import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
 import GoalItem from "@/components/GoalItem";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
-import {
-  CalorieLog,
-  getCalorieLogs,
-  getGoals,
-  getUser,
-  getWorkoutLogs,
-  Goal,
-  WorkoutLog,
-} from "@/lib/api";
-import { colors } from "@/lib/colors";
-import { useQuery } from "@tanstack/react-query";
-import { useColorScheme } from "nativewind";
+import useCalorieLogs from "@/hooks/useCalorieLogs";
+import useGoals from "@/hooks/useGoals";
+import useTheme from "@/hooks/useTheme";
+import useUser from "@/hooks/useUser";
+import useWorkoutLogs from "@/hooks/useWorkoutLogs";
+import { CalorieLog, Goal, WorkoutLog } from "@/lib/api";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 export default function History() {
-  const { data: authData } = useAuth();
+  const { user: authUser } = useAuthenticatedAuth();
+  const { data: user } = useUser(authUser.id);
+  const { data: calorieLogs } = useCalorieLogs(authUser.id);
+  const { data: workoutLogs } = useWorkoutLogs(authUser.id);
+  const { data: goals } = useGoals(authUser.id);
 
   const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
     "calories",
   );
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
-
-  const { data: user } = useQuery({
-    queryKey: ["user", authData?.user.id || ""],
-    queryFn: ({ queryKey }) => {
-      const [, userId] = queryKey;
-      return getUser(userId);
-    },
-    enabled: authData !== null,
-  });
-
-  const { data: calorieLogs } = useQuery({
-    queryKey: ["calorieLogs", authData?.user.id || ""],
-    queryFn: ({ queryKey }) => {
-      const [, userId] = queryKey;
-      return getCalorieLogs(userId);
-    },
-    enabled: authData !== null,
-  });
-
-  const { data: workoutLogs } = useQuery({
-    queryKey: ["workoutLogs", authData?.user.id || ""],
-    queryFn: ({ queryKey }) => {
-      const [, userId] = queryKey;
-      return getWorkoutLogs(userId);
-    },
-    enabled: authData !== null,
-  });
-
-  const { data: goals } = useQuery({
-    queryKey: ["goals", authData?.user.id || ""],
-    queryFn: ({ queryKey }) => {
-      const [, userId] = queryKey;
-      return getGoals(userId);
-    },
-    enabled: authData !== null,
-  });
+  const theme = useTheme();
 
   if (
     user === undefined ||

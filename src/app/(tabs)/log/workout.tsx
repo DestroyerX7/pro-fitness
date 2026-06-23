@@ -1,13 +1,12 @@
-import { useAuth } from "@/components/AuthProvider";
+import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import useTheme from "@/hooks/useTheme";
 import { createWorkoutLog } from "@/lib/api";
-import { colors } from "@/lib/colors";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { useColorScheme } from "nativewind";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
@@ -45,27 +44,23 @@ const icons: Icon[] = [
 ];
 
 export default function Workout() {
-  const { data: authData } = useAuth();
-
   const queryClient = useQueryClient();
+  const { user } = useAuthenticatedAuth();
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("");
-
   const [performedAt, setPerformedAt] = useState(new Date());
-
   const [selectedIcon, setSelectedIcon] = useState<Icon>({
     library: "MaterialCommunityIcons",
     name: "run",
   });
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
 
   const createWorkoutLogMutation = useMutation({
     mutationFn: createWorkoutLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", authData?.user.id],
+        queryKey: ["workoutLogs", user.id],
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -76,14 +71,14 @@ export default function Workout() {
     const trimmedName = name.trim();
     const durationNum = Number(duration);
 
-    if (authData === null || trimmedName.length < 1 || durationNum < 1) {
+    if (trimmedName.length < 1 || durationNum < 1) {
       return;
     }
 
     const performedAtString = performedAt.toISOString();
 
     createWorkoutLogMutation.mutate({
-      userId: authData.user.id,
+      userId: user.id,
       name: trimmedName,
       duration: durationNum,
       performedAt: performedAtString,

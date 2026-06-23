@@ -19,9 +19,8 @@ import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 export default function Favorites() {
-  const { user } = useAuthenticatedAuth();
-
   const queryClient = useQueryClient();
+  const { user } = useAuthenticatedAuth();
 
   const [activeTab, setActiveTab] = useState<"calories" | "workouts">(
     "calories",
@@ -143,7 +142,8 @@ export default function Favorites() {
             </ThemedText>
 
             <ThemedText color="text-muted-foreground" className="text-center">
-              Edit a calorie log and press create preset based off it&apos;s values
+              Edit a calorie log and press create preset based off it&apos;s
+              values
             </ThemedText>
           </View>
         )
@@ -175,7 +175,8 @@ export default function Favorites() {
           </ThemedText>
 
           <ThemedText color="text-muted-foreground" className="text-center">
-            Edit a workout log and press create preset based off it&apos;s values
+            Edit a workout log and press create preset based off it&apos;s
+            values
           </ThemedText>
         </View>
       )}

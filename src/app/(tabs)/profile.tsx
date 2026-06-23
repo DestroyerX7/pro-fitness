@@ -1,36 +1,21 @@
-import { useAuth } from "@/components/AuthProvider";
+import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
-import { backendUrl, getUser } from "@/lib/api";
+import useTheme from "@/hooks/useTheme";
+import useUser from "@/hooks/useUser";
+import { backendUrl } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
-import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useColorScheme } from "nativewind";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Profile() {
-  const { data: authData } = useAuth();
+  const { user: authUser } = useAuthenticatedAuth();
+  const { data: user, isPending, error } = useUser(authUser.id);
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
-
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
-
-  const {
-    data: user,
-    isPending,
-    error,
-  } = useQuery({
-    queryKey: ["user", authData?.user.id || ""],
-    queryFn: ({ queryKey }) => {
-      const [, userId] = queryKey;
-      return getUser(userId);
-    },
-    enabled: authData !== null,
-  });
 
   const showConfirmDeleteUser = () => {
     Alert.alert(
@@ -51,11 +36,7 @@ export default function Profile() {
   };
 
   const deleteUser = async () => {
-    if (authData === null) {
-      return;
-    }
-
-    await axios.delete(`${backendUrl}/api/delete-user/${authData.user.id}`);
+    await axios.delete(`${backendUrl}/api/delete-user/${authUser.id}`);
     await authClient.signOut();
   };
 

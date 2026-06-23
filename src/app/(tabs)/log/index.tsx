@@ -1,14 +1,12 @@
 import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
-import { colors } from "@/lib/colors";
+import useTheme from "@/hooks/useTheme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useColorScheme } from "nativewind";
 import { Pressable, ScrollView, View } from "react-native";
 
 export default function Index() {
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
 
   return (
     <ScrollView

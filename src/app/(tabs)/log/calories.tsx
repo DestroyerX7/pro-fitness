@@ -14,10 +14,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 export default function Calories() {
-  const { user } = useAuthenticatedAuth();
-
   const queryClient = useQueryClient();
-
+  const { user } = useAuthenticatedAuth();
   const [name, setName] = useState("");
   const [calories, setCalories] = useState("");
   const [image, setImage] = useState<string | null>(null);

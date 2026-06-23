@@ -1,8 +1,8 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import useTheme from "@/hooks/useTheme";
 import { createCalorieLog } from "@/lib/api";
-import { colors } from "@/lib/colors";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import {
   AntDesign,
@@ -17,7 +17,6 @@ import {
   useCameraPermissions,
 } from "expo-camera";
 import * as Haptics from "expo-haptics";
-import { useColorScheme } from "nativewind";
 import { useRef, useState } from "react";
 import {
   Image,
@@ -39,9 +38,8 @@ type Product = {
 };
 
 export default function Scan() {
-  const { user } = useAuthenticatedAuth();
-
   const queryClient = useQueryClient();
+  const { user } = useAuthenticatedAuth();
 
   const [status, requestPermission] = useCameraPermissions();
 
@@ -53,12 +51,10 @@ export default function Scan() {
   const [name, setName] = useState("");
   const [caloriesPerServing, setCaloriesPerServing] = useState("");
   const [numberOfServings, setNumberOfServings] = useState("");
+  const [consumedAt, setConsumedAt] = useState(new Date());
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const [consumedAt, setConsumedAt] = useState(new Date());
-
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
 
   const createCalorieLogMutation = useMutation({
     mutationFn: createCalorieLog,
