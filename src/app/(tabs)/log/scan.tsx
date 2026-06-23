@@ -1,4 +1,4 @@
-import { useAuth } from "@/components/AuthProvider";
+import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { createCalorieLog } from "@/lib/api";
@@ -39,7 +39,7 @@ type Product = {
 };
 
 export default function Scan() {
-  const { data: authData } = useAuth();
+  const { user } = useAuthenticatedAuth();
 
   const queryClient = useQueryClient();
 
@@ -64,7 +64,7 @@ export default function Scan() {
     mutationFn: createCalorieLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", authData?.user.id],
+        queryKey: ["calorieLogs", user.id],
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -96,25 +96,15 @@ export default function Scan() {
         `https://world.openfoodfacts.org/api/v2/product/${barcode}`,
       );
 
-      const { code, product_name, nutriments, serving_size, image_url } =
-        response.data.product;
-
-      console.log({
-        code,
-        product_name,
-        energy_kcal_per_serving: nutriments["energy-kcal_serving"],
-        energy_kcal_100g: nutriments["energy-kcal_100g"],
-        serving_size,
-        image_url,
-      });
+      const { product_name, nutriments, image_url } = response.data.product;
 
       setProduct(response.data.product);
-      setName(product_name || "");
+      setName(product_name ?? "");
       setCaloriesPerServing(
-        Math.round(nutriments["energy-kcal_serving"] || 0).toString(),
+        Math.round(nutriments["energy-kcal_serving"] ?? 0).toString(),
       );
-      setImageUrl(image_url || null);
-    } catch (error) {
+      setImageUrl(image_url ?? null);
+    } catch {
       setError("Product not found, try again.");
     } finally {
       isLoadingRef.current = false;
@@ -128,7 +118,6 @@ export default function Scan() {
     const numberOfServingsNum = Number(numberOfServings);
 
     if (
-      authData === null ||
       trimmedName.length < 1 ||
       caloriesPerServingNum < 1 ||
       numberOfServingsNum < 1
@@ -139,7 +128,7 @@ export default function Scan() {
     const consumedAtString = consumedAt.toISOString();
 
     createCalorieLogMutation.mutate({
-      userId: authData.user.id,
+      userId: user.id,
       name: trimmedName,
       calories: caloriesPerServingNum * numberOfServingsNum,
       imageUrl,

@@ -1,40 +1,36 @@
-import { useAuth } from "@/components/AuthProvider";
+import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import useTheme from "@/hooks/useTheme";
 import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
-import { colors } from "@/lib/colors";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import { useColorScheme } from "nativewind";
 import { useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 export default function Calories() {
-  const { data: authData } = useAuth();
+  const { user } = useAuthenticatedAuth();
 
   const queryClient = useQueryClient();
 
   const [name, setName] = useState("");
   const [calories, setCalories] = useState("");
   const [image, setImage] = useState<string | null>(null);
-
   const [consumedAt, setConsumedAt] = useState(new Date());
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
-
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
 
   const createCalorieLogMutation = useMutation({
     mutationFn: createCalorieLog,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", authData?.user.id],
+        queryKey: ["calorieLogs", user.id],
       });
 
       Toast.show({
@@ -62,7 +58,7 @@ export default function Calories() {
     const trimmedName = name.trim();
     const caloriesNum = Number(calories);
 
-    if (authData === null || trimmedName.length < 1 || caloriesNum < 1) {
+    if (trimmedName.length < 1 || caloriesNum < 1) {
       return;
     }
 
@@ -70,7 +66,7 @@ export default function Calories() {
     const consumedAtString = consumedAt.toISOString();
 
     createCalorieLogMutation.mutate({
-      userId: authData.user.id,
+      userId: user.id,
       name: trimmedName,
       calories: caloriesNum,
       imageUrl,

@@ -11,7 +11,6 @@ import Toast, {
   ErrorToast,
   ToastConfig,
 } from "react-native-toast-message";
-// import { StatusBar } from "expo-status-bar";
 
 const queryClient = new QueryClient();
 
@@ -52,7 +51,8 @@ function RootNavigator() {
             headerShown: true,
             title: "Edit Calorie Log",
             presentation: "formSheet",
-            sheetAllowedDetents: [0.5, 1],
+            sheetAllowedDetents: [0.75, 1],
+            sheetLargestUndimmedDetentIndex: "last",
             sheetGrabberVisible: true,
             contentStyle: { backgroundColor: "transparent" },
           }}

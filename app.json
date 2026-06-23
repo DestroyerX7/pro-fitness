@@ -53,14 +53,9 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow ProFitness to access your camera"
+          "cameraPermission": "Allow Pro Fitness to access your camera to take pictures and scan barcodes"
         }
-      ],
-      "expo-font",
-      "expo-image",
-      "expo-secure-store",
-      "expo-web-browser",
-      "expo-status-bar"
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

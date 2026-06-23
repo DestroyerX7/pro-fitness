@@ -124,7 +124,7 @@ export default function Login() {
       </Pressable>
 
       <ThemedText className="text-center text-xl">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link href="/(auth)/sign-up">
           <ThemedText color="text-primary" className="underline">
             Sign Up

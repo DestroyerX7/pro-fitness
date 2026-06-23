@@ -1,7 +1,9 @@
-import { useAuth } from "@/components/AuthProvider";
+import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
+import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
+import useTheme from "@/hooks/useTheme";
 import {
   CalorieLogPreset,
   createCalorieLog,
@@ -10,16 +12,14 @@ import {
   getWorkoutLogPresets,
   WorkoutLogPreset,
 } from "@/lib/api";
-import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { useColorScheme } from "nativewind";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 export default function Favorites() {
-  const { data: authData } = useAuth();
+  const { user } = useAuthenticatedAuth();
 
   const queryClient = useQueryClient();
 
@@ -27,23 +27,18 @@ export default function Favorites() {
     "calories",
   );
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
 
   const { data: calorieLogPresets } = useQuery({
-    queryKey: ["calorieLogPresets", authData?.user.id || ""],
-    queryFn: ({ queryKey }) => {
-      const [, userId] = queryKey;
-      return getCalorieLogPresets(userId);
-    },
-    enabled: authData !== null,
+    queryKey: ["calorieLogPresets", user.id],
+    queryFn: () => getCalorieLogPresets(user.id),
   });
 
   const createCalorieLogMutation = useMutation({
     mutationFn: createCalorieLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", authData?.user.id],
+        queryKey: ["calorieLogs", user.id],
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -51,19 +46,15 @@ export default function Favorites() {
   });
 
   const { data: workoutLogPresets } = useQuery({
-    queryKey: ["workoutLogPresets", authData?.user.id || ""],
-    queryFn: ({ queryKey }) => {
-      const [, userId] = queryKey;
-      return getWorkoutLogPresets(userId);
-    },
-    enabled: authData !== null,
+    queryKey: ["workoutLogPresets", user.id],
+    queryFn: () => getWorkoutLogPresets(user.id),
   });
 
   const createWorkoutLogMutation = useMutation({
     mutationFn: createWorkoutLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", authData?.user.id],
+        queryKey: ["workoutLogs", user.id],
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -75,12 +66,8 @@ export default function Favorites() {
   });
 
   const logCalories = async (calorieLogPreset: CalorieLogPreset) => {
-    if (authData === null) {
-      return;
-    }
-
     createCalorieLogMutation.mutate({
-      userId: authData.user.id,
+      userId: user.id,
       name: calorieLogPreset.name,
       calories: calorieLogPreset.calories,
       imageUrl: calorieLogPreset.imageUrl,
@@ -89,12 +76,8 @@ export default function Favorites() {
   };
 
   const logWorkout = async (workoutLogPreset: WorkoutLogPreset) => {
-    if (authData === null) {
-      return;
-    }
-
     createWorkoutLogMutation.mutate({
-      userId: authData.user.id,
+      userId: user.id,
       name: workoutLogPreset.name,
       duration: workoutLogPreset.duration,
       performedAt: new Date().toISOString(),
@@ -103,11 +86,7 @@ export default function Favorites() {
     });
   };
 
-  if (
-    authData === null ||
-    calorieLogPresets === undefined ||
-    workoutLogPresets === undefined
-  ) {
+  if (calorieLogPresets === undefined || workoutLogPresets === undefined) {
     return;
   }
 
@@ -120,78 +99,20 @@ export default function Favorites() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, flex: 1 }}
+        contentContainerClassName="gap-2 flex-1"
       >
-        <Pressable
-          className="p-4 rounded-xl"
-          style={{
-            backgroundColor:
-              activeTab === "calories" ? theme.foreground : theme.secondary,
-          }}
+        <TabButton
+          text="Calories"
+          active={activeTab === "calories"}
           onPress={() => setActiveTab("calories")}
-        >
-          <ThemedText
-            color={
-              activeTab === "calories"
-                ? "text-background"
-                : "text-secondary-foreground"
-            }
-          >
-            Calories
-          </ThemedText>
-        </Pressable>
+        />
 
-        <Pressable
-          className="p-4 bg-secondary rounded-xl"
-          style={{
-            backgroundColor:
-              activeTab === "workouts" ? theme.foreground : theme.secondary,
-          }}
+        <TabButton
+          text="Workouts"
+          active={activeTab === "workouts"}
           onPress={() => setActiveTab("workouts")}
-        >
-          <ThemedText
-            color={
-              activeTab === "workouts"
-                ? "text-background"
-                : "text-secondary-foreground"
-            }
-          >
-            Workouts
-          </ThemedText>
-        </Pressable>
+        />
       </ScrollView>
-
-      {/* <View className="flex-row gap-4 items-center">
-        <Pressable
-          className={`border-b-2 ${
-            activeTab === "calories"
-              ? "border-foreground"
-              : "border-transparent"
-          }`}
-          onPress={() => setActiveTab("calories")}
-        >
-          <ThemedText
-            className={`text-2xl ${activeTab === "calories" ? "font-bold" : ""}`}
-          >
-            Calories
-          </ThemedText>
-        </Pressable>
-
-        <Pressable
-          className={`border-b-2 ${
-            activeTab === "workouts"
-              ? "border-foreground"
-              : "border-transparent"
-          }`}
-          onPress={() => setActiveTab("workouts")}
-        >
-          <ThemedText
-            className={`text-2xl ${activeTab === "workouts" ? "font-bold" : ""}`}
-          >
-            Workouts
-          </ThemedText>
-        </Pressable>
-      </View> */}
 
       {/* Add editing later */}
       {activeTab === "calories" ? (
@@ -206,7 +127,6 @@ export default function Favorites() {
                 name={calorieLogPreset.name}
                 imageUrl={calorieLogPreset.imageUrl}
                 calories={calorieLogPreset.calories}
-                colorScheme={colorScheme}
               />
             </Pressable>
           ))
@@ -223,7 +143,7 @@ export default function Favorites() {
             </ThemedText>
 
             <ThemedText color="text-muted-foreground" className="text-center">
-              Edit a calorie log and press create preset based off it's values
+              Edit a calorie log and press create preset based off it&apos;s values
             </ThemedText>
           </View>
         )
@@ -237,7 +157,6 @@ export default function Favorites() {
               id={workoutLogPreset.id}
               name={workoutLogPreset.name}
               duration={workoutLogPreset.duration}
-              colorScheme={colorScheme}
               iconLibrary={workoutLogPreset.iconLibrary}
               iconName={workoutLogPreset.iconName}
             />
@@ -256,7 +175,7 @@ export default function Favorites() {
           </ThemedText>
 
           <ThemedText color="text-muted-foreground" className="text-center">
-            Edit a workout log and press create preset based off it's values
+            Edit a workout log and press create preset based off it&apos;s values
           </ThemedText>
         </View>
       )}

@@ -1,4 +1,3 @@
-import { colors } from "@/lib/colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 import Card from "./Card";

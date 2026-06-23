@@ -2,8 +2,6 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
 import Card from "@/components/Card";
 import DailyGoalCard from "@/components/DailyGoalCard";
-import EditGoalModal from "@/components/EditGoalModal";
-import EditWorkoutLogModal from "@/components/EditWorkoutLogModal";
 import GoalItem from "@/components/GoalItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
@@ -14,17 +12,11 @@ import useTheme from "@/hooks/useTheme";
 import useUser from "@/hooks/useUser";
 import useWorkoutLogs from "@/hooks/useWorkoutLogs";
 import {
-  deleteGoal,
-  deleteWorkoutLog,
-  Goal,
   updateCalorieGoal,
-  updateGoal,
   updateGoalCompleted,
   updateGoalHidden,
   updateWorkoutGoal,
-  updateWorkoutLog,
   User,
-  WorkoutLog,
 } from "@/lib/api";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -35,21 +27,18 @@ import { Alert, Pressable, ScrollView, View } from "react-native";
 
 export default function Index() {
   const queryClient = useQueryClient();
-  const authData = useAuthenticatedAuth();
-  const { data: user } = useUser(authData.user.id);
-  const { data: calorieLogs } = useCalorieLogs(authData.user.id);
-  const { data: workoutLogs } = useWorkoutLogs(authData.user.id);
-  const { data: goals } = useGoals(authData.user.id);
+  const { user: authUser } = useAuthenticatedAuth();
+  const { data: user } = useUser(authUser.id);
+  const { data: calorieLogs } = useCalorieLogs(authUser.id);
+  const { data: workoutLogs } = useWorkoutLogs(authUser.id);
+  const { data: goals } = useGoals(authUser.id);
 
   const theme = useTheme();
 
-  // const [editingCalorieLog, setEditingCalorieLog] = useState<CalorieLog | null>(
+  // const [editingWorkoutLog, setEditingWorkoutLog] = useState<WorkoutLog | null>(
   //   null,
   // );
-  const [editingWorkoutLog, setEditingWorkoutLog] = useState<WorkoutLog | null>(
-    null,
-  );
-  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  // const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
 
   const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
     "calories",
@@ -58,93 +47,71 @@ export default function Index() {
   const updateDailyCalorieGoalMutation = useMutation({
     mutationFn: updateCalorieGoal,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", authData.user.id] });
+      queryClient.invalidateQueries({ queryKey: ["user", authUser.id] });
     },
   });
 
   const updateDailyWorkoutGoalMutation = useMutation({
     mutationFn: updateWorkoutGoal,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", authData.user.id] });
+      queryClient.invalidateQueries({ queryKey: ["user", authUser.id] });
     },
   });
 
-  // const updateCalorieLogMutaion = useMutation({
-  //   mutationFn: updateCalorieLog,
+  // const updateWorkoutLogMutaion = useMutation({
+  //   mutationFn: updateWorkoutLog,
   //   onSuccess: () => {
   //     queryClient.invalidateQueries({
-  //       queryKey: ["calorieLogs", authData.user.id],
+  //       queryKey: ["workoutLogs", authUser.id],
   //     });
   //   },
   // });
 
-  // const deleteCalorieLogMutation = useMutation({
-  //   mutationFn: deleteCalorieLog,
+  // const deleteWorkoutLogMutation = useMutation({
+  //   mutationFn: deleteWorkoutLog,
   //   onSuccess: () => {
   //     queryClient.invalidateQueries({
-  //       queryKey: ["calorieLogs", authData.user.id],
+  //       queryKey: ["workoutLogs", authUser.id],
   //     });
   //   },
   // });
 
-  const updateWorkoutLogMutaion = useMutation({
-    mutationFn: updateWorkoutLog,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", authData.user.id],
-      });
-    },
-  });
-
-  const deleteWorkoutLogMutation = useMutation({
-    mutationFn: deleteWorkoutLog,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", authData.user.id],
-      });
-    },
-  });
-
-  const updateGoalMutation = useMutation({
-    mutationFn: updateGoal,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", authData.user.id] });
-    },
-  });
+  // const updateGoalMutation = useMutation({
+  //   mutationFn: updateGoal,
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["goals", authUser.id] });
+  //   },
+  // });
 
   const updateGoalCompletedMutation = useMutation({
     mutationFn: updateGoalCompleted,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", authData.user.id] });
+      queryClient.invalidateQueries({ queryKey: ["goals", authUser.id] });
     },
   });
 
   const updateGoalHiddenMutation = useMutation({
     mutationFn: updateGoalHidden,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", authData.user.id] });
+      queryClient.invalidateQueries({ queryKey: ["goals", authUser.id] });
     },
   });
 
-  const deleteGoalMutation = useMutation({
-    mutationFn: deleteGoal,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", authData.user.id] });
-    },
-  });
+  // const deleteGoalMutation = useMutation({
+  //   mutationFn: deleteGoal,
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["goals", authUser.id] });
+  //   },
+  // });
 
   const editDailyCalorieGoal = async (user: User) => {
-    if (authData == null) {
-      return;
-    }
-
     Alert.prompt(
       "Edit calorie goal",
       "Update your daily calorie goal",
       (calorieGoalText) =>
         updateDailyCalorieGoalMutation.mutate({
           calorieGoalText,
-          userId: authData.user.id,
+          userId: user.id,
         }),
       "plain-text",
       user.dailyCalorieGoal.toString(),
@@ -155,17 +122,13 @@ export default function Index() {
   };
 
   const editDailyWorkoutGoal = async (user: User) => {
-    if (authData == null) {
-      return;
-    }
-
     Alert.prompt(
       "Edit workout goal",
       "Update your daily workout goal",
-      async (workoutGoalText) =>
+      (workoutGoalText) =>
         updateDailyWorkoutGoalMutation.mutate({
           workoutGoalText,
-          userId: authData.user.id,
+          userId: user.id,
         }),
       "plain-text",
       user.dailyWorkoutGoal.toString(),
@@ -176,68 +139,58 @@ export default function Index() {
   };
 
   const editCalorieLog = async (calorieLogId: string) => {
-    const calorieLog = calorieLogs?.find((c) => c.id === calorieLogId);
-
-    if (calorieLog === undefined) {
-      return;
-    }
-
     router.push({
       pathname: "/edit/calorieLog/[id]",
-      params: { id: calorieLog.id },
+      params: { id: calorieLogId },
     });
 
-    // setEditingCalorieLog(calorieLog);
     await Haptics.selectionAsync();
   };
 
   const editWorkoutLog = async (workoutLogId: string) => {
-    const workoutLog = workoutLogs?.find((w) => w.id === workoutLogId);
+    // const workoutLog = workoutLogs?.find((w) => w.id === workoutLogId);
 
-    if (workoutLog === undefined) {
-      return;
-    }
+    // if (workoutLog === undefined) {
+    //   return;
+    // }
 
-    setEditingWorkoutLog(workoutLog);
+    // setEditingWorkoutLog(workoutLog);
     await Haptics.selectionAsync();
   };
 
-  // const saveCalorieLog = async (editedCalorieLog: CalorieLog) => {
-  //   if (editedCalorieLog === editingCalorieLog) {
+  const editGoal = async (goalId: string) => {
+    // const workoutLog = workoutLogs?.find((w) => w.id === workoutLogId);
+
+    // if (workoutLog === undefined) {
+    //   return;
+    // }
+
+    // setEditingWorkoutLog(workoutLog);
+    await Haptics.selectionAsync();
+  };
+
+  // const saveWorkoutLog = async (editedWorkoutLog: WorkoutLog) => {
+  //   if (editedWorkoutLog === editingWorkoutLog) {
   //     return;
   //   }
 
-  //   updateCalorieLogMutaion.mutate({ calorieLog: editedCalorieLog });
-  //   setEditingCalorieLog(null);
+  //   updateWorkoutLogMutaion.mutate({ workoutLog: editedWorkoutLog });
+  //   setEditingWorkoutLog(null);
   // };
 
-  const saveWorkoutLog = async (editedWorkoutLog: WorkoutLog) => {
-    if (editedWorkoutLog === editingWorkoutLog) {
-      return;
-    }
+  // const saveGoal = async (editedGoal: Goal) => {
+  //   if (editedGoal === editingGoal) {
+  //     return;
+  //   }
 
-    updateWorkoutLogMutaion.mutate({ workoutLog: editedWorkoutLog });
-    setEditingWorkoutLog(null);
-  };
-
-  const saveGoal = async (editedGoal: Goal) => {
-    if (editedGoal === editingGoal) {
-      return;
-    }
-
-    updateGoalMutation.mutate({ goal: editedGoal });
-    setEditingGoal(null);
-  };
-
-  // const handledeleteCalorieLog = async (calorieLogId: string) => {
-  //   deleteCalorieLogMutation.mutate(calorieLogId);
-  //   setEditingCalorieLog(null);
+  //   updateGoalMutation.mutate({ goal: editedGoal });
+  //   setEditingGoal(null);
   // };
 
-  const handleDeleteWorkoutLog = async (workoutLogId: string) => {
-    deleteWorkoutLogMutation.mutate(workoutLogId);
-    setEditingWorkoutLog(null);
-  };
+  // const handleDeleteWorkoutLog = async (workoutLogId: string) => {
+  //   deleteWorkoutLogMutation.mutate(workoutLogId);
+  //   setEditingWorkoutLog(null);
+  // };
 
   const handleUpdateGoalCompleted = (completed: boolean, goalId: string) => {
     updateGoalCompletedMutation.mutate({ completed, goalId });
@@ -247,10 +200,10 @@ export default function Index() {
     updateGoalHiddenMutation.mutate({ hidden, goalId });
   };
 
-  const handleDeleteGoal = (goalId: string) => {
-    deleteGoalMutation.mutate({ goalId });
-    setEditingGoal(null);
-  };
+  // const handleDeleteGoal = (goalId: string) => {
+  //   deleteGoalMutation.mutate({ goalId });
+  //   setEditingGoal(null);
+  // };
 
   if (
     user === undefined ||
@@ -267,7 +220,7 @@ export default function Index() {
         <Card className="gap-4">
           <View className="flex-row justify-between">
             <ThemedText className="text-2xl font-bold">
-              Today's Calories
+              Today&apos;s Calories
             </ThemedText>
 
             <View>
@@ -279,31 +232,14 @@ export default function Index() {
             </View>
           </View>
 
-          <View
-            className="rounded-md"
-            style={{ width: "25%", height: 48, backgroundColor: theme.border }}
-          />
+          <View className="h-8 w-1/4 bg-border rounded-md" />
 
           <View className="h-8 bg-border rounded-full" />
 
           <View className="flex-row justify-between">
-            <View
-              className="rounded-md"
-              style={{
-                width: "40%",
-                height: 32,
-                backgroundColor: theme.border,
-              }}
-            />
+            <View className="h-8 bg-border w-1/2 rounded-md" />
 
-            <View
-              className="rounded-md"
-              style={{
-                width: "25%",
-                height: 32,
-                backgroundColor: theme.border,
-              }}
-            />
+            <View className="h-8 bg-border w-1/4 rounded-md" />
           </View>
         </Card>
 
@@ -320,29 +256,14 @@ export default function Index() {
             </View>
           </View>
 
-          <View
-            className="rounded-md bg-border"
-            style={{ width: "25%", height: 48 }}
-          />
+          <View className="h-8 w-1/4 bg-border rounded-md" />
 
           <View className="h-8 bg-border rounded-full" />
 
           <View className="flex-row justify-between">
-            <View
-              className="rounded-md bg-border"
-              style={{
-                width: "40%",
-                height: 32,
-              }}
-            />
+            <View className="h-8 bg-border w-1/2 rounded-md" />
 
-            <View
-              className="rounded-md bg-border"
-              style={{
-                width: "25%",
-                height: 32,
-              }}
-            />
+            <View className="h-8 bg-border w-1/4 rounded-md" />
           </View>
         </Card>
 
@@ -419,32 +340,23 @@ export default function Index() {
       contentContainerClassName="gap-4 p-4"
       showsVerticalScrollIndicator={false}
     >
-      {/* {editingCalorieLog !== null && (
-        <EditCalorieLogModal
-          calorieLog={editingCalorieLog}
-          close={() => setEditingCalorieLog(null)}
-          onSave={saveCalorieLog}
-          onDelete={handledeleteCalorieLog}
-        />
-      )} */}
-
-      {editingWorkoutLog !== null && (
+      {/* {editingWorkoutLog !== null && (
         <EditWorkoutLogModal
           workoutLog={editingWorkoutLog}
           close={() => setEditingWorkoutLog(null)}
           onSave={saveWorkoutLog}
           onDelete={handleDeleteWorkoutLog}
         />
-      )}
+      )} */}
 
-      {editingGoal !== null && (
+      {/* {editingGoal !== null && (
         <EditGoalModal
           goal={editingGoal}
           close={() => setEditingGoal(null)}
           onSave={saveGoal}
           onDelete={handleDeleteGoal}
         />
-      )}
+      )} */}
 
       <DailyGoalCard
         title="Today's Calories"
@@ -598,7 +510,7 @@ export default function Index() {
                   name={goal.name}
                   description={goal.description}
                   completed={goal.completed}
-                  onEdit={() => setEditingGoal(goal)}
+                  onEdit={editGoal}
                 />
               </Pressable>
             ))}

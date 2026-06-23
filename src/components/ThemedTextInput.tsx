@@ -1,15 +1,12 @@
-import { colors } from "@/lib/colors";
+import useTheme from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
-import { useColorScheme } from "nativewind";
-import React from "react";
 import { TextInput, TextInputProps } from "react-native";
 
 export default function ThemedTextInput({
   className,
   ...props
 }: TextInputProps) {
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "dark" ? colors.dark : colors.light;
+  const theme = useTheme();
 
   return (
     <TextInput
