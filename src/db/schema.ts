@@ -122,7 +122,9 @@ export const calorieLog = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
     calories: integer("calories").notNull(),
-    consumedAt: timestamp("consumed_at").defaultNow().notNull(),
+    consumedAt: timestamp("consumed_at", { mode: "string" })
+      .defaultNow()
+      .notNull(),
     imageUrl: text("image_url"),
     userId: text("user_id")
       .notNull()
@@ -153,7 +155,9 @@ export const workoutLog = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
     duration: integer("duration").notNull(),
-    performedAt: timestamp("performed_at").defaultNow().notNull(),
+    performedAt: timestamp("performed_at", { mode: "string" })
+      .defaultNow()
+      .notNull(),
     iconLibrary: iconLibraryEnum("icon_library").notNull(),
     iconName: text("icon_name").notNull(),
     userId: text("user_id")

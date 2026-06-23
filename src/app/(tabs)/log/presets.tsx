@@ -12,6 +12,7 @@ import {
   getWorkoutLogPresets,
   WorkoutLogPreset,
 } from "@/lib/api";
+import { toSqlTimestamp } from "@/lib/dates";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -65,21 +66,25 @@ export default function Favorites() {
   });
 
   const logCalories = async (calorieLogPreset: CalorieLogPreset) => {
+    const consumedAtString = toSqlTimestamp(new Date());
+
     createCalorieLogMutation.mutate({
       userId: user.id,
       name: calorieLogPreset.name,
       calories: calorieLogPreset.calories,
       imageUrl: calorieLogPreset.imageUrl,
-      consumedAt: new Date().toISOString(),
+      consumedAt: consumedAtString,
     });
   };
 
   const logWorkout = async (workoutLogPreset: WorkoutLogPreset) => {
+    const performedAtString = toSqlTimestamp(new Date());
+
     createWorkoutLogMutation.mutate({
       userId: user.id,
       name: workoutLogPreset.name,
       duration: workoutLogPreset.duration,
-      performedAt: new Date().toISOString(),
+      performedAt: performedAtString,
       iconLibrary: workoutLogPreset.iconLibrary,
       iconName: workoutLogPreset.iconName,
     });

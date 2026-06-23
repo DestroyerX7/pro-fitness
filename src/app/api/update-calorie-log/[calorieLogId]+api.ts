@@ -10,7 +10,7 @@ export async function PUT(
 
   const [updatedCalorieLog] = await db
     .update(calorieLog)
-    .set({ name, calories, consumedAt: new Date(consumedAt), imageUrl })
+    .set({ name, calories, consumedAt, imageUrl })
     .where(eq(calorieLog.id, calorieLogId))
     .returning();
 

@@ -93,7 +93,7 @@ export const createCalorieLog = async ({
   return response.data;
 };
 
-export const getCalorieLogs = async (userId: string) => {
+export const getCalorieLogs = async (userId: string): Promise<CalorieLog[]> => {
   const response = await axios.get<CalorieLog[]>(
     `${backendUrl}/api/get-calorie-logs/${userId}`,
   );

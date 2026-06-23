@@ -3,6 +3,7 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
+import { toSqlTimestamp } from "@/lib/dates";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -61,7 +62,7 @@ export default function Calories() {
     }
 
     const imageUrl = image !== null ? await uploadToCloudinary(image) : null;
-    const consumedAtString = consumedAt.toISOString();
+    const consumedAtString = toSqlTimestamp(consumedAt);
 
     createCalorieLogMutation.mutate({
       userId: user.id,

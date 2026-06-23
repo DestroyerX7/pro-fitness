@@ -8,7 +8,7 @@ import {
   deleteCalorieLog,
   updateCalorieLog,
 } from "@/lib/api";
-import { colors } from "@/lib/colors";
+import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -16,7 +16,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -62,8 +61,7 @@ function CalorieLogForm({
   errors: { name?: string; calories?: string };
   onDraftChanged: (draft: DraftCalorieLog) => void;
 }) {
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
 
   return (
     <View className="gap-4">
@@ -219,11 +217,13 @@ export default function Screen() {
       return;
     }
 
+    const consumedAtString = toSqlTimestamp(draft.consumedAt);
+
     const editedCalorieLog: CalorieLog = {
       ...calorieLog,
       name,
       calories,
-      consumedAt: draft.consumedAt,
+      consumedAt: consumedAtString,
     };
 
     updateCalorieLogMutation.mutate(

@@ -11,8 +11,7 @@ export async function POST(request: Request) {
       userId,
       name,
       duration,
-      performedAt:
-        performedAt !== undefined ? new Date(performedAt) : undefined,
+      performedAt,
       iconLibrary,
       iconName,
     })

@@ -117,13 +117,11 @@ export default function Profile() {
         <Pressable className="p-4 border border-border rounded-xl flex-row items-center justify-between">
           <ThemedText className="text-xl">System</ThemedText>
 
-          {true && (
-            <MaterialCommunityIcons
-              name="check-circle"
-              size={24}
-              color={theme.primary}
-            />
-          )}
+          <MaterialCommunityIcons
+            name="check-circle"
+            size={24}
+            color={theme.primary}
+          />
         </Pressable>
 
         {/* <Pressable className="p-4 border border-border rounded-xl flex-row items-center justify-between">

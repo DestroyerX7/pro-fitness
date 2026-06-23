@@ -3,6 +3,7 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import { createWorkoutLog } from "@/lib/api";
+import { toSqlTimestamp } from "@/lib/dates";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -75,7 +76,7 @@ export default function Workout() {
       return;
     }
 
-    const performedAtString = performedAt.toISOString();
+    const performedAtString = toSqlTimestamp(performedAt);
 
     createWorkoutLogMutation.mutate({
       userId: user.id,

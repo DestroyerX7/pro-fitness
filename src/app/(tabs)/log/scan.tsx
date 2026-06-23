@@ -3,6 +3,7 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import { createCalorieLog } from "@/lib/api";
+import { toSqlTimestamp } from "@/lib/dates";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import {
   AntDesign,
@@ -121,7 +122,7 @@ export default function Scan() {
       return;
     }
 
-    const consumedAtString = consumedAt.toISOString();
+    const consumedAtString = toSqlTimestamp(consumedAt);
 
     createCalorieLogMutation.mutate({
       userId: user.id,

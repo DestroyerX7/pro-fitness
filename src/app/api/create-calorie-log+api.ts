@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       name,
       calories,
       imageUrl,
-      consumedAt: consumedAt !== undefined ? new Date(consumedAt) : undefined,
+      consumedAt,
     })
     .returning();
 

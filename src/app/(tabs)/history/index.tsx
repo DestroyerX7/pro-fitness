@@ -1,6 +1,7 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import CalorieLogItem from "@/components/CalorieLogItem";
 import GoalItem from "@/components/GoalItem";
+import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
 import useCalorieLogs from "@/hooks/useCalorieLogs";
@@ -9,8 +10,9 @@ import useTheme from "@/hooks/useTheme";
 import useUser from "@/hooks/useUser";
 import useWorkoutLogs from "@/hooks/useWorkoutLogs";
 import { CalorieLog, Goal, WorkoutLog } from "@/lib/api";
+import { toSqlDate } from "@/lib/dates";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 export default function History() {
   const { user: authUser } = useAuthenticatedAuth();
@@ -34,26 +36,26 @@ export default function History() {
     return;
   }
 
-  const dates: string[] = Array.from({ length: 31 }, (_, i) => {
+  const dates = Array.from({ length: 31 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    return date.toISOString().split("T")[0];
+    return toSqlDate(date);
   });
 
   const calorieLogsGroupedByDate = calorieLogs.reduce<
     Record<string, { calorieLogs: CalorieLog[]; totalCalories: number }>
   >((dict, calorieLog) => {
-    const date = calorieLog.consumedAt.toString().split("T")[0];
+    const dateString = calorieLog.consumedAt.slice(0, 10);
 
-    if (!dict[date]) {
-      dict[date] = {
-        calorieLogs: [calorieLog],
-        totalCalories: calorieLog.calories,
+    if (!dict[dateString]) {
+      dict[dateString] = {
+        calorieLogs: [],
+        totalCalories: 0,
       };
-    } else {
-      dict[date].calorieLogs.push(calorieLog);
-      dict[date].totalCalories += calorieLog.calories;
     }
+
+    dict[dateString].calorieLogs.push(calorieLog);
+    dict[dateString].totalCalories += calorieLog.calories;
 
     return dict;
   }, {});
@@ -61,30 +63,30 @@ export default function History() {
   const workoutLogsGroupedByDate = workoutLogs.reduce<
     Record<string, { workoutLogs: WorkoutLog[]; totalDuration: number }>
   >((dict, workoutLog) => {
-    const date = workoutLog.performedAt.toString().split("T")[0];
+    const dateString = workoutLog.performedAt.slice(0, 10);
 
-    if (!dict[date]) {
-      dict[date] = {
-        workoutLogs: [workoutLog],
-        totalDuration: workoutLog.duration,
+    if (!dict[dateString]) {
+      dict[dateString] = {
+        workoutLogs: [],
+        totalDuration: 0,
       };
-    } else {
-      dict[date].workoutLogs.push(workoutLog);
-      dict[date].totalDuration += workoutLog.duration;
     }
+
+    dict[dateString].workoutLogs.push(workoutLog);
+    dict[dateString].totalDuration += workoutLog.duration;
 
     return dict;
   }, {});
 
   const goalsGroupedByCreatedAt = goals.reduce<Record<string, Goal[]>>(
     (dict, goal) => {
-      const date = goal.createdAt.toString().split("T")[0];
+      const dateString = goal.createdAt.toString().split("T")[0];
 
-      if (!dict[date]) {
-        dict[date] = [goal];
-      } else {
-        dict[date].push(goal);
+      if (!dict[dateString]) {
+        dict[dateString] = [];
       }
+
+      dict[dateString].push(goal);
 
       return dict;
     },
@@ -102,85 +104,47 @@ export default function History() {
         showsHorizontalScrollIndicator={false}
         contentContainerClassName="gap-2 flex-1"
       >
-        <Pressable
-          className="p-4 rounded-xl"
-          style={{
-            backgroundColor:
-              activeTab === "calories" ? theme.foreground : theme.secondary,
-          }}
+        <TabButton
+          text="Calories"
+          active={activeTab === "calories"}
           onPress={() => setActiveTab("calories")}
-        >
-          <ThemedText
-            color={
-              activeTab === "calories"
-                ? "text-background"
-                : "text-secondary-foreground"
-            }
-          >
-            Calories
-          </ThemedText>
-        </Pressable>
+        />
 
-        <Pressable
-          className="p-4 bg-secondary rounded-xl"
-          style={{
-            backgroundColor:
-              activeTab === "workouts" ? theme.foreground : theme.secondary,
-          }}
+        <TabButton
+          text="Workouts"
+          active={activeTab === "workouts"}
           onPress={() => setActiveTab("workouts")}
-        >
-          <ThemedText
-            color={
-              activeTab === "workouts"
-                ? "text-background"
-                : "text-secondary-foreground"
-            }
-          >
-            Workouts
-          </ThemedText>
-        </Pressable>
+        />
 
-        <Pressable
-          className="p-4 bg-secondary rounded-xl"
-          style={{
-            backgroundColor:
-              activeTab === "goals" ? theme.foreground : theme.secondary,
-          }}
+        <TabButton
+          text="Goals"
+          active={activeTab === "goals"}
           onPress={() => setActiveTab("goals")}
-        >
-          <ThemedText
-            color={
-              activeTab === "goals"
-                ? "text-background"
-                : "text-secondary-foreground"
-            }
-          >
-            Goals
-          </ThemedText>
-        </Pressable>
+        />
       </ScrollView>
 
-      <View className="flex-row flex-wrap gap-4">
+      <View className="flex-row flex-wrap">
         {dates.map((date) => (
-          <View
-            key={date}
-            className="w-16 h-16 rounded items-center justify-center"
-            style={{
-              backgroundColor:
-                (calorieLogsGroupedByDate[date]?.totalCalories || 0) >=
-                user.dailyCalorieGoal
-                  ? "#30d030"
-                  : theme.secondary,
-            }}
-          >
-            <ThemedText>
-              {(
-                ((calorieLogsGroupedByDate[date]?.totalCalories || 0) /
-                  user.dailyCalorieGoal) *
-                100
-              ).toFixed(0)}
-              %
-            </ThemedText>
+          <View key={date} className="w-[16.66%] aspect-square p-1">
+            <View
+              className="flex-1 rounded items-center justify-center"
+              style={{
+                backgroundColor:
+                  (calorieLogsGroupedByDate[date]?.totalCalories ?? 0) >=
+                  user.dailyCalorieGoal
+                    ? "#30d030"
+                    : theme.secondary,
+              }}
+            >
+              <ThemedText>
+                {(
+                  ((calorieLogsGroupedByDate[date]?.totalCalories ?? 0) /
+                    user.dailyCalorieGoal) *
+                  100
+                ).toFixed(0)}
+                %
+              </ThemedText>
+            </View>
           </View>
         ))}
       </View>

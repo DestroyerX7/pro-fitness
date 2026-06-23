@@ -14,7 +14,7 @@ export async function PUT(
     .set({
       name,
       duration,
-      performedAt: new Date(performedAt),
+      performedAt,
       iconLibrary,
       iconName,
     })

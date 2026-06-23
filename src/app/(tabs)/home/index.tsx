@@ -18,6 +18,7 @@ import {
   updateWorkoutGoal,
   User,
 } from "@/lib/api";
+import { toSqlTimestamp } from "@/lib/dates";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -294,37 +295,15 @@ export default function Index() {
     );
   }
 
-  const todaysCalorieLogs = calorieLogs
-    .filter((c) => {
-      const consumedAtDate = new Date(c.consumedAt);
-      const today = new Date();
+  const todayString = toSqlTimestamp(new Date()).slice(0, 10);
 
-      return (
-        consumedAtDate.getFullYear() === today.getFullYear() &&
-        consumedAtDate.getMonth() === today.getMonth() &&
-        consumedAtDate.getDate() === today.getDate()
-      );
-    })
-    .sort(
-      (a, b) =>
-        new Date(b.consumedAt).getTime() - new Date(a.consumedAt).getTime(),
-    );
+  const todaysCalorieLogs = calorieLogs
+    .filter((c) => c.consumedAt.slice(0, 10) === todayString)
+    .sort((a, b) => a.consumedAt.localeCompare(b.consumedAt));
 
   const todaysWorkoutLogs = workoutLogs
-    .filter((w) => {
-      const performedAtDate = new Date(w.performedAt);
-      const today = new Date();
-
-      return (
-        performedAtDate.getFullYear() === today.getFullYear() &&
-        performedAtDate.getMonth() === today.getMonth() &&
-        performedAtDate.getDate() === today.getDate()
-      );
-    })
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    .filter((w) => w.performedAt.slice(0, 10) === todayString)
+    .sort((a, b) => a.performedAt.localeCompare(b.performedAt));
 
   const loggedCalories = todaysCalorieLogs.reduce((a, b) => a + b.calories, 0);
   const loggedWorkoutTime = todaysWorkoutLogs.reduce(
