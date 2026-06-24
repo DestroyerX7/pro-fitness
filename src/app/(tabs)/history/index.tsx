@@ -14,6 +14,10 @@ import { toSqlDate } from "@/lib/dates";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
+const startedColor = "#004000";
+const halfwayColor = "#108010";
+const completedColor = "#20b020";
+
 export default function History() {
   const { user: authUser } = useAuthenticatedAuth();
   const { data: user } = useUser(authUser.id);
@@ -124,34 +128,41 @@ export default function History() {
       </ScrollView>
 
       <View className="flex-row flex-wrap">
-        {dates.map((date) => (
-          <View key={date} className="w-[16.66%] aspect-square p-1">
-            <View
-              className="flex-1 rounded items-center justify-center"
-              style={{
-                backgroundColor:
-                  (calorieLogsGroupedByDate[date]?.totalCalories ?? 0) >=
-                  user.dailyCalorieGoal
-                    ? "#30d030"
-                    : theme.secondary,
-              }}
-            >
-              <ThemedText>
-                {(
-                  ((calorieLogsGroupedByDate[date]?.totalCalories ?? 0) /
-                    user.dailyCalorieGoal) *
-                  100
-                ).toFixed(0)}
-                %
-              </ThemedText>
+        {dates.map((date) => {
+          const totalCalories =
+            calorieLogsGroupedByDate[date]?.totalCalories ?? 0;
+          const backgroundColor =
+            totalCalories >= user.dailyCalorieGoal
+              ? completedColor
+              : totalCalories >= user.dailyCalorieGoal * 0.5
+                ? halfwayColor
+                : totalCalories > 0
+                  ? startedColor
+                  : theme.secondary;
+
+          const percentComplete = (
+            (totalCalories / user.dailyCalorieGoal) *
+            100
+          ).toFixed(0);
+
+          return (
+            <View key={date} className="w-[16.66%] aspect-square p-1">
+              <View
+                className="flex-1 rounded items-center justify-center"
+                style={{
+                  backgroundColor,
+                }}
+              >
+                <ThemedText>{percentComplete}%</ThemedText>
+              </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
 
       {activeTab === "calories" &&
-        Object.entries(calorieLogsGroupedByDate)
-          .toReversed()
+        [...Object.entries(calorieLogsGroupedByDate)]
+          .sort((a, b) => b[0].localeCompare(a[0]))
           .map(([dateString, { calorieLogs, totalCalories }]) => (
             <View key={dateString} className="gap-4">
               <View className="flex-row justify-between">
@@ -176,8 +187,8 @@ export default function History() {
           ))}
 
       {activeTab === "workouts" &&
-        Object.entries(workoutLogsGroupedByDate)
-          .toReversed()
+        [...Object.entries(workoutLogsGroupedByDate)]
+          .sort((a, b) => b[0].localeCompare(a[0]))
           .map(([dateString, { workoutLogs, totalDuration }]) => (
             <View key={dateString} className="gap-4">
               <View className="flex-row justify-between">
@@ -203,8 +214,8 @@ export default function History() {
           ))}
 
       {activeTab === "goals" &&
-        Object.entries(goalsGroupedByCreatedAt)
-          .toReversed()
+        [...Object.entries(goalsGroupedByCreatedAt)]
+          .sort((a, b) => b[0].localeCompare(a[0]))
           .map(([dateString, goals]) => (
             <View key={dateString} className="gap-4">
               <View className="flex-row justify-between">

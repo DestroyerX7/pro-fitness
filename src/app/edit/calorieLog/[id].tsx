@@ -8,7 +8,7 @@ import {
   deleteCalorieLog,
   updateCalorieLog,
 } from "@/lib/api";
-import { toSqlTimestamp } from "@/lib/dates";
+import { fromSqlTimestampToLocalDate, toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -115,11 +115,11 @@ function CalorieLogForm({
       <View className="gap-1">
         <ThemedText className="font-bold">Image</ThemedText>
 
-        <View className="w-full aspect-square">
+        <View className="aspect-square">
           {calorieLog.imageUrl !== null ? (
             <Image
               source={{ uri: calorieLog.imageUrl }}
-              className="w-full h-full rounded-2xl"
+              style={{ flex: 1, borderRadius: 16 }}
             />
           ) : (
             <View className="flex-1 border rounded-xl border-border items-center justify-center bg-muted">
@@ -144,16 +144,19 @@ export default function Screen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const calorieLog = queryClient
-    .getQueryData<CalorieLog[]>(["calorieLogs", authData?.user.id])
-    ?.find((c) => c.id === id);
+  const calorieLog =
+    authData !== null
+      ? queryClient
+          .getQueryData<CalorieLog[]>(["calorieLogs", authData.user.id])
+          ?.find((c) => c.id === id)
+      : undefined;
 
   const [draft, setDraft] = useState<DraftCalorieLog | null>(
-    calorieLog
+    calorieLog !== undefined
       ? {
           name: calorieLog.name,
           calories: calorieLog.calories.toString(),
-          consumedAt: new Date(calorieLog.consumedAt.toString()),
+          consumedAt: fromSqlTimestampToLocalDate(calorieLog.consumedAt),
         }
       : null,
   );
@@ -193,10 +196,10 @@ export default function Screen() {
   // deep link to a deleted log). Doing this in an effect rather than during
   // render avoids triggering a navigation side effect mid-render.
   useEffect(() => {
-    if (calorieLog === undefined) {
+    if (authData === null || calorieLog === undefined) {
       router.back();
     }
-  }, [calorieLog]);
+  }, [authData, calorieLog]);
 
   if (calorieLog === undefined || draft === null) {
     return null;

@@ -139,11 +139,11 @@ export default function Calories() {
       <View className="gap-1">
         <ThemedText className="font-bold">Image</ThemedText>
 
-        <Pressable className="w-full aspect-square" onPress={takePicture}>
+        <Pressable className="aspect-square" onPress={takePicture}>
           {image !== null ? (
             <Image
               source={{ uri: image }}
-              style={{ width: "100%", aspectRatio: 1, borderRadius: 16 }}
+              style={{ flex: 1, borderRadius: 16 }}
             />
           ) : (
             <View className="border border-border rounded-xl h-full items-center justify-center bg-muted">
