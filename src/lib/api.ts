@@ -16,7 +16,7 @@ export type Goal = typeof goal.$inferSelect;
 export type CalorieLogPreset = typeof calorieLogPreset.$inferSelect;
 export type WorkoutLogPreset = typeof workoutLogPreset.$inferSelect;
 
-type SignatureResponse = {
+type CloudinarySignatureResponse = {
   signature: string;
   timestamp: number;
   apiKey: string;
@@ -43,11 +43,6 @@ export const getUser = async (userId: string) => {
   return response.data;
 };
 
-export const deleteUser = async (userId: string) => {
-  const response = await api.get<User>(`/api/delete-user/${userId}`);
-  return response.data;
-};
-
 export const updateUser = async ({
   dailyCalorieGoal,
   dailyWorkoutGoal,
@@ -62,6 +57,11 @@ export const updateUser = async ({
     dailyWorkoutGoal,
   });
 
+  return response.data;
+};
+
+export const deleteUser = async (userId: string) => {
+  const response = await api.get<User>(`/api/delete-user/${userId}`);
   return response.data;
 };
 
@@ -286,6 +286,41 @@ export const getCalorieLogPresets = async (userId: string) => {
   return response.data;
 };
 
+export const updateCalorieLogPreset = async ({
+  name,
+  calories,
+  imageUrl,
+  calorieLogId,
+}: {
+  name?: string;
+  calories?: number;
+  imageUrl?: string | null | undefined;
+  calorieLogId: string;
+}) => {
+  const response = await api.patch<CalorieLogPreset>(
+    `/api/update-calorie-log-preset/${calorieLogId}`,
+    {
+      name,
+      calories,
+      imageUrl,
+    },
+  );
+
+  return response.data;
+};
+
+export const deleteCalorieLogPreset = async ({
+  calorieLogId,
+}: {
+  calorieLogId: string;
+}) => {
+  const response = await api.delete<CalorieLogPreset>(
+    `/api/delete-calorie-log-preset/${calorieLogId}`,
+  );
+
+  return response.data;
+};
+
 export const createWorkoutLogPreset = async ({
   userId,
   name,
@@ -318,23 +353,23 @@ export const getWorkoutLogPresets = async (userId: string) => {
   return response.data;
 };
 
-export const updateWorkoutLogPresets = async ({
+export const updateWorkoutLogPreset = async ({
   name,
   duration,
   performedAt,
   iconLibrary,
   iconName,
-  workoutLogId,
+  workoutLogPresetId,
 }: {
   name?: string;
   duration?: number;
   performedAt?: string;
   iconLibrary?: string;
   iconName?: string;
-  workoutLogId: string;
+  workoutLogPresetId: string;
 }) => {
   const response = await api.patch<WorkoutLog>(
-    `/api/update-workout-log-preset/${workoutLogId}`,
+    `/api/update-workout-log-preset/${workoutLogPresetId}`,
     {
       name,
       duration,
@@ -347,8 +382,20 @@ export const updateWorkoutLogPresets = async ({
   return response.data;
 };
 
+export const deleteWorkoutLogPreset = async ({
+  workoutLogId,
+}: {
+  workoutLogId: string;
+}) => {
+  const response = await api.delete<WorkoutLogPreset>(
+    `/api/delete-workout-log-preset/${workoutLogId}`,
+  );
+
+  return response.data;
+};
+
 export const uploadToCloudinary = async (imageUri: string) => {
-  const signResponse = await api.post<SignatureResponse>(
+  const signResponse = await api.post<CloudinarySignatureResponse>(
     `/api/sign-cloudinary-upload`,
   );
 

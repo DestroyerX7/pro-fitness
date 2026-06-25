@@ -1,7 +1,7 @@
 import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Pressable, View } from "react-native";
 
 export type Icon =
