@@ -88,6 +88,13 @@ npx expo export --platform web --no-ssg
 eas deploy --prod
 ```
 
+If it says the total sourcemap size is too large use
+
+```bash
+npx expo export --platform web --no-ssg
+eas deploy --prod --no-source-maps
+```
+
 ### Make a Build (iOS)
 
 ```bash

@@ -1,25 +1,66 @@
 import { db } from "@/db";
 import { workoutLog } from "@/db/schema";
+import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { createUpdateSchema } from "drizzle-zod";
+import z from "zod";
 
-export async function PUT(
+const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+
+const updateWorkoutLogSchema = createUpdateSchema(workoutLog, {
+  name: (schema) => schema.min(1),
+  duration: (schema) => schema.int().min(1),
+  performedAt: (schema) =>
+    schema
+      .regex(datetimeRegex, "Expected format: YYYY-MM-DD HH:mm:ss")
+      .refine(
+        (val) => !Number.isNaN(new Date(val.replace(" ", "T")).getTime()),
+        { message: "Invalid date" },
+      ),
+});
+
+export async function PATCH(
   request: Request,
   { workoutLogId }: Record<string, string>,
 ) {
-  const { name, duration, performedAt, iconLibrary, iconName } =
-    await request.json();
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+
+  if (session === null) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!z.uuid().safeParse(workoutLogId).success) {
+    return Response.json({ error: "Invalid calorie log id" }, { status: 400 });
+  }
+
+  const body = await request.json();
+  const parsed = updateWorkoutLogSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Validation failed", message: parsed.error.message },
+      { status: 400 },
+    );
+  }
+
+  if (Object.keys(parsed.data).length === 0) {
+    return Response.json(
+      { error: "No fields provided to update" },
+      { status: 400 },
+    );
+  }
 
   const [updatedWorkoutLog] = await db
     .update(workoutLog)
-    .set({
-      name,
-      duration,
-      performedAt,
-      iconLibrary,
-      iconName,
-    })
+    .set(parsed.data)
     .where(eq(workoutLog.id, workoutLogId))
     .returning();
+
+  if (updatedWorkoutLog === undefined) {
+    return Response.json({ error: "Workout log not found" }, { status: 404 });
+  }
 
   return Response.json(updatedWorkoutLog);
 }

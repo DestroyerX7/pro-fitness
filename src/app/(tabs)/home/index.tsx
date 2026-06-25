@@ -11,13 +11,7 @@ import useGoals from "@/hooks/useGoals";
 import useTheme from "@/hooks/useTheme";
 import useUser from "@/hooks/useUser";
 import useWorkoutLogs from "@/hooks/useWorkoutLogs";
-import {
-  updateCalorieGoal,
-  updateGoalCompleted,
-  updateGoalHidden,
-  updateWorkoutGoal,
-  User,
-} from "@/lib/api";
+import { updateGoal, updateUser, User } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -34,84 +28,33 @@ export default function Index() {
   const { data: workoutLogs } = useWorkoutLogs(authUser.id);
   const { data: goals } = useGoals(authUser.id);
 
-  const theme = useTheme();
-
-  // const [editingWorkoutLog, setEditingWorkoutLog] = useState<WorkoutLog | null>(
-  //   null,
-  // );
-  // const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-
   const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
     "calories",
   );
 
-  const updateDailyCalorieGoalMutation = useMutation({
-    mutationFn: updateCalorieGoal,
+  const theme = useTheme();
+
+  const updateUserMutation = useMutation({
+    mutationFn: updateUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user", authUser.id] });
     },
   });
 
-  const updateDailyWorkoutGoalMutation = useMutation({
-    mutationFn: updateWorkoutGoal,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", authUser.id] });
-    },
-  });
-
-  // const updateWorkoutLogMutaion = useMutation({
-  //   mutationFn: updateWorkoutLog,
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({
-  //       queryKey: ["workoutLogs", authUser.id],
-  //     });
-  //   },
-  // });
-
-  // const deleteWorkoutLogMutation = useMutation({
-  //   mutationFn: deleteWorkoutLog,
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({
-  //       queryKey: ["workoutLogs", authUser.id],
-  //     });
-  //   },
-  // });
-
-  // const updateGoalMutation = useMutation({
-  //   mutationFn: updateGoal,
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["goals", authUser.id] });
-  //   },
-  // });
-
-  const updateGoalCompletedMutation = useMutation({
-    mutationFn: updateGoalCompleted,
+  const updateGoalMutation = useMutation({
+    mutationFn: updateGoal,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals", authUser.id] });
     },
   });
 
-  const updateGoalHiddenMutation = useMutation({
-    mutationFn: updateGoalHidden,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", authUser.id] });
-    },
-  });
-
-  // const deleteGoalMutation = useMutation({
-  //   mutationFn: deleteGoal,
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["goals", authUser.id] });
-  //   },
-  // });
-
-  const editDailyCalorieGoal = async (user: User) => {
+  const handleEditDailyCalorieGoal = async (user: User) => {
     Alert.prompt(
       "Edit calorie goal",
       "Update your daily calorie goal",
       (calorieGoalText) =>
-        updateDailyCalorieGoalMutation.mutate({
-          calorieGoalText,
+        updateUserMutation.mutate({
+          dailyCalorieGoal: Number(calorieGoalText),
           userId: user.id,
         }),
       "plain-text",
@@ -122,13 +65,13 @@ export default function Index() {
     await Haptics.selectionAsync();
   };
 
-  const editDailyWorkoutGoal = async (user: User) => {
+  const handleEditDailyWorkoutGoal = async (user: User) => {
     Alert.prompt(
       "Edit workout goal",
       "Update your daily workout goal",
       (workoutGoalText) =>
-        updateDailyWorkoutGoalMutation.mutate({
-          workoutGoalText,
+        updateUserMutation.mutate({
+          dailyWorkoutGoal: Number(workoutGoalText),
           userId: user.id,
         }),
       "plain-text",
@@ -139,72 +82,40 @@ export default function Index() {
     await Haptics.selectionAsync();
   };
 
-  const editCalorieLog = async (calorieLogId: string) => {
+  const handleEditCalorieLog = async (calorieLogId: string) => {
     router.push({
-      pathname: "/edit/calorieLog/[id]",
-      params: { id: calorieLogId },
+      pathname: "/edit/calorie-log/[calorieLogId]",
+      params: { calorieLogId },
     });
 
     await Haptics.selectionAsync();
   };
 
-  const editWorkoutLog = async (workoutLogId: string) => {
-    // const workoutLog = workoutLogs?.find((w) => w.id === workoutLogId);
+  const handleEditWorkoutLog = async (workoutLogId: string) => {
+    router.push({
+      pathname: "/edit/workout-log/[workoutLogId]",
+      params: { workoutLogId },
+    });
 
-    // if (workoutLog === undefined) {
-    //   return;
-    // }
-
-    // setEditingWorkoutLog(workoutLog);
     await Haptics.selectionAsync();
   };
 
-  const editGoal = async (goalId: string) => {
-    // const workoutLog = workoutLogs?.find((w) => w.id === workoutLogId);
+  const handleEditGoal = async (goalId: string) => {
+    router.push({
+      pathname: "/edit/goal/[goalId]",
+      params: { goalId },
+    });
 
-    // if (workoutLog === undefined) {
-    //   return;
-    // }
-
-    // setEditingWorkoutLog(workoutLog);
     await Haptics.selectionAsync();
   };
-
-  // const saveWorkoutLog = async (editedWorkoutLog: WorkoutLog) => {
-  //   if (editedWorkoutLog === editingWorkoutLog) {
-  //     return;
-  //   }
-
-  //   updateWorkoutLogMutaion.mutate({ workoutLog: editedWorkoutLog });
-  //   setEditingWorkoutLog(null);
-  // };
-
-  // const saveGoal = async (editedGoal: Goal) => {
-  //   if (editedGoal === editingGoal) {
-  //     return;
-  //   }
-
-  //   updateGoalMutation.mutate({ goal: editedGoal });
-  //   setEditingGoal(null);
-  // };
-
-  // const handleDeleteWorkoutLog = async (workoutLogId: string) => {
-  //   deleteWorkoutLogMutation.mutate(workoutLogId);
-  //   setEditingWorkoutLog(null);
-  // };
 
   const handleUpdateGoalCompleted = (completed: boolean, goalId: string) => {
-    updateGoalCompletedMutation.mutate({ completed, goalId });
+    updateGoalMutation.mutate({ completed, goalId });
   };
 
   const handleUpdateGoalHidden = (hidden: boolean, goalId: string) => {
-    updateGoalHiddenMutation.mutate({ hidden, goalId });
+    updateGoalMutation.mutate({ hidden, goalId });
   };
-
-  // const handleDeleteGoal = (goalId: string) => {
-  //   deleteGoalMutation.mutate({ goalId });
-  //   setEditingGoal(null);
-  // };
 
   if (
     user === undefined ||
@@ -297,13 +208,13 @@ export default function Index() {
 
   const todayString = toSqlTimestamp(new Date()).slice(0, 10);
 
-  const todaysCalorieLogs = calorieLogs
+  const todaysCalorieLogs = [...calorieLogs]
     .filter((c) => c.consumedAt.slice(0, 10) === todayString)
-    .sort((a, b) => a.consumedAt.localeCompare(b.consumedAt));
+    .sort((a, b) => b.consumedAt.localeCompare(a.consumedAt));
 
-  const todaysWorkoutLogs = workoutLogs
+  const todaysWorkoutLogs = [...workoutLogs]
     .filter((w) => w.performedAt.slice(0, 10) === todayString)
-    .sort((a, b) => a.performedAt.localeCompare(b.performedAt));
+    .sort((a, b) => b.performedAt.localeCompare(a.performedAt));
 
   const loggedCalories = todaysCalorieLogs.reduce((a, b) => a + b.calories, 0);
   const loggedWorkoutTime = todaysWorkoutLogs.reduce(
@@ -311,7 +222,7 @@ export default function Index() {
     0,
   );
   const goalsVisable = goals.filter((g) => !g.hidden);
-  const goalsCompleted = goalsVisable.filter((g) => g.completed).length;
+  const numGoalsCompleted = goalsVisable.filter((g) => g.completed).length;
 
   return (
     <ScrollView
@@ -319,31 +230,13 @@ export default function Index() {
       contentContainerClassName="gap-4 p-4"
       showsVerticalScrollIndicator={false}
     >
-      {/* {editingWorkoutLog !== null && (
-        <EditWorkoutLogModal
-          workoutLog={editingWorkoutLog}
-          close={() => setEditingWorkoutLog(null)}
-          onSave={saveWorkoutLog}
-          onDelete={handleDeleteWorkoutLog}
-        />
-      )} */}
-
-      {/* {editingGoal !== null && (
-        <EditGoalModal
-          goal={editingGoal}
-          close={() => setEditingGoal(null)}
-          onSave={saveGoal}
-          onDelete={handleDeleteGoal}
-        />
-      )} */}
-
       <DailyGoalCard
         title="Today's Calories"
         completedAmount={loggedCalories}
         goalAmount={user.dailyCalorieGoal}
         remainingText="calories"
         topRight={
-          <Pressable onPress={() => editDailyCalorieGoal(user)}>
+          <Pressable onPress={() => handleEditDailyCalorieGoal(user)}>
             <MaterialIcons
               name="mode-edit"
               size={24}
@@ -360,7 +253,7 @@ export default function Index() {
         remainingText="minutes"
         fillColor={theme.primary}
         topRight={
-          <Pressable onPress={() => editDailyWorkoutGoal(user)}>
+          <Pressable onPress={() => handleEditDailyWorkoutGoal(user)}>
             <MaterialIcons
               name="mode-edit"
               size={24}
@@ -403,7 +296,7 @@ export default function Index() {
               name={calorieLog.name}
               calories={calorieLog.calories}
               imageUrl={calorieLog.imageUrl}
-              onEdit={editCalorieLog}
+              onEdit={handleEditCalorieLog}
             />
           ))
         ) : (
@@ -440,7 +333,7 @@ export default function Index() {
               duration={workoutLog.duration}
               iconLibrary={workoutLog.iconLibrary}
               iconName={workoutLog.iconName}
-              onEdit={editWorkoutLog}
+              onEdit={handleEditWorkoutLog}
             />
           ))
         ) : (
@@ -471,7 +364,7 @@ export default function Index() {
         (goalsVisable.length > 0 ? (
           <>
             <ThemedText className="text-2xl font-bold">
-              ({goalsCompleted}/{goalsVisable.length}) Completed
+              ({numGoalsCompleted}/{goalsVisable.length}) Completed
             </ThemedText>
 
             {goalsVisable.map((goal) => (
@@ -489,7 +382,7 @@ export default function Index() {
                   name={goal.name}
                   description={goal.description}
                   completed={goal.completed}
-                  onEdit={editGoal}
+                  onEdit={handleEditGoal}
                 />
               </Pressable>
             ))}

@@ -3,10 +3,9 @@ import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
 import useTheme from "@/hooks/useTheme";
 import useUser from "@/hooks/useUser";
-import { backendUrl } from "@/lib/api";
+import { deleteUser } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import axios from "axios";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -17,7 +16,7 @@ export default function Profile() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const showConfirmDeleteUser = () => {
+  const handleDeleteUser = () => {
     Alert.alert(
       "Delete account",
       "Are you sure you want to permanently delete your account?",
@@ -28,16 +27,14 @@ export default function Profile() {
         },
         {
           text: "Delete",
-          onPress: () => deleteUser(),
+          onPress: async () => {
+            await deleteUser(authUser.id);
+            await authClient.signOut();
+          },
           style: "destructive",
         },
       ],
     );
-  };
-
-  const deleteUser = async () => {
-    await axios.delete(`${backendUrl}/api/delete-user/${authUser.id}`);
-    await authClient.signOut();
   };
 
   if (error !== null) {
@@ -164,7 +161,7 @@ export default function Profile() {
 
       <Pressable
         className="bg-destructive-accent p-4 rounded-xl flex-row gap-2 items-center border border-destructive"
-        onPress={showConfirmDeleteUser}
+        onPress={handleDeleteUser}
       >
         <MaterialCommunityIcons
           name="trash-can"

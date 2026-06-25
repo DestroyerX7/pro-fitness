@@ -137,7 +137,7 @@ function CalorieLogForm({
 }
 
 export default function Screen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { calorieLogId } = useLocalSearchParams<{ calorieLogId: string }>();
   const queryClient = useQueryClient();
   const { data: authData } = useAuth();
 
@@ -148,7 +148,7 @@ export default function Screen() {
     authData !== null
       ? queryClient
           .getQueryData<CalorieLog[]>(["calorieLogs", authData.user.id])
-          ?.find((c) => c.id === id)
+          ?.find((c) => c.id === calorieLogId)
       : undefined;
 
   const [draft, setDraft] = useState<DraftCalorieLog | null>(
@@ -230,7 +230,13 @@ export default function Screen() {
     };
 
     updateCalorieLogMutation.mutate(
-      { calorieLog: editedCalorieLog },
+      {
+        name: editedCalorieLog.name,
+        calories: editedCalorieLog.calories,
+        consumedAt: editedCalorieLog.consumedAt,
+        imageUrl: editedCalorieLog.imageUrl,
+        calorieLogId: editedCalorieLog.id,
+      },
       {
         onSuccess: () => router.back(),
         onError: () =>

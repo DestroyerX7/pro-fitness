@@ -1,18 +1,17 @@
 import { db } from "@/db";
-import { goal } from "@/db/schema";
+import { user } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
-import z from "zod";
 
-const updateGoalSchema = createUpdateSchema(goal, {
-  name: (schema) => schema.min(1),
-  description: (schema) => schema.min(1),
-}).pick({ name: true, description: true, completed: true, hidden: true });
+const updateUserSchema = createUpdateSchema(user, {
+  dailyCalorieGoal: (schema) => schema.int().min(1),
+  dailyWorkoutGoal: (schema) => schema.int().min(1),
+}).pick({ dailyCalorieGoal: true, dailyWorkoutGoal: true });
 
 export async function PATCH(
   request: Request,
-  { goalId }: Record<string, string>,
+  { userId }: Record<string, string>,
 ) {
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -22,12 +21,12 @@ export async function PATCH(
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!z.uuid().safeParse(goalId).success) {
-    return Response.json({ error: "Invalid goal id" }, { status: 400 });
+  if (session.user.id !== userId) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const body = await request.json();
-  const parsed = updateGoalSchema.safeParse(body);
+  const parsed = updateUserSchema.safeParse(body);
 
   if (!parsed.success) {
     return Response.json(
@@ -43,15 +42,15 @@ export async function PATCH(
     );
   }
 
-  const [updatedGoal] = await db
-    .update(goal)
+  const [updatedUser] = await db
+    .update(user)
     .set(parsed.data)
-    .where(eq(goal.id, goalId))
+    .where(eq(user.id, userId))
     .returning();
 
-  if (updatedGoal === undefined) {
-    return Response.json({ error: "Goal not found" }, { status: 404 });
+  if (updatedUser === undefined) {
+    return Response.json({ error: "User not found" }, { status: 404 });
   }
 
-  return Response.json(updatedGoal);
+  return Response.json(updatedUser);
 }

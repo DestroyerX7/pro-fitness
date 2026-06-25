@@ -46,10 +46,36 @@ function RootNavigator() {
         <Stack.Screen name="(tabs)" />
 
         <Stack.Screen
-          name="edit/calorieLog/[id]"
+          name="edit/calorie-log/[calorieLogId]"
           options={{
             headerShown: true,
             title: "Edit Calorie Log",
+            presentation: "formSheet",
+            sheetAllowedDetents: [0.75, 1],
+            sheetLargestUndimmedDetentIndex: "last",
+            sheetGrabberVisible: true,
+            contentStyle: { backgroundColor: "transparent" },
+          }}
+        />
+
+        <Stack.Screen
+          name="edit/workout-log/[workoutLogId]"
+          options={{
+            headerShown: true,
+            title: "Edit Workout Log",
+            presentation: "formSheet",
+            sheetAllowedDetents: [0.75, 1],
+            sheetLargestUndimmedDetentIndex: "last",
+            sheetGrabberVisible: true,
+            contentStyle: { backgroundColor: "transparent" },
+          }}
+        />
+
+        <Stack.Screen
+          name="edit/goal/[goalId]"
+          options={{
+            headerShown: true,
+            title: "Edit Goal",
             presentation: "formSheet",
             sheetAllowedDetents: [0.75, 1],
             sheetLargestUndimmedDetentIndex: "last",

@@ -3,8 +3,10 @@ import GoalItem from "@/components/GoalItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import useGoals from "@/hooks/useGoals";
-import { updateGoalCompleted } from "@/lib/api";
+import { updateGoal } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView } from "react-native";
 
@@ -13,52 +15,29 @@ export default function Goals() {
   const { user } = useAuthenticatedAuth();
   const { data: goals, isPending, error } = useGoals(user.id);
 
-  // const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-
   const [activeTab, setActiveTab] = useState<
     "all" | "visible" | "hidden" | "completed" | "notCompleted"
   >("all");
 
-  // const updateGoalMutation = useMutation({
-  //   mutationFn: updateGoal,
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
-  //   },
-  // });
-
-  // const deleteGoalMutation = useMutation({
-  //   mutationFn: deleteGoal,
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
-  //   },
-  // });
-
-  // const saveGoal = async (editedGoal: Goal) => {
-  //   if (editedGoal === editingGoal) {
-  //     return;
-  //   }
-
-  //   updateGoalMutation.mutate({ goal: editedGoal });
-  //   setEditingGoal(null);
-  // };
-
-  const updateGoalCompletedMutation = useMutation({
-    mutationFn: updateGoalCompleted,
+  const updateGoalMutation = useMutation({
+    mutationFn: updateGoal,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
     },
   });
 
   const handleUpdateGoalCompleted = (completed: boolean, goalId: string) => {
-    updateGoalCompletedMutation.mutate({ completed, goalId });
+    updateGoalMutation.mutate({ completed, goalId });
   };
 
-  const editGoal = (goalId: string) => {};
+  const handleEditGoal = async (goalId: string) => {
+    router.push({
+      pathname: "/edit/goal/[goalId]",
+      params: { goalId },
+    });
 
-  // const handleDeleteGoal = (goalId: string) => {
-  //   deleteGoalMutation.mutate({ goalId });
-  //   setEditingGoal(null);
-  // };
+    await Haptics.selectionAsync();
+  };
 
   if (error !== null) {
     return <ThemedText>{error.message}</ThemedText>;
@@ -86,14 +65,6 @@ export default function Goals() {
       contentContainerClassName="gap-4 p-4"
       showsVerticalScrollIndicator={false}
     >
-      {/* {editingGoal !== null && (
-        <EditGoalModal
-          goal={editingGoal}
-          close={() => setEditingGoal(null)}
-          onSave={saveGoal}
-          onDelete={handleDeleteGoal}
-        />
-      )} */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -140,7 +111,7 @@ export default function Goals() {
             name={goal.name}
             description={goal.description}
             completed={goal.completed}
-            onEdit={editGoal}
+            onEdit={handleEditGoal}
           />
         </Pressable>
       ))}

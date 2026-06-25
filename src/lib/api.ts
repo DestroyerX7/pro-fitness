@@ -7,14 +7,14 @@ import {
   workoutLogPreset,
 } from "@/db/schema";
 import axios from "axios";
+import { authClient } from "./auth-client";
+
 export type User = typeof user.$inferSelect;
 export type CalorieLog = typeof calorieLog.$inferSelect;
 export type WorkoutLog = typeof workoutLog.$inferSelect;
 export type Goal = typeof goal.$inferSelect;
 export type CalorieLogPreset = typeof calorieLogPreset.$inferSelect;
 export type WorkoutLogPreset = typeof workoutLogPreset.$inferSelect;
-
-export const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL!;
 
 type SignatureResponse = {
   signature: string;
@@ -24,44 +24,43 @@ type SignatureResponse = {
   folder: string;
 };
 
+const api = axios.create({
+  baseURL: process.env.EXPO_PUBLIC_BACKEND_URL!,
+});
+
+api.interceptors.request.use((config) => {
+  const cookie = authClient.getCookie();
+
+  if (cookie.length > 0) {
+    config.headers.Cookie = cookie;
+  }
+
+  return config;
+});
+
 export const getUser = async (userId: string) => {
-  const response = await axios.get<User>(
-    `${backendUrl}/api/get-user/${userId}`,
-  );
-
+  const response = await api.get<User>(`/api/get-user/${userId}`);
   return response.data;
 };
 
-export const updateCalorieGoal = async ({
-  calorieGoalText,
-  userId,
-}: {
-  calorieGoalText: string;
-  userId: string;
-}) => {
-  const response = await axios.patch<User>(
-    `${backendUrl}/api/update-daily-calorie-goal/${userId}`,
-    {
-      dailyCalorieGoal: Number(calorieGoalText),
-    },
-  );
-
+export const deleteUser = async (userId: string) => {
+  const response = await api.get<User>(`/api/delete-user/${userId}`);
   return response.data;
 };
 
-export const updateWorkoutGoal = async ({
-  workoutGoalText,
+export const updateUser = async ({
+  dailyCalorieGoal,
+  dailyWorkoutGoal,
   userId,
 }: {
-  workoutGoalText: string;
+  dailyCalorieGoal?: number;
+  dailyWorkoutGoal?: number;
   userId: string;
 }) => {
-  const response = await axios.patch<User>(
-    `${backendUrl}/api/update-daily-calorie-goal/${userId}`,
-    {
-      dailyCalorieGoal: Number(workoutGoalText),
-    },
-  );
+  const response = await api.patch<User>(`/api/update-user/${userId}`, {
+    dailyCalorieGoal,
+    dailyWorkoutGoal,
+  });
 
   return response.data;
 };
@@ -77,12 +76,43 @@ export const createCalorieLog = async ({
   name: string;
   calories: number;
   consumedAt?: string;
-  imageUrl: string | null;
+  imageUrl?: string | null | undefined;
 }) => {
-  const response = await axios.post<CalorieLog>(
-    `${backendUrl}/api/create-calorie-log`,
+  const response = await api.post<CalorieLog>("/api/create-calorie-log", {
+    userId,
+    name,
+    calories,
+    consumedAt,
+    imageUrl,
+  });
+
+  return response.data;
+};
+
+export const getCalorieLogs = async (userId: string): Promise<CalorieLog[]> => {
+  const response = await api.get<CalorieLog[]>(
+    `/api/get-calorie-logs/${userId}`,
+  );
+
+  return response.data;
+};
+
+export const updateCalorieLog = async ({
+  name,
+  calories,
+  consumedAt,
+  imageUrl,
+  calorieLogId,
+}: {
+  name?: string;
+  calories?: number;
+  consumedAt?: string;
+  imageUrl?: string | null | undefined;
+  calorieLogId: string;
+}) => {
+  const response = await api.patch<CalorieLog>(
+    `/api/update-calorie-log/${calorieLogId}`,
     {
-      userId,
       name,
       calories,
       consumedAt,
@@ -93,34 +123,12 @@ export const createCalorieLog = async ({
   return response.data;
 };
 
-export const getCalorieLogs = async (userId: string): Promise<CalorieLog[]> => {
-  const response = await axios.get<CalorieLog[]>(
-    `${backendUrl}/api/get-calorie-logs/${userId}`,
-  );
-
-  return response.data;
-};
-
-export const updateCalorieLog = async ({
-  calorieLog,
-}: {
-  calorieLog: CalorieLog;
-}) => {
-  const response = await axios.put<CalorieLog>(
-    `${backendUrl}/api/update-calorie-log/${calorieLog.id}`,
-    {
-      name: calorieLog.name,
-      calories: calorieLog.calories,
-      consumedAt: calorieLog.consumedAt,
-      imageUrl: calorieLog.imageUrl,
-    },
-  );
-
-  return response.data;
-};
-
 export const deleteCalorieLog = async (calorieLogId: string) => {
-  await axios.delete(`${backendUrl}/api/delete-calorie-log/${calorieLogId}`);
+  const response = await api.delete<CalorieLog>(
+    `/api/delete-calorie-log/${calorieLogId}`,
+  );
+
+  return response.data;
 };
 
 export const createWorkoutLog = async ({
@@ -138,10 +146,44 @@ export const createWorkoutLog = async ({
   iconLibrary: string;
   iconName: string;
 }) => {
-  const response = await axios.post<WorkoutLog>(
-    `${backendUrl}/api/create-workout-log`,
+  const response = await api.post<WorkoutLog>("/api/create-workout-log", {
+    userId,
+    name,
+    duration,
+    performedAt,
+    iconLibrary,
+    iconName,
+  });
+
+  return response.data;
+};
+
+export const getWorkoutLogs = async (userId: string) => {
+  const response = await api.get<WorkoutLog[]>(
+    `/api/get-workout-logs/${userId}`,
+  );
+
+  return response.data;
+};
+
+export const updateWorkoutLog = async ({
+  name,
+  duration,
+  performedAt,
+  iconLibrary,
+  iconName,
+  workoutLogId,
+}: {
+  name?: string;
+  duration?: number;
+  performedAt?: string;
+  iconLibrary?: string;
+  iconName?: string;
+  workoutLogId: string;
+}) => {
+  const response = await api.patch<WorkoutLog>(
+    `/api/update-workout-log/${workoutLogId}`,
     {
-      userId,
       name,
       duration,
       performedAt,
@@ -153,35 +195,12 @@ export const createWorkoutLog = async ({
   return response.data;
 };
 
-export const getWorkoutLogs = async (userId: string) => {
-  const response = await axios.get<WorkoutLog[]>(
-    `${backendUrl}/api/get-workout-logs/${userId}`,
-  );
-
-  return response.data;
-};
-
-export const updateWorkoutLog = async ({
-  workoutLog,
-}: {
-  workoutLog: WorkoutLog;
-}) => {
-  const response = await axios.put<WorkoutLog>(
-    `${backendUrl}/api/update-workout-log/${workoutLog.id}`,
-    {
-      name: workoutLog.name,
-      duration: workoutLog.duration,
-      performedAt: workoutLog.performedAt,
-      iconLibrary: workoutLog.iconLibrary,
-      iconName: workoutLog.iconName,
-    },
-  );
-
-  return response.data;
-};
-
 export const deleteWorkoutLog = async (workoutLogId: string) => {
-  await axios.delete(`${backendUrl}/api/delete-workout-log/${workoutLogId}`);
+  const response = await api.delete<WorkoutLog>(
+    `/api/delete-workout-log/${workoutLogId}`,
+  );
+
+  return response.data;
 };
 
 export const createGoal = async ({
@@ -191,9 +210,9 @@ export const createGoal = async ({
 }: {
   userId: string;
   name: string;
-  description: string;
+  description?: string;
 }) => {
-  const response = await axios.post<Goal>(`${backendUrl}/api/create-goal`, {
+  const response = await api.post<Goal>("/api/create-goal", {
     userId,
     name,
     description,
@@ -203,66 +222,35 @@ export const createGoal = async ({
 };
 
 export const getGoals = async (userId: string) => {
-  const response = await axios.get<Goal[]>(
-    `${backendUrl}/api/get-goals/${userId}`,
-  );
-
+  const response = await api.get<Goal[]>(`/api/get-goals/${userId}`);
   return response.data;
 };
 
-export const updateGoal = async ({ goal }: { goal: Goal }) => {
-  const response = await axios.put<Goal>(
-    `${backendUrl}/api/update-goal/${goal.id}`,
-    {
-      name: goal.name,
-      description: goal.description,
-      completed: goal.completed,
-      hidden: goal.hidden,
-    },
-  );
-
-  return response.data;
-};
-
-export const updateGoalCompleted = async ({
+export const updateGoal = async ({
+  name,
+  description,
   completed,
-  goalId,
-}: {
-  completed: boolean;
-  goalId: string;
-}) => {
-  const response = await axios.patch<Goal>(
-    `${backendUrl}/api/update-goal-completed/${goalId}`,
-    {
-      completed,
-    },
-  );
-
-  return response.data;
-};
-
-export const updateGoalHidden = async ({
   hidden,
   goalId,
 }: {
-  hidden: boolean;
+  name?: string;
+  description?: string;
+  completed?: boolean;
+  hidden?: boolean;
   goalId: string;
 }) => {
-  const response = await axios.patch<Goal>(
-    `${backendUrl}/api/update-goal-hidden/${goalId}`,
-    {
-      hidden,
-    },
-  );
+  const response = await api.patch<Goal>(`/api/update-goal/${goalId}`, {
+    name,
+    description,
+    completed,
+    hidden,
+  });
 
   return response.data;
 };
 
 export const deleteGoal = async ({ goalId }: { goalId: string }) => {
-  const response = await axios.delete<Goal>(
-    `${backendUrl}/api/delete-goal/${goalId}`,
-  );
-
+  const response = await api.delete<Goal>(`/api/delete-goal/${goalId}`);
   return response.data;
 };
 
@@ -275,19 +263,24 @@ export const createCalorieLogPreset = async ({
   userId: string;
   name: string;
   calories: number;
-  imageUrl: string | null;
+  imageUrl?: string | null | undefined;
 }) => {
-  await axios.post(`${backendUrl}/api/create-calorie-log-preset`, {
-    userId,
-    name,
-    calories,
-    imageUrl,
-  });
+  const response = await api.post<CalorieLogPreset>(
+    "/api/create-calorie-log-preset",
+    {
+      userId,
+      name,
+      calories,
+      imageUrl,
+    },
+  );
+
+  return response.data;
 };
 
 export const getCalorieLogPresets = async (userId: string) => {
-  const response = await axios.get<CalorieLogPreset[]>(
-    `${backendUrl}/api/get-calorie-log-presets/${userId}`,
+  const response = await api.get<CalorieLogPreset[]>(
+    `/api/get-calorie-log-presets/${userId}`,
   );
 
   return response.data;
@@ -306,26 +299,57 @@ export const createWorkoutLogPreset = async ({
   iconLibrary: string;
   iconName: string;
 }) => {
-  await axios.post(`${backendUrl}/api/create-workout-log-preset`, {
+  const response = await api.post(`/api/create-workout-log-preset`, {
     userId,
     name,
     duration,
     iconLibrary,
     iconName,
   });
+
+  return response.data;
 };
 
 export const getWorkoutLogPresets = async (userId: string) => {
-  const response = await axios.get<WorkoutLogPreset[]>(
-    `${backendUrl}/api/get-workout-log-presets/${userId}`,
+  const response = await api.get<WorkoutLogPreset[]>(
+    `/api/get-workout-log-presets/${userId}`,
+  );
+
+  return response.data;
+};
+
+export const updateWorkoutLogPresets = async ({
+  name,
+  duration,
+  performedAt,
+  iconLibrary,
+  iconName,
+  workoutLogId,
+}: {
+  name?: string;
+  duration?: number;
+  performedAt?: string;
+  iconLibrary?: string;
+  iconName?: string;
+  workoutLogId: string;
+}) => {
+  const response = await api.patch<WorkoutLog>(
+    `/api/update-workout-log-preset/${workoutLogId}`,
+    {
+      name,
+      duration,
+      performedAt,
+      iconLibrary,
+      iconName,
+    },
   );
 
   return response.data;
 };
 
 export const uploadToCloudinary = async (imageUri: string) => {
-  const signResponse = await axios.post<SignatureResponse>(
-    `${backendUrl}/api/sign-cloudinary-upload`,
+  const signResponse = await api.post<SignatureResponse>(
+    `/api/sign-cloudinary-upload`,
   );
 
   const { signature, timestamp, apiKey, cloudName, folder } = signResponse.data;
