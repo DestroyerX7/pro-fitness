@@ -8,6 +8,8 @@ import {
   CalorieLogPreset,
   createCalorieLog,
   createWorkoutLog,
+  deleteCalorieLogPreset,
+  deleteWorkoutLogPreset,
   getCalorieLogPresets,
   getWorkoutLogPresets,
   WorkoutLogPreset,
@@ -34,6 +36,11 @@ export default function Favorites() {
     queryFn: () => getCalorieLogPresets(user.id),
   });
 
+  const { data: workoutLogPresets } = useQuery({
+    queryKey: ["workoutLogPresets", user.id],
+    queryFn: () => getWorkoutLogPresets(user.id),
+  });
+
   const createCalorieLogMutation = useMutation({
     mutationFn: createCalorieLog,
     onSuccess: () => {
@@ -43,11 +50,23 @@ export default function Favorites() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
+    onError: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
   });
 
-  const { data: workoutLogPresets } = useQuery({
-    queryKey: ["workoutLogPresets", user.id],
-    queryFn: () => getWorkoutLogPresets(user.id),
+  const deleteCalorieLogPresetMutation = useMutation({
+    mutationFn: deleteCalorieLogPreset,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["calorieLogPresets", user.id],
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
+    onError: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
   });
 
   const createWorkoutLogMutation = useMutation({
@@ -59,8 +78,21 @@ export default function Favorites() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
-    onError: (error) => {
-      console.log(error.message);
+    onError: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
+  });
+
+  const deleteWorkoutLogPresetMutation = useMutation({
+    mutationFn: deleteWorkoutLogPreset,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["workoutLogPresets", user.id],
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
+    onError: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
@@ -124,6 +156,11 @@ export default function Favorites() {
           calorieLogPresets.map((calorieLogPreset) => (
             <Pressable
               onPress={() => logCalories(calorieLogPreset)}
+              onLongPress={() =>
+                deleteCalorieLogPresetMutation.mutate({
+                  calorieLogPresetId: calorieLogPreset.id,
+                })
+              }
               key={calorieLogPreset.id}
             >
               <CalorieLogItem
@@ -156,6 +193,11 @@ export default function Favorites() {
         workoutLogPresets.map((workoutLogPreset) => (
           <Pressable
             onPress={() => logWorkout(workoutLogPreset)}
+            onLongPress={() =>
+              deleteWorkoutLogPresetMutation.mutate({
+                workoutLogPresetId: workoutLogPreset.id,
+              })
+            }
             key={workoutLogPreset.id}
           >
             <WorkoutLogItem

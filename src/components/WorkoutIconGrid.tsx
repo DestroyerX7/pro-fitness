@@ -1,17 +1,16 @@
-import { colors } from "@/lib/colors";
+import useTheme from "@/hooks/useTheme";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { useColorScheme } from "nativewind";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 
-export type Icon =
+export type IconType =
   | { library: "MaterialIcons"; name: keyof typeof MaterialIcons.glyphMap }
   | {
       library: "MaterialCommunityIcons";
       name: keyof typeof MaterialCommunityIcons.glyphMap;
     };
 
-const icons: Icon[] = [
+const iconTypes: IconType[] = [
   { library: "MaterialCommunityIcons", name: "run" },
   { library: "MaterialCommunityIcons", name: "dumbbell" },
   { library: "MaterialCommunityIcons", name: "weight-lifter" },
@@ -32,64 +31,72 @@ const icons: Icon[] = [
   { library: "MaterialCommunityIcons", name: "bow-arrow" },
 ];
 
-export const iconLibraries = {
-  MaterialIcons,
-  MaterialCommunityIcons,
-};
+export function Icon({
+  iconType,
+  size,
+  color,
+}: {
+  iconType: IconType;
+  size: number;
+  color: string;
+}) {
+  switch (iconType.library) {
+    case "MaterialIcons":
+      return <MaterialIcons name={iconType.name} size={size} color={color} />;
+    case "MaterialCommunityIcons":
+      return (
+        <MaterialCommunityIcons
+          name={iconType.name}
+          size={size}
+          color={color}
+        />
+      );
+  }
+}
 
-type Props = {
-  iconSize?: number;
-  buttonWidth?: number;
-  defaultSelected: Icon;
-  onSelect: (icon: Icon) => void;
-};
+export default function WorkoutIconGrid({
+  value,
+  numColumns = 5,
+  gap = 8,
+  onValueChange,
+}: {
+  value: IconType;
+  numColumns?: number;
+  gap?: number;
+  onValueChange?: (iconType: IconType) => void;
+}) {
+  const [containerWidth, setContainerWidth] = useState(0);
+  const theme = useTheme();
 
-export default function WorkoutIconList({
-  iconSize = 48,
-  buttonWidth = 64,
-  defaultSelected,
-  onSelect,
-}: Props) {
-  const [selectedIcon, setSelectedIcon] = useState<Icon>(defaultSelected);
-
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
-
-  const select = (icon: Icon) => {
-    onSelect(icon);
-    setSelectedIcon(icon);
-  };
+  const itemWidth = containerWidth
+    ? (containerWidth - gap * (numColumns - 1)) / numColumns
+    : 0;
 
   return (
-    <View className="flex-row gap-4 flex-wrap">
-      {icons.map((icon, index) => {
-        const IconComponent = iconLibraries[icon.library];
-
-        return (
+    <View onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
+      <View className="flex-row flex-wrap" style={{ gap }}>
+        {iconTypes.map((iconType, i) => (
           <Pressable
-            key={index}
-            className="items-center justify-center rounded-md"
+            key={i}
+            className="items-center justify-center rounded-xl"
             style={[
-              {
-                width: buttonWidth,
-                height: buttonWidth,
-              },
-              selectedIcon.library === icon.library &&
-                selectedIcon.name === icon.name && {
+              { width: itemWidth, height: itemWidth },
+              value.library === iconType.library &&
+                value.name === iconType.name && {
                   borderWidth: 2,
                   borderColor: theme.foreground,
                 },
             ]}
-            onPress={() => select(icon)}
+            onPress={() => onValueChange?.(iconType)}
           >
-            <IconComponent
-              name={icon.name as any}
-              size={iconSize}
+            <Icon
+              iconType={iconType}
+              size={itemWidth * 0.75}
               color={theme.foreground}
             />
           </Pressable>
-        );
-      })}
+        ))}
+      </View>
     </View>
   );
 }

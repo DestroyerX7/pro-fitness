@@ -1,48 +1,14 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import useTheme from "@/hooks/useTheme";
+import WorkoutIconGrid, { IconType } from "@/components/WorkoutIconGrid";
 import { createWorkoutLog } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
-
-export const iconComponents = {
-  MaterialIcons,
-  MaterialCommunityIcons,
-} as const;
-
-export type Icon =
-  | { library: "MaterialIcons"; name: keyof typeof MaterialIcons.glyphMap }
-  | {
-      library: "MaterialCommunityIcons";
-      name: keyof typeof MaterialCommunityIcons.glyphMap;
-    };
-
-const icons: Icon[] = [
-  { library: "MaterialCommunityIcons", name: "run" },
-  { library: "MaterialCommunityIcons", name: "dumbbell" },
-  { library: "MaterialCommunityIcons", name: "weight-lifter" },
-  { library: "MaterialCommunityIcons", name: "arm-flex" },
-  { library: "MaterialCommunityIcons", name: "bike" },
-  { library: "MaterialCommunityIcons", name: "swim" },
-  { library: "MaterialCommunityIcons", name: "gymnastics" },
-  { library: "MaterialCommunityIcons", name: "football" },
-  { library: "MaterialCommunityIcons", name: "soccer" },
-  { library: "MaterialCommunityIcons", name: "basketball" },
-  { library: "MaterialCommunityIcons", name: "tennis" },
-  { library: "MaterialCommunityIcons", name: "table-tennis" },
-  { library: "MaterialCommunityIcons", name: "golf" },
-  { library: "MaterialCommunityIcons", name: "bowling" },
-  { library: "MaterialCommunityIcons", name: "ski" },
-  { library: "MaterialCommunityIcons", name: "snowboard" },
-  { library: "MaterialIcons", name: "ice-skating" },
-  { library: "MaterialCommunityIcons", name: "bow-arrow" },
-];
 
 export default function Workout() {
   const queryClient = useQueryClient();
@@ -50,12 +16,10 @@ export default function Workout() {
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("");
   const [performedAt, setPerformedAt] = useState(new Date());
-  const [selectedIcon, setSelectedIcon] = useState<Icon>({
+  const [selectedIconType, setSelectedIconType] = useState<IconType>({
     library: "MaterialCommunityIcons",
     name: "run",
   });
-
-  const theme = useTheme();
 
   const createWorkoutLogMutation = useMutation({
     mutationFn: createWorkoutLog,
@@ -83,8 +47,8 @@ export default function Workout() {
       name: trimmedName,
       duration: durationNum,
       performedAt: performedAtString,
-      iconLibrary: selectedIcon.library,
-      iconName: selectedIcon.name,
+      iconLibrary: selectedIconType.library,
+      iconName: selectedIconType.name,
     });
   };
 
@@ -135,30 +99,10 @@ export default function Workout() {
         <ThemedText className="font-bold">Icon</ThemedText>
 
         <View className="flex-row gap-4 flex-wrap p-4 bg-muted border rounded-xl border-border">
-          {icons.map((icon, index) => {
-            const IconComponent = iconComponents[icon.library];
-
-            return (
-              <Pressable
-                key={index}
-                className="w-16 h-16 items-center justify-center rounded-md"
-                style={[
-                  selectedIcon.library === icon.library &&
-                    selectedIcon.name === icon.name && {
-                      borderWidth: 2,
-                      borderColor: theme.foreground,
-                    },
-                ]}
-                onPress={() => setSelectedIcon(icon)}
-              >
-                <IconComponent
-                  name={icon.name as any}
-                  size={48}
-                  color={theme.foreground}
-                />
-              </Pressable>
-            );
-          })}
+          <WorkoutIconGrid
+            value={selectedIconType}
+            onValueChange={setSelectedIconType}
+          />
         </View>
       </View>
 

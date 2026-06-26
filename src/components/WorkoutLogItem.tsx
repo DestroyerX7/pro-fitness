@@ -1,9 +1,9 @@
+import useTheme from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
 import Card from "./Card";
 import ThemedText from "./ThemedText";
-import { iconLibraries } from "./WorkoutIconList";
-import useTheme from "@/hooks/useTheme";
+import { Icon, IconType } from "./WorkoutIconGrid";
 
 type Props = {
   id: string;
@@ -22,16 +22,15 @@ export default function WorkoutLogItem({
   iconName,
   onEdit,
 }: Props) {
+  const iconType: IconType = {
+    library: iconLibrary,
+    name: iconName,
+  } as IconType;
   const theme = useTheme();
-  const IconComponent = iconLibraries[iconLibrary];
 
   return (
     <Card className="flex-row gap-4">
-      <IconComponent
-        name={iconName as any}
-        size={48}
-        color={theme.foreground}
-      />
+      <Icon iconType={iconType} size={48} color={theme.foreground} />
 
       <View className="flex-1 gap-1">
         <ThemedText className="text-lg font-bold">{name}</ThemedText>

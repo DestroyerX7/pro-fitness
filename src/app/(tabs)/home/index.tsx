@@ -18,15 +18,37 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  View,
+} from "react-native";
 
 export default function Index() {
   const queryClient = useQueryClient();
   const { user: authUser } = useAuthenticatedAuth();
-  const { data: user } = useUser(authUser.id);
-  const { data: calorieLogs } = useCalorieLogs(authUser.id);
-  const { data: workoutLogs } = useWorkoutLogs(authUser.id);
-  const { data: goals } = useGoals(authUser.id);
+  const {
+    data: user,
+    refetch: refetchUser,
+    isFetching: isFetchingUser,
+  } = useUser(authUser.id);
+  const {
+    data: calorieLogs,
+    refetch: refetchCalorieLogs,
+    isFetching: isFetchingCalorieLogs,
+  } = useCalorieLogs(authUser.id);
+  const {
+    data: workoutLogs,
+    refetch: refetchWorkoutLogs,
+    isFetching: isFetchingWorkoutLogs,
+  } = useWorkoutLogs(authUser.id);
+  const {
+    data: goals,
+    refetch: refetchGoals,
+    isFetching: isFetchingGoals,
+  } = useGoals(authUser.id);
 
   const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
     "calories",
@@ -208,11 +230,11 @@ export default function Index() {
 
   const todayString = toSqlTimestamp(new Date()).slice(0, 10);
 
-  const todaysCalorieLogs = [...calorieLogs]
+  const todaysCalorieLogs = calorieLogs
     .filter((c) => c.consumedAt.slice(0, 10) === todayString)
     .sort((a, b) => b.consumedAt.localeCompare(a.consumedAt));
 
-  const todaysWorkoutLogs = [...workoutLogs]
+  const todaysWorkoutLogs = workoutLogs
     .filter((w) => w.performedAt.slice(0, 10) === todayString)
     .sort((a, b) => b.performedAt.localeCompare(a.performedAt));
 
@@ -229,6 +251,22 @@ export default function Index() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerClassName="gap-4 p-4"
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={
+            isFetchingUser ||
+            isFetchingCalorieLogs ||
+            isFetchingWorkoutLogs ||
+            isFetchingGoals
+          }
+          onRefresh={() => {
+            refetchUser();
+            refetchCalorieLogs();
+            refetchWorkoutLogs();
+            refetchGoals();
+          }}
+        />
+      }
     >
       <DailyGoalCard
         title="Today's Calories"

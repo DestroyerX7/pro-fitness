@@ -310,12 +310,12 @@ export const updateCalorieLogPreset = async ({
 };
 
 export const deleteCalorieLogPreset = async ({
-  calorieLogId,
+  calorieLogPresetId,
 }: {
-  calorieLogId: string;
+  calorieLogPresetId: string;
 }) => {
   const response = await api.delete<CalorieLogPreset>(
-    `/api/delete-calorie-log-preset/${calorieLogId}`,
+    `/api/delete-calorie-log-preset/${calorieLogPresetId}`,
   );
 
   return response.data;
@@ -383,12 +383,12 @@ export const updateWorkoutLogPreset = async ({
 };
 
 export const deleteWorkoutLogPreset = async ({
-  workoutLogId,
+  workoutLogPresetId,
 }: {
-  workoutLogId: string;
+  workoutLogPresetId: string;
 }) => {
   const response = await api.delete<WorkoutLogPreset>(
-    `/api/delete-workout-log-preset/${workoutLogId}`,
+    `/api/delete-workout-log-preset/${workoutLogPresetId}`,
   );
 
   return response.data;
