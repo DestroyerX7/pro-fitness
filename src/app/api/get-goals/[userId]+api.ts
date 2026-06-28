@@ -23,7 +23,7 @@ export async function GET(
     .select()
     .from(goal)
     .where(eq(goal.userId, userId))
-    .orderBy(desc(goal.updatedAt));
+    .orderBy(desc(goal.createdAt));
 
   return Response.json(goals);
 }

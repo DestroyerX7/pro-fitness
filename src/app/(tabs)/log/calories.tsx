@@ -33,7 +33,7 @@ export default function Calories() {
       });
 
       Toast.show({
-        type: "loggedFood",
+        type: "loggedCalories",
         text1: "Logged!",
         text2: `${data.name} • ${data.calories} cal`,
         topOffset: insets.top + 16,

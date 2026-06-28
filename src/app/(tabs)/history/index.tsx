@@ -40,7 +40,7 @@ export default function History() {
     return;
   }
 
-  const dates = Array.from({ length: 31 }, (_, i) => {
+  const datesStrings = Array.from({ length: 31 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - i);
     return toSqlDate(date);
@@ -128,9 +128,9 @@ export default function History() {
       </ScrollView>
 
       <View className="flex-row flex-wrap">
-        {dates.map((date) => {
+        {datesStrings.map((dateString) => {
           const totalCalories =
-            calorieLogsGroupedByDate[date]?.totalCalories ?? 0;
+            calorieLogsGroupedByDate[dateString]?.totalCalories ?? 0;
           const backgroundColor =
             totalCalories >= user.dailyCalorieGoal
               ? completedColor
@@ -146,7 +146,7 @@ export default function History() {
           ).toFixed(0);
 
           return (
-            <View key={date} className="w-[16.66%] aspect-square p-1">
+            <View key={dateString} className="w-[16.66%] aspect-square p-1">
               <View
                 className="flex-1 rounded items-center justify-center"
                 style={{
@@ -161,83 +161,107 @@ export default function History() {
       </View>
 
       {activeTab === "calories" &&
-        [...Object.entries(calorieLogsGroupedByDate)]
-          .sort((a, b) => b[0].localeCompare(a[0]))
-          .map(([dateString, { calorieLogs, totalCalories }]) => (
-            <View key={dateString} className="gap-4">
-              <View className="flex-row justify-between">
-                <ThemedText>
-                  {/* {new Date(dateString).toLocaleDateString()} */}
-                  {dateString}
-                </ThemedText>
+        Object.entries(calorieLogsGroupedByDate)
+          .sort(([aDateString], [bDateString]) =>
+            bDateString.localeCompare(aDateString),
+          )
+          .map(([dateString, { calorieLogs, totalCalories }]) => {
+            const [year, month, day] = dateString.split("-").map(Number);
+            const localeDateString = new Date(
+              year,
+              month - 1,
+              day,
+            ).toLocaleDateString();
 
-                <ThemedText>{totalCalories} calories</ThemedText>
+            return (
+              <View key={dateString} className="gap-4">
+                <View className="flex-row justify-between">
+                  <ThemedText>{localeDateString}</ThemedText>
+
+                  <ThemedText>{totalCalories} calories</ThemedText>
+                </View>
+
+                {calorieLogs.map((calorieLog) => (
+                  <CalorieLogItem
+                    key={calorieLog.id}
+                    id={calorieLog.id}
+                    name={calorieLog.name}
+                    calories={calorieLog.calories}
+                    imageUrl={calorieLog.imageUrl}
+                  />
+                ))}
               </View>
-
-              {calorieLogs.map((calorieLog) => (
-                <CalorieLogItem
-                  key={calorieLog.id}
-                  id={calorieLog.id}
-                  name={calorieLog.name}
-                  calories={calorieLog.calories}
-                  imageUrl={calorieLog.imageUrl}
-                />
-              ))}
-            </View>
-          ))}
+            );
+          })}
 
       {activeTab === "workouts" &&
-        [...Object.entries(workoutLogsGroupedByDate)]
-          .sort((a, b) => b[0].localeCompare(a[0]))
-          .map(([dateString, { workoutLogs, totalDuration }]) => (
-            <View key={dateString} className="gap-4">
-              <View className="flex-row justify-between">
-                <ThemedText>
-                  {/* {new Date(dateString).toLocaleDateString()} */}
-                  {dateString}
-                </ThemedText>
+        Object.entries(workoutLogsGroupedByDate)
+          .sort(([aDateString], [bDateString]) =>
+            bDateString.localeCompare(aDateString),
+          )
+          .map(([dateString, { workoutLogs, totalDuration }]) => {
+            const [year, month, day] = dateString.split("-").map(Number);
+            const localeDateString = new Date(
+              year,
+              month - 1,
+              day,
+            ).toLocaleDateString();
 
-                <ThemedText>{totalDuration} minutes</ThemedText>
+            return (
+              <View key={dateString} className="gap-4">
+                <View className="flex-row justify-between">
+                  <ThemedText>{localeDateString}</ThemedText>
+
+                  <ThemedText>{totalDuration} minutes</ThemedText>
+                </View>
+
+                {workoutLogs.map((workoutLog) => (
+                  <WorkoutLogItem
+                    key={workoutLog.id}
+                    id={workoutLog.id}
+                    name={workoutLog.name}
+                    duration={workoutLog.duration}
+                    iconLibrary={workoutLog.iconLibrary}
+                    iconName={workoutLog.iconName}
+                  />
+                ))}
               </View>
-
-              {workoutLogs.map((workoutLog) => (
-                <WorkoutLogItem
-                  key={workoutLog.id}
-                  id={workoutLog.id}
-                  name={workoutLog.name}
-                  duration={workoutLog.duration}
-                  iconLibrary={workoutLog.iconLibrary}
-                  iconName={workoutLog.iconName}
-                />
-              ))}
-            </View>
-          ))}
+            );
+          })}
 
       {activeTab === "goals" &&
-        [...Object.entries(goalsGroupedByCreatedAt)]
-          .sort((a, b) => b[0].localeCompare(a[0]))
-          .map(([dateString, goals]) => (
-            <View key={dateString} className="gap-4">
-              <View className="flex-row justify-between">
-                <ThemedText>
-                  {/* {new Date(dateString).toLocaleDateString()} */}
-                  {dateString}
-                </ThemedText>
+        Object.entries(goalsGroupedByCreatedAt)
+          .sort(([aDateString], [bDateString]) =>
+            bDateString.localeCompare(aDateString),
+          )
+          .map(([dateString, goals]) => {
+            const [year, month, day] = dateString.split("-").map(Number);
+            const localeDateString = new Date(
+              year,
+              month - 1,
+              day,
+            ).toLocaleDateString();
 
-                <ThemedText>{goals.length} created</ThemedText>
+            return (
+              <View key={dateString} className="gap-4">
+                <View className="flex-row justify-between">
+                  <ThemedText>{localeDateString}</ThemedText>
+
+                  <ThemedText>{goals.length} created</ThemedText>
+                </View>
+
+                {goals.map((goal) => (
+                  <GoalItem
+                    key={goal.id}
+                    id={goal.id}
+                    name={goal.name}
+                    description={goal.description}
+                    completed={goal.completed}
+                  />
+                ))}
               </View>
-
-              {goals.map((goal) => (
-                <GoalItem
-                  key={goal.id}
-                  id={goal.id}
-                  name={goal.name}
-                  description={goal.description}
-                  completed={goal.completed}
-                />
-              ))}
-            </View>
-          ))}
+            );
+          })}
     </ScrollView>
   );
 }
