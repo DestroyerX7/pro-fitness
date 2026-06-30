@@ -66,7 +66,7 @@ export default function Scan() {
         caloriesPerServing: "",
         numberOfServings: "",
         consumedAt: new Date(),
-        image: null,
+        imageUri: null,
       },
     });
 
@@ -131,7 +131,7 @@ export default function Scan() {
         Math.ceil(nutriments["energy-kcal_serving"] ?? 0).toString(),
         { shouldValidate: true },
       );
-      setValue("image", image_url ?? null, { shouldValidate: true });
+      setValue("imageUri", image_url ?? null, { shouldValidate: true });
     } catch {
       setError("Product not found, try again.");
     } finally {
@@ -177,7 +177,7 @@ export default function Scan() {
       return;
     }
 
-    setValue("image", result.assets[0].uri, { shouldValidate: true });
+    setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
   };
 
   const openLibrary = async () => {
@@ -200,7 +200,7 @@ export default function Scan() {
       return;
     }
 
-    setValue("image", result.assets[0].uri, { shouldValidate: true });
+    setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
   };
 
   const onSubmit = async (data: ScanFormValues) => {
@@ -210,11 +210,11 @@ export default function Scan() {
     const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
 
     const imageUrl =
-      data.image === null
+      data.imageUri === null
         ? null
-        : z.safeParse(z.url(), data.image).success
-          ? data.image
-          : await uploadToCloudinary(data.image);
+        : z.url({ protocol: /^https?$/ }).safeParse(data.imageUri).success
+          ? data.imageUri
+          : await uploadToCloudinary(data.imageUri);
 
     createCalorieLogMutation.mutate({
       userId: user.id,
@@ -337,7 +337,7 @@ export default function Scan() {
         <View className="items-center gap-2">
           <Controller
             control={control}
-            name="image"
+            name="imageUri"
             render={({ field }) => (
               <View className="relative h-48 w-48">
                 <Pressable

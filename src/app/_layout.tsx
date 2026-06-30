@@ -46,11 +46,8 @@ function RootNavigator() {
           options={{
             headerShown: true,
             title: "Edit Calorie Log",
-            presentation: "formSheet",
-            sheetAllowedDetents: [0.75, 1],
-            sheetLargestUndimmedDetentIndex: "last",
-            sheetGrabberVisible: true,
-            contentStyle: { backgroundColor: "transparent" },
+            presentation: "modal",
+            contentStyle: { backgroundColor: theme.background },
           }}
         />
 
@@ -59,11 +56,8 @@ function RootNavigator() {
           options={{
             headerShown: true,
             title: "Edit Workout Log",
-            presentation: "formSheet",
-            sheetAllowedDetents: [0.75, 1],
-            sheetLargestUndimmedDetentIndex: "last",
-            sheetGrabberVisible: true,
-            contentStyle: { backgroundColor: "transparent" },
+            presentation: "modal",
+            contentStyle: { backgroundColor: theme.background },
           }}
         />
 
@@ -72,11 +66,8 @@ function RootNavigator() {
           options={{
             headerShown: true,
             title: "Edit Goal",
-            presentation: "formSheet",
-            sheetAllowedDetents: [0.75, 1],
-            sheetLargestUndimmedDetentIndex: "last",
-            sheetGrabberVisible: true,
-            contentStyle: { backgroundColor: "transparent" },
+            presentation: "modal",
+            contentStyle: { backgroundColor: theme.background },
           }}
         />
 
@@ -85,11 +76,8 @@ function RootNavigator() {
           options={{
             headerShown: true,
             title: "Edit Calorie Log Preset",
-            presentation: "formSheet",
-            sheetAllowedDetents: [0.75, 1],
-            sheetLargestUndimmedDetentIndex: "last",
-            sheetGrabberVisible: true,
-            contentStyle: { backgroundColor: "transparent" },
+            presentation: "modal",
+            contentStyle: { backgroundColor: theme.background },
           }}
         />
       </Stack.Protected>

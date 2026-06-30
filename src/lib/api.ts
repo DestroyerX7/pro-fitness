@@ -252,7 +252,7 @@ export const updateGoal = async ({
   return response.data;
 };
 
-export const deleteGoal = async ({ goalId }: { goalId: string }) => {
+export const deleteGoal = async (goalId: string) => {
   const response = await api.delete<Goal>(`/api/delete-goal/${goalId}`);
   return response.data;
 };
@@ -381,11 +381,7 @@ export const updateWorkoutLogPreset = async ({
   return response.data;
 };
 
-export const deleteWorkoutLogPreset = async ({
-  workoutLogPresetId,
-}: {
-  workoutLogPresetId: string;
-}) => {
+export const deleteWorkoutLogPreset = async (workoutLogPresetId: string) => {
   const response = await api.delete<WorkoutLogPreset>(
     `/api/delete-workout-log-preset/${workoutLogPresetId}`,
   );

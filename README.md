@@ -1,4 +1,4 @@
-# ProFitness
+# Pro Fitness
 
 A cross-platform fitness app built with Expo that helps you track your calories, log workout durations, and set personal health goals.
 

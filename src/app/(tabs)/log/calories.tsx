@@ -29,7 +29,7 @@ export default function Calories() {
         name: "",
         calories: "",
         consumedAt: new Date(),
-        image: null,
+        imageUri: null,
       },
     });
 
@@ -104,7 +104,7 @@ export default function Calories() {
       return;
     }
 
-    setValue("image", result.assets[0].uri, { shouldValidate: true });
+    setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
   };
 
   const openLibrary = async () => {
@@ -127,7 +127,7 @@ export default function Calories() {
       return;
     }
 
-    setValue("image", result.assets[0].uri, { shouldValidate: true });
+    setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
   };
 
   const onSubmit = async (data: CalorieLogFormValues) => {
@@ -140,7 +140,7 @@ export default function Calories() {
 
       const caloriesNum = Number(data.calories);
       const imageUrl =
-        data.image !== null ? await uploadToCloudinary(data.image) : null;
+        data.imageUri !== null ? await uploadToCloudinary(data.imageUri) : null;
       const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
 
       createCalorieLogMutation.mutate({
@@ -163,7 +163,7 @@ export default function Calories() {
       <View className="items-center gap-2">
         <Controller
           control={control}
-          name="image"
+          name="imageUri"
           render={({ field }) => (
             <View className="relative h-48 w-48">
               <Pressable
@@ -289,7 +289,7 @@ export default function Calories() {
 
       {/* Consumed At */}
       <View className="gap-2">
-        <ThemedText className="text-sm font-medium">Consumed At</ThemedText>
+        <ThemedText className="text-sm font-medium">Consumed at</ThemedText>
 
         <Controller
           control={control}

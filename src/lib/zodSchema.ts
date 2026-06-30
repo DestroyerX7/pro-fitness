@@ -10,7 +10,7 @@ export const calorieLogSchema = z.object({
     .regex(/^\d+$/, "Calories must be a whole number")
     .refine((val) => Number(val) > 0, "Calories must be greater than 0"),
   consumedAt: z.date(),
-  image: z.string().nullable(),
+  imageUri: z.string().nullable(),
 });
 
 export type CalorieLogFormValues = z.infer<typeof calorieLogSchema>;
@@ -55,7 +55,7 @@ export const scanSchema = z.object({
       "Number of servings must be greater than 0",
     ),
   consumedAt: z.date(),
-  image: z.string().nullable(),
+  imageUri: z.string().nullable(),
 });
 
 export type ScanFormValues = z.infer<typeof scanSchema>;

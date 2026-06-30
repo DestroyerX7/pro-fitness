@@ -246,9 +246,7 @@ export default function Favorites() {
           <Pressable
             onPress={() => logWorkout(workoutLogPreset)}
             onLongPress={() =>
-              deleteWorkoutLogPresetMutation.mutate({
-                workoutLogPresetId: workoutLogPreset.id,
-              })
+              deleteWorkoutLogPresetMutation.mutate(workoutLogPreset.id)
             }
             key={workoutLogPreset.id}
           >
