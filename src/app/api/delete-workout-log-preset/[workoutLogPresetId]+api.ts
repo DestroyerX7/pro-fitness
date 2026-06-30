@@ -20,7 +20,7 @@ export async function DELETE(
     .where(
       and(
         eq(workoutLogPreset.id, workoutLogPresetId),
-        eq(workoutLogPreset.id, session.user.id),
+        eq(workoutLogPreset.userId, session.user.id),
       ),
     )
     .returning();
