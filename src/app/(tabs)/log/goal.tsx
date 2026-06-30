@@ -2,64 +2,132 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { createGoal } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import { GoalFormValues, goalSchema } from "@/lib/zodSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function Goal() {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
 
-  const createGoalMutation = useMutation({
-    mutationFn: createGoal,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  const { control, handleSubmit, formState } = useForm<GoalFormValues>({
+    resolver: zodResolver(goalSchema),
+    defaultValues: {
+      name: "",
+      description: "",
     },
   });
 
-  const handleCreateGoal = async () => {
-    createGoalMutation.mutate({ userId: user.id, name, description });
+  const insets = useSafeAreaInsets();
+
+  const createGoalMutation = useMutation({
+    mutationFn: createGoal,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
+
+      Toast.show({
+        type: "createdGoal",
+        text1: "Goal created!",
+        text2: data.name,
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error.message,
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
+  });
+
+  const onSubmit = async (data: GoalFormValues) => {
+    createGoalMutation.mutate({
+      userId: user.id,
+      name: data.name,
+      description: data.description,
+    });
   };
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerClassName="p-4 gap-4"
+      contentContainerClassName="p-4 gap-6"
       showsVerticalScrollIndicator={false}
     >
-      <View className="gap-1">
-        <ThemedText className="font-bold">Name</ThemedText>
+      <View className="gap-2">
+        <ThemedText className="text-sm font-medium">Name</ThemedText>
 
-        <ThemedTextInput
-          placeholder="Name"
-          value={name}
-          onChangeText={(text) => setName(text)}
+        <Controller
+          control={control}
+          name="name"
+          render={({ field }) => (
+            <ThemedTextInput
+              placeholder="Name"
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              className={
+                formState.errors.name !== undefined ? "border-destructive" : ""
+              }
+            />
+          )}
         />
+
+        {formState.errors.name !== undefined && (
+          <ThemedText className="text-destructive text-xs">
+            {formState.errors.name.message}
+          </ThemedText>
+        )}
       </View>
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Description</ThemedText>
+      <View className="gap-2">
+        <ThemedText className="text-sm font-medium">Description</ThemedText>
 
-        <ThemedTextInput
-          className="h-32"
-          placeholder="Description..."
-          value={description}
-          onChangeText={(text) => setDescription(text)}
-          textAlignVertical="top"
-          multiline
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <ThemedTextInput
+              className={cn(
+                "h-32",
+                formState.errors.description !== undefined
+                  ? "border-destructive"
+                  : "",
+              )}
+              placeholder="Description..."
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              textAlignVertical="top"
+              multiline
+            />
+          )}
         />
+
+        {formState.errors.description !== undefined && (
+          <ThemedText className="text-destructive text-xs">
+            {formState.errors.description.message}
+          </ThemedText>
+        )}
       </View>
 
       <Pressable
-        onPress={handleCreateGoal}
-        className="bg-primary p-4 rounded-full"
+        onPress={handleSubmit(onSubmit)}
+        className="bg-primary p-4 rounded-xl active:opacity-80"
       >
-        <ThemedText className="text-primary-foreground text-center text-lg font-bold">
+        <ThemedText className="text-primary-foreground text-center font-semibold">
           Create Goal
         </ThemedText>
       </Pressable>

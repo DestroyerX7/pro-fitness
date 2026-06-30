@@ -3,7 +3,7 @@ import { SplashScreenController } from "@/components/SplashScreenController";
 import ThemeProvider from "@/components/ThemeProvider";
 import "@/global.css";
 import useTheme from "@/hooks/useTheme";
-import { toastConfig } from "@/lib/toast-config";
+import { toastConfig } from "@/lib/toastConfig";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import Toast from "react-native-toast-message";

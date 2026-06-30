@@ -58,4 +58,24 @@ export const toastConfig: ToastConfig = {
       </View>
     </View>
   ),
+  createdGoal: ({ text1, text2 }) => (
+    <View
+      style={{
+        height: 60,
+        width: "90%",
+        backgroundColor: "#1e1e1e",
+        borderRadius: 12,
+        padding: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <Text style={{ fontSize: 20 }}>🎯</Text>
+      <View>
+        <Text style={{ color: "white", fontWeight: "600" }}>{text1}</Text>
+        <Text style={{ color: "#aaa", fontSize: 12 }}>{text2}</Text>
+      </View>
+    </View>
+  ),
 };

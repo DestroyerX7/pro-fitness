@@ -1,9 +1,11 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
+import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/utils";
+import { CalorieLogFormValues, calorieLogSchema } from "@/lib/zodSchema";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,50 +14,24 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Alert,
-  Image,
-  Pressable,
-  ScrollView,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Image, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import z from "zod";
-
-const calorieLogSchema = z.object({
-  name: z.string().trim().min(1, "Please enter a name"),
-  calories: z
-    .string()
-    .trim()
-    .min(1, "Please enter a calorie amount")
-    .regex(/^\d+$/, "Calories must be a whole number")
-    .refine((val) => Number(val) > 0, "Calories must be greater than 0"),
-  consumedAt: z.date(),
-  image: z.string().nullable(),
-});
-
-type CalorieLogFormValues = z.infer<typeof calorieLogSchema>;
 
 export default function Calories() {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
 
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<CalorieLogFormValues>({
-    resolver: zodResolver(calorieLogSchema),
-    defaultValues: {
-      name: "",
-      calories: "",
-      consumedAt: new Date(),
-      image: null,
-    },
-  });
+  const { control, handleSubmit, setValue, formState } =
+    useForm<CalorieLogFormValues>({
+      resolver: zodResolver(calorieLogSchema),
+      defaultValues: {
+        name: "",
+        calories: "",
+        consumedAt: new Date(),
+        image: null,
+      },
+    });
 
   const [logging, setLogging] = useState(false);
 
@@ -165,14 +141,14 @@ export default function Calories() {
       const caloriesNum = Number(data.calories);
       const imageUrl =
         data.image !== null ? await uploadToCloudinary(data.image) : null;
-      const consumedAtTimestamp = toSqlTimestamp(data.consumedAt);
+      const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
 
       createCalorieLogMutation.mutate({
         userId: user.id,
         name: data.name,
         calories: caloriesNum,
         imageUrl,
-        consumedAt: consumedAtTimestamp,
+        consumedAt: consumedAtSqlTimestamp,
       });
     } catch (error) {}
   };
@@ -188,20 +164,20 @@ export default function Calories() {
         <Controller
           control={control}
           name="image"
-          render={({ field: { value, onChange } }) => (
+          render={({ field }) => (
             <View className="relative h-48 w-48">
               <Pressable
                 onPress={pickImage}
                 className={cn(
                   "flex-1 items-center justify-center overflow-hidden rounded-2xl",
-                  value !== null
+                  field.value !== null
                     ? "border border-transparent"
                     : "border border-dashed border-border bg-muted",
                 )}
               >
-                {value !== null ? (
+                {field.value !== null ? (
                   <Image
-                    source={{ uri: value }}
+                    source={{ uri: field.value }}
                     style={{ flex: 1, width: "100%" }}
                   />
                 ) : (
@@ -213,9 +189,9 @@ export default function Calories() {
                 )}
               </Pressable>
 
-              {value !== null && (
+              {field.value !== null && (
                 <Pressable
-                  onPress={() => onChange(null)}
+                  onPress={() => field.onChange(null)}
                   hitSlop={8}
                   className="absolute -right-3 -top-3 h-8 w-8 items-center justify-center rounded-full bg-destructive shadow active:opacity-80"
                 >
@@ -246,28 +222,25 @@ export default function Calories() {
         <Controller
           control={control}
           name="name"
-          render={({ field: { value, onChange, onBlur } }) => (
-            <TextInput
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
+          render={({ field }) => (
+            <ThemedTextInput
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
               placeholder="Name"
               placeholderTextColor={theme.mutedForeground}
-              className={cn(
-                "rounded-xl border bg-card-background px-4 py-3 text-foreground",
-                errors.name ? "border-destructive" : "border-border",
-              )}
+              className={formState.errors.name ? "border-destructive" : ""}
             />
           )}
         />
 
-        {errors.name && (
+        {formState.errors.name && (
           <ThemedText className="text-xs text-destructive">
-            {errors.name.message}
+            {formState.errors.name.message}
           </ThemedText>
         )}
 
-        <View className="flex-row flex-wrap gap-2 pt-2">
+        <View className="flex-row flex-wrap gap-2">
           {[
             "Breakfast",
             "Lunch",
@@ -279,7 +252,7 @@ export default function Calories() {
             <Pressable
               key={label}
               onPress={() => setValue("name", label, { shouldValidate: true })}
-              className="rounded-full border border-border bg-muted px-3 py-1.5 active:opacity-80"
+              className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
             >
               <ThemedText className="text-sm">{label}</ThemedText>
             </Pressable>
@@ -294,25 +267,22 @@ export default function Calories() {
         <Controller
           control={control}
           name="calories"
-          render={({ field: { value, onChange, onBlur } }) => (
-            <TextInput
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
+          render={({ field }) => (
+            <ThemedTextInput
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
               placeholder="Calories"
               placeholderTextColor={theme.mutedForeground}
               keyboardType="number-pad"
-              className={cn(
-                "rounded-xl border bg-card-background px-4 py-3 text-foreground",
-                errors.calories ? "border-destructive" : "border-border",
-              )}
+              className={formState.errors.calories ? "border-destructive" : ""}
             />
           )}
         />
 
-        {errors.calories && (
+        {formState.errors.calories && (
           <ThemedText className="text-xs text-destructive">
-            {errors.calories.message}
+            {formState.errors.calories.message}
           </ThemedText>
         )}
       </View>
@@ -325,7 +295,7 @@ export default function Calories() {
           control={control}
           name="consumedAt"
           render={({ field: { value, onChange } }) => (
-            <View className="rounded-xl border border-border bg-card-background px-2 py-1">
+            <View className="rounded-xl border border-border bg-muted px-2 py-1">
               <DateTimePicker
                 value={value}
                 mode="datetime"
@@ -339,7 +309,7 @@ export default function Calories() {
       {/* Log Calories */}
       <Pressable
         onPress={handleSubmit(onSubmit)}
-        className="items-center rounded-xl bg-primary py-3 active:opacity-80"
+        className="items-center rounded-xl bg-primary p-4 active:opacity-80"
         disabled={logging}
       >
         <ThemedText className="font-semibold text-primary-foreground">

@@ -2,14 +2,17 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
-import { createCalorieLog } from "@/lib/api";
+import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
+import { cn } from "@/lib/utils";
+import { ScanFormValues, scanSchema } from "@/lib/zodSchema";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import {
   AntDesign,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
@@ -18,14 +21,20 @@ import {
   useCameraPermissions,
 } from "expo-camera";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
 import { useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
+  Alert,
   Image,
   KeyboardAvoidingView,
   Pressable,
   ScrollView,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+import z from "zod";
 
 type Product = {
   code: string;
@@ -49,25 +58,45 @@ export default function Scan() {
   const [isLoading, setIsLoading] = useState(false);
   const isLoadingRef = useRef(false);
 
-  const [name, setName] = useState("");
-  const [caloriesPerServing, setCaloriesPerServing] = useState("");
-  const [numberOfServings, setNumberOfServings] = useState("");
-  const [consumedAt, setConsumedAt] = useState(new Date());
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const { control, handleSubmit, setValue, formState, reset } =
+    useForm<ScanFormValues>({
+      resolver: zodResolver(scanSchema),
+      defaultValues: {
+        name: "",
+        caloriesPerServing: "",
+        numberOfServings: "",
+        consumedAt: new Date(),
+        image: null,
+      },
+    });
 
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const createCalorieLogMutation = useMutation({
     mutationFn: createCalorieLog,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["calorieLogs", user.id],
+      });
+
+      Toast.show({
+        type: "loggedCalories",
+        text1: "Logged!",
+        text2: `${data.name} • ${data.calories} cal`,
+        topOffset: insets.top + 16,
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
     onError: (error) => {
-      console.log(error.message);
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error.message,
+        topOffset: insets.top + 16,
+      });
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
@@ -96,11 +125,13 @@ export default function Scan() {
       const { product_name, nutriments, image_url } = response.data.product;
 
       setProduct(response.data.product);
-      setName(product_name ?? "");
-      setCaloriesPerServing(
-        Math.round(nutriments["energy-kcal_serving"] ?? 0).toString(),
+      setValue("name", product_name ?? "", { shouldValidate: true });
+      setValue(
+        "caloriesPerServing",
+        Math.ceil(nutriments["energy-kcal_serving"] ?? 0).toString(),
+        { shouldValidate: true },
       );
-      setImageUrl(image_url ?? null);
+      setValue("image", image_url ?? null, { shouldValidate: true });
     } catch {
       setError("Product not found, try again.");
     } finally {
@@ -109,27 +140,88 @@ export default function Scan() {
     }
   };
 
-  const logCalories = async () => {
-    const trimmedName = name.trim();
-    const caloriesPerServingNum = Number(caloriesPerServing);
-    const numberOfServingsNum = Number(numberOfServings);
+  const pickImage = async () => {
+    Alert.alert("Select Image", "Choose an option", [
+      {
+        text: "Take Photo",
+        onPress: () => openCamera(),
+      },
+      {
+        text: "Choose from Library",
+        onPress: () => openLibrary(),
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
+  };
 
-    if (
-      trimmedName.length < 1 ||
-      caloriesPerServingNum < 1 ||
-      numberOfServingsNum < 1
-    ) {
+  const openCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission required",
+        "Camera access is needed to take a photo.",
+      );
       return;
     }
 
-    const consumedAtString = toSqlTimestamp(consumedAt);
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    setValue("image", result.assets[0].uri, { shouldValidate: true });
+  };
+
+  const openLibrary = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission required",
+        "Photo library access is needed to select an image.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    setValue("image", result.assets[0].uri, { shouldValidate: true });
+  };
+
+  const onSubmit = async (data: ScanFormValues) => {
+    const caloriesPerServingNum = Number(data.caloriesPerServing);
+    const numberOfServingsNum = Number(data.numberOfServings);
+    const calories = Math.ceil(caloriesPerServingNum * numberOfServingsNum);
+    const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
+
+    const imageUrl =
+      data.image === null
+        ? null
+        : z.safeParse(z.url(), data.image).success
+          ? data.image
+          : await uploadToCloudinary(data.image);
 
     createCalorieLogMutation.mutate({
       userId: user.id,
-      name: trimmedName,
-      calories: caloriesPerServingNum * numberOfServingsNum,
+      name: data.name,
+      calories,
       imageUrl,
-      consumedAt: consumedAtString,
+      consumedAt: consumedAtSqlTimestamp,
     });
   };
 
@@ -139,10 +231,10 @@ export default function Scan() {
     setIsLoading(false);
     isLoadingRef.current = false;
 
-    setNumberOfServings("");
+    reset();
   };
 
-  if (!status) {
+  if (status === null) {
     return;
   }
 
@@ -223,103 +315,202 @@ export default function Scan() {
     <KeyboardAvoidingView behavior="padding" className="flex-1">
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-4"
+        contentContainerClassName="p-4 gap-6"
         showsVerticalScrollIndicator={false}
       >
         <Pressable
-          className="bg-secondary p-4 rounded-full flex-row items-center justify-center gap-2"
+          className="bg-secondary p-4 rounded-xl flex-row items-center justify-center gap-1 active:opacity-80"
           onPress={rescan}
         >
           <MaterialCommunityIcons
             name="refresh"
-            size={24}
+            size={16}
             color={theme.secondaryForeground}
           />
 
-          <ThemedText className="text-secondary-foreground text-center text-lg font-bold">
+          <ThemedText className="text-secondary-foreground text-center font-semibold">
             Rescan
           </ThemedText>
         </Pressable>
 
-        {imageUrl !== null ? (
-          <Image
-            className="h-64"
-            style={{ objectFit: "contain" }}
-            source={{
-              uri: imageUrl,
-            }}
-          />
-        ) : (
-          <View className="items-center border border-border p-4 rounded-xl h-64 justify-center">
-            <MaterialCommunityIcons
-              name="image"
-              size={64}
-              color={theme.foreground}
-            />
+        {/* Image picker */}
+        <View className="items-center gap-2">
+          <Controller
+            control={control}
+            name="image"
+            render={({ field }) => (
+              <View className="relative h-48 w-48">
+                <Pressable
+                  onPress={pickImage}
+                  className={cn(
+                    "flex-1 items-center justify-center overflow-hidden rounded-2xl",
+                    field.value !== null
+                      ? "border border-transparent"
+                      : "border border-dashed border-border bg-muted",
+                  )}
+                >
+                  {field.value !== null ? (
+                    <Image
+                      source={{ uri: field.value }}
+                      style={{ flex: 1, width: "100%" }}
+                    />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name="camera"
+                      size={48}
+                      color={theme.mutedForeground}
+                    />
+                  )}
+                </Pressable>
 
-            <ThemedText className="font-bold text-2xl">
-              Product image not found
+                {field.value !== null && (
+                  <Pressable
+                    onPress={() => field.onChange(null)}
+                    hitSlop={8}
+                    className="absolute -right-3 -top-3 h-8 w-8 items-center justify-center rounded-full bg-destructive shadow active:opacity-80"
+                  >
+                    <MaterialCommunityIcons
+                      name="trash-can-outline"
+                      size={16}
+                      color={theme.destructiveForeground}
+                    />
+                  </Pressable>
+                )}
+              </View>
+            )}
+          />
+
+          <View className="items-center">
+            <ThemedText className="text-sm font-medium">
+              Add an image
             </ThemedText>
 
-            <ThemedText className="text-muted-foreground">
-              Tap to take your own picture
+            <ThemedText className="text-xs text-muted-foreground">
+              Tap to select an image
             </ThemedText>
           </View>
-        )}
+        </View>
 
-        <View className="gap-1">
-          <ThemedText className="font-bold">Name</ThemedText>
+        {/* Name */}
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Name</ThemedText>
 
-          <ThemedTextInput
-            placeholder="Name"
-            value={name}
-            onChangeText={(text) => setName(text)}
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <ThemedTextInput
+                placeholder="Name"
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                placeholderTextColor={theme.mutedForeground}
+                className={formState.errors.name ? "border-destructive" : ""}
+              />
+            )}
+          />
+
+          {formState.errors.name && (
+            <ThemedText className="text-xs text-destructive">
+              {formState.errors.name.message}
+            </ThemedText>
+          )}
+        </View>
+
+        {/* Consumed at */}
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Consumed at</ThemedText>
+
+          <Controller
+            control={control}
+            name="consumedAt"
+            render={({ field }) => (
+              <View className="text-foreground px-2 py-1 border border-border rounded-xl bg-muted">
+                <DateTimePicker
+                  value={field.value}
+                  mode="datetime"
+                  onValueChange={(_, selectedDate) => {
+                    field.onChange(selectedDate);
+                  }}
+                />
+              </View>
+            )}
           />
         </View>
 
-        <View className="gap-1">
-          <ThemedText className="font-bold">Date</ThemedText>
+        {/* Calories per serving */}
+        <View className="flex-row gap-4 items-start">
+          <View className="gap-2 flex-1">
+            <ThemedText className="text-sm font-medium">
+              Calories per serving
+            </ThemedText>
 
-          <View className="text-foreground py-4 border border-border rounded-xl bg-muted">
-            <DateTimePicker
-              value={consumedAt}
-              mode="datetime"
-              onValueChange={(_, selectedDate) => {
-                setConsumedAt(selectedDate);
-              }}
+            <Controller
+              control={control}
+              name="caloriesPerServing"
+              render={({ field }) => (
+                <ThemedTextInput
+                  placeholder="Calories per serving"
+                  keyboardType="number-pad"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  placeholderTextColor={theme.mutedForeground}
+                  className={
+                    formState.errors.caloriesPerServing
+                      ? "border-destructive"
+                      : ""
+                  }
+                />
+              )}
             />
+
+            {formState.errors.caloriesPerServing && (
+              <ThemedText className="text-xs text-destructive">
+                {formState.errors.caloriesPerServing.message}
+              </ThemedText>
+            )}
           </View>
-        </View>
 
-        <View className="flex-row gap-4 items-end">
-          <View className="gap-1 flex-1">
-            <ThemedText className="font-bold">Calories per serving</ThemedText>
+          {/* Number of servings */}
+          <View className="gap-2 flex-1">
+            <ThemedText className="text-sm font-medium">
+              Number of servings
+            </ThemedText>
 
-            <ThemedTextInput
-              placeholder="Calories per serving"
-              keyboardType="number-pad"
-              value={caloriesPerServing}
-              onChangeText={(text) => setCaloriesPerServing(text)}
+            <Controller
+              control={control}
+              name="numberOfServings"
+              render={({ field }) => (
+                <ThemedTextInput
+                  placeholder="Number of servings"
+                  keyboardType="numeric"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  placeholderTextColor={theme.mutedForeground}
+                  className={
+                    formState.errors.numberOfServings
+                      ? "border-destructive"
+                      : ""
+                  }
+                />
+              )}
             />
-          </View>
 
-          <View className="gap-1 flex-1">
-            <ThemedText className="font-bold">Number of servings</ThemedText>
-
-            <ThemedTextInput
-              placeholder="Number of servings"
-              keyboardType="number-pad"
-              value={numberOfServings}
-              onChangeText={(text) => setNumberOfServings(text)}
-            />
+            {formState.errors.numberOfServings && (
+              <ThemedText className="text-xs text-destructive">
+                {formState.errors.numberOfServings.message}
+              </ThemedText>
+            )}
           </View>
         </View>
 
         <Pressable
-          className="bg-primary p-4 rounded-full"
-          onPress={logCalories}
+          className="bg-primary p-4 rounded-xl active:opacity-80"
+          onPress={handleSubmit(onSubmit)}
         >
-          <ThemedText className="text-primary-foreground text-center text-lg font-bold">
+          <ThemedText className="text-primary-foreground text-center font-semibold">
             Log Calories
           </ThemedText>
         </Pressable>

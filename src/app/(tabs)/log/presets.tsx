@@ -21,6 +21,8 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function Favorites() {
   const queryClient = useQueryClient();
@@ -31,6 +33,7 @@ export default function Favorites() {
   );
 
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const { data: calorieLogPresets } = useQuery({
     queryKey: ["calorieLogPresets", user.id],
@@ -44,14 +47,28 @@ export default function Favorites() {
 
   const createCalorieLogMutation = useMutation({
     mutationFn: createCalorieLog,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["calorieLogs", user.id],
       });
 
+      Toast.show({
+        type: "loggedCalories",
+        text1: "Logged!",
+        text2: `${data.name} • ${data.calories} cal`,
+        topOffset: insets.top + 16,
+      });
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
-    onError: () => {
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error.message,
+        topOffset: insets.top + 16,
+      });
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
@@ -65,21 +82,42 @@ export default function Favorites() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
-    onError: () => {
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error.message,
+        topOffset: insets.top + 16,
+      });
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
 
   const createWorkoutLogMutation = useMutation({
     mutationFn: createWorkoutLog,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["workoutLogs", user.id],
       });
 
+      Toast.show({
+        type: "loggedWorkout",
+        text1: "Logged!",
+        text2: `${data.name} • ${data.duration} mins`,
+        topOffset: insets.top + 16,
+      });
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
-    onError: () => {
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error.message,
+        topOffset: insets.top + 16,
+      });
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
@@ -93,31 +131,38 @@ export default function Favorites() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
-    onError: () => {
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error.message,
+        topOffset: insets.top + 16,
+      });
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
 
   const logCalories = async (calorieLogPreset: CalorieLogPreset) => {
-    const consumedAtString = toSqlTimestamp(new Date());
+    const consumedAtSqlTimestamp = toSqlTimestamp(new Date());
 
     createCalorieLogMutation.mutate({
       userId: user.id,
       name: calorieLogPreset.name,
       calories: calorieLogPreset.calories,
       imageUrl: calorieLogPreset.imageUrl,
-      consumedAt: consumedAtString,
+      consumedAt: consumedAtSqlTimestamp,
     });
   };
 
   const logWorkout = async (workoutLogPreset: WorkoutLogPreset) => {
-    const performedAtString = toSqlTimestamp(new Date());
+    const performedAtSqlTimestamp = toSqlTimestamp(new Date());
 
     createWorkoutLogMutation.mutate({
       userId: user.id,
       name: workoutLogPreset.name,
       duration: workoutLogPreset.duration,
-      performedAt: performedAtString,
+      performedAt: performedAtSqlTimestamp,
       iconLibrary: workoutLogPreset.iconLibrary,
       iconName: workoutLogPreset.iconName,
     });

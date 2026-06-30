@@ -40,7 +40,7 @@ export default function History() {
     return;
   }
 
-  const datesStrings = Array.from({ length: 31 }, (_, i) => {
+  const dateStrings = Array.from({ length: 31 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - i);
     return toSqlDate(date);
@@ -128,7 +128,7 @@ export default function History() {
       </ScrollView>
 
       <View className="flex-row flex-wrap">
-        {datesStrings.map((dateString) => {
+        {dateStrings.map((dateString) => {
           const totalCalories =
             calorieLogsGroupedByDate[dateString]?.totalCalories ?? 0;
           const backgroundColor =
