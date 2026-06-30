@@ -354,7 +354,7 @@ export default function Index() {
               className="bg-secondary p-4 rounded-xl"
               onPress={() => router.push("/(tabs)/log/calories")}
             >
-              <ThemedText color="text-secondary-foreground">
+              <ThemedText className="text-secondary-foreground">
                 Log calories
               </ThemedText>
             </Pressable>
@@ -391,7 +391,7 @@ export default function Index() {
               className="bg-secondary p-4 rounded-xl"
               onPress={() => router.push("/(tabs)/log/workout")}
             >
-              <ThemedText color="text-secondary-foreground">
+              <ThemedText className="text-secondary-foreground">
                 Log workout
               </ThemedText>
             </Pressable>
@@ -441,7 +441,7 @@ export default function Index() {
               className="bg-secondary p-4 rounded-xl"
               onPress={() => router.push("/(tabs)/log/goal")}
             >
-              <ThemedText color="text-secondary-foreground">
+              <ThemedText className="text-secondary-foreground">
                 Create Goal
               </ThemedText>
             </Pressable>

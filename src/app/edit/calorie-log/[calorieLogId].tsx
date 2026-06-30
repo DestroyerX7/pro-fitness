@@ -280,7 +280,7 @@ export default function Screen() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            deleteCalorieLogMutation.mutate(calorieLog.id, {
+            deleteCalorieLogMutation.mutate(calorieLogId, {
               onSuccess: () => router.back(),
               onError: () =>
                 Alert.alert(
@@ -379,7 +379,7 @@ export default function Screen() {
               disabled={isSaving || !hasUnsavedChanges}
               onPress={handleSave}
             >
-              <ThemedText color="text-primary-foreground">
+              <ThemedText className="text-primary-foreground">
                 {isSaving ? "Saving..." : "Save"}
               </ThemedText>
             </Pressable>

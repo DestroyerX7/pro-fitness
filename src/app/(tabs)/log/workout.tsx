@@ -76,36 +76,68 @@ export default function Workout() {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerClassName="p-4 gap-4"
+      contentContainerClassName="p-4 gap-6"
       showsVerticalScrollIndicator={false}
     >
-      <View className="flex-row gap-4 items-end">
-        <View className="gap-1 flex-1">
-          <ThemedText className="font-bold">Name</ThemedText>
+      <View className="gap-2">
+        <ThemedText className="text-sm font-medium">Name</ThemedText>
 
-          <ThemedTextInput
-            placeholder="Name"
-            value={name}
-            onChangeText={(text) => setName(text)}
-          />
-        </View>
+        <ThemedTextInput
+          placeholder="Name"
+          value={name}
+          onChangeText={(text) => setName(text)}
+        />
 
-        <View className="gap-1 flex-1">
-          <ThemedText className="font-bold">Duration</ThemedText>
-
-          <ThemedTextInput
-            placeholder="Duration"
-            keyboardType="number-pad"
-            value={duration}
-            onChangeText={(text) => setDuration(text)}
-          />
+        <View className="flex-row flex-wrap gap-2 pt-2">
+          {[
+            "Push",
+            "Pull",
+            "Legs",
+            "Upper",
+            "Lower",
+            "Chest",
+            "Shoulders",
+            "Arms",
+            "Cardio",
+          ].map((label) => (
+            <Pressable
+              key={label}
+              onPress={() => setName(label)}
+              className="rounded-full border border-border bg-muted px-3 py-1.5 active:opacity-80"
+            >
+              <ThemedText className="text-sm">{label}</ThemedText>
+            </Pressable>
+          ))}
         </View>
       </View>
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Performed At</ThemedText>
+      <View className="gap-2">
+        <ThemedText className="text-sm font-medium">Duration</ThemedText>
 
-        <View className="text-foreground py-4 border border-border rounded-xl bg-muted">
+        <ThemedTextInput
+          placeholder="Duration"
+          keyboardType="number-pad"
+          value={duration}
+          onChangeText={(text) => setDuration(text)}
+        />
+
+        <View className="flex-row flex-wrap gap-2 pt-2">
+          {["15", "30", "45", "60", "75", "90", "105", "120"].map((label) => (
+            <Pressable
+              key={label}
+              onPress={() => setDuration(label)}
+              className="rounded-full border border-border bg-muted px-3 py-1.5 active:opacity-80"
+            >
+              <ThemedText className="text-sm">{label}</ThemedText>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      <View className="gap-2">
+        <ThemedText className="text-sm font-medium">Performed At</ThemedText>
+
+        <View className="text-foreground px-2 py-1 border border-border rounded-xl bg-muted">
           <DateTimePicker
             value={performedAt}
             mode="datetime"
@@ -116,22 +148,20 @@ export default function Workout() {
         </View>
       </View>
 
-      <View className="gap-1">
-        <ThemedText className="font-bold">Icon</ThemedText>
+      <View className="gap-2">
+        <ThemedText className="text-sm font-medium">Icon</ThemedText>
 
         <View className="flex-row gap-4 flex-wrap p-4 bg-muted border rounded-xl border-border">
           <WorkoutIconGrid
             value={selectedIconType}
             onValueChange={setSelectedIconType}
+            numColumns={6}
           />
         </View>
       </View>
 
-      <Pressable onPress={logWorkout} className="bg-primary p-4 rounded-full">
-        <ThemedText
-          color="text-primary-foreground"
-          className="text-center text-lg font-bold"
-        >
+      <Pressable onPress={logWorkout} className="bg-primary py-3 rounded-xl">
+        <ThemedText className="text-primary-foreground text-center font-medium">
           Log Workout
         </ThemedText>
       </Pressable>

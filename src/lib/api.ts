@@ -46,15 +46,18 @@ export const getUser = async (userId: string) => {
 export const updateUser = async ({
   dailyCalorieGoal,
   dailyWorkoutGoal,
+  image,
   userId,
 }: {
   dailyCalorieGoal?: number;
   dailyWorkoutGoal?: number;
+  image?: string | null | undefined;
   userId: string;
 }) => {
   const response = await api.patch<User>(`/api/update-user/${userId}`, {
     dailyCalorieGoal,
     dailyWorkoutGoal,
+    image,
   });
 
   return response.data;
@@ -309,11 +312,7 @@ export const updateCalorieLogPreset = async ({
   return response.data;
 };
 
-export const deleteCalorieLogPreset = async ({
-  calorieLogPresetId,
-}: {
-  calorieLogPresetId: string;
-}) => {
+export const deleteCalorieLogPreset = async (calorieLogPresetId: string) => {
   const response = await api.delete<CalorieLogPreset>(
     `/api/delete-calorie-log-preset/${calorieLogPresetId}`,
   );

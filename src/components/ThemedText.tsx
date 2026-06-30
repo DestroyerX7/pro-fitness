@@ -1,31 +1,13 @@
 import { cn } from "@/lib/utils";
 import { Text, TextProps } from "react-native";
 
-type Props = {
-  color?:
-    | "text-foreground"
-    | "text-background"
-    | "text-primary"
-    | "text-primary-foreground"
-    | "text-secondary"
-    | "text-secondary-foreground"
-    | "text-muted"
-    | "text-muted-foreground"
-    | "text-accent"
-    | "text-accent-foreground"
-    | "text-destructive"
-    | "text-destructive-foreground"
-    | "text-destructive-accent"
-    | "";
-} & TextProps;
 export default function ThemedText({
-  color = "text-foreground",
   className,
   children,
   ...props
-}: Props) {
+}: TextProps) {
   return (
-    <Text className={cn(color, className)} {...props}>
+    <Text className={cn("text-foreground", className)} {...props}>
       {children}
     </Text>
   );

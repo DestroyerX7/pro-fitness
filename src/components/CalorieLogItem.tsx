@@ -41,11 +41,11 @@ export default function CalorieLogItem({
       <View className="flex-1 gap-1">
         <ThemedText className="text-lg font-bold">{name}</ThemedText>
 
-        <ThemedText color="text-muted-foreground">{calories}</ThemedText>
+        <ThemedText className="text-muted-foreground">{calories}</ThemedText>
       </View>
 
       {onEdit !== undefined && (
-        <Pressable onPress={() => onEdit(id)}>
+        <Pressable hitSlop={8} onPress={() => onEdit(id)}>
           <Ionicons
             name="ellipsis-horizontal"
             size={24}

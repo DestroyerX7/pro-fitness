@@ -18,6 +18,7 @@ import { toSqlTimestamp } from "@/lib/dates";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
@@ -122,6 +123,13 @@ export default function Favorites() {
     });
   };
 
+  const handleEditCalorieLogPreset = (calorieLogPresetId: string) => {
+    router.push({
+      pathname: "/edit/calorie-log-preset/[calorieLogPresetId]",
+      params: { calorieLogPresetId },
+    });
+  };
+
   if (calorieLogPresets === undefined || workoutLogPresets === undefined) {
     return;
   }
@@ -157,9 +165,7 @@ export default function Favorites() {
             <Pressable
               onPress={() => logCalories(calorieLogPreset)}
               onLongPress={() =>
-                deleteCalorieLogPresetMutation.mutate({
-                  calorieLogPresetId: calorieLogPreset.id,
-                })
+                deleteCalorieLogPresetMutation.mutate(calorieLogPreset.id)
               }
               key={calorieLogPreset.id}
             >
@@ -168,6 +174,7 @@ export default function Favorites() {
                 name={calorieLogPreset.name}
                 imageUrl={calorieLogPreset.imageUrl}
                 calories={calorieLogPreset.calories}
+                onEdit={handleEditCalorieLogPreset}
               />
             </Pressable>
           ))
@@ -183,7 +190,7 @@ export default function Favorites() {
               No saved calorie presets
             </ThemedText>
 
-            <ThemedText color="text-muted-foreground" className="text-center">
+            <ThemedText className="text-muted-foreground text-center">
               Edit a calorie log and press create preset based off it&apos;s
               values
             </ThemedText>
@@ -221,7 +228,7 @@ export default function Favorites() {
             No saved workout presets
           </ThemedText>
 
-          <ThemedText color="text-muted-foreground" className="text-center">
+          <ThemedText className="text-muted-foreground text-center">
             Edit a workout log and press create preset based off it&apos;s
             values
           </ThemedText>

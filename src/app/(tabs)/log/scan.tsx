@@ -173,10 +173,7 @@ export default function Scan() {
             color={theme.primaryForeground}
           />
 
-          <ThemedText
-            color="text-primary-foreground"
-            className="text-center text-lg font-bold"
-          >
+          <ThemedText className="text-primary-foreground text-center text-lg font-bold">
             Rescan
           </ThemedText>
         </Pressable>
@@ -239,10 +236,7 @@ export default function Scan() {
             color={theme.secondaryForeground}
           />
 
-          <ThemedText
-            color="text-secondary-foreground"
-            className="text-center text-lg font-bold"
-          >
+          <ThemedText className="text-secondary-foreground text-center text-lg font-bold">
             Rescan
           </ThemedText>
         </Pressable>
@@ -267,7 +261,7 @@ export default function Scan() {
               Product image not found
             </ThemedText>
 
-            <ThemedText color="text-muted-foreground">
+            <ThemedText className="text-muted-foreground">
               Tap to take your own picture
             </ThemedText>
           </View>
@@ -325,10 +319,7 @@ export default function Scan() {
           className="bg-primary p-4 rounded-full"
           onPress={logCalories}
         >
-          <ThemedText
-            color="text-primary-foreground"
-            className="text-center text-lg font-bold"
-          >
+          <ThemedText className="text-primary-foreground text-center text-lg font-bold">
             Log Calories
           </ThemedText>
         </Pressable>

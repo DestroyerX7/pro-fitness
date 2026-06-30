@@ -35,7 +35,7 @@ export default function WorkoutLogItem({
       <View className="flex-1 gap-1">
         <ThemedText className="text-lg font-bold">{name}</ThemedText>
 
-        <ThemedText color="text-muted-foreground">
+        <ThemedText className="text-muted-foreground">
           {duration} minutes
         </ThemedText>
       </View>

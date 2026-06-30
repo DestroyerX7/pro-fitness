@@ -32,7 +32,7 @@ export default function TabButton({
       onPress={onPress}
     >
       <ThemedText
-        color={active ? "text-background" : "text-secondary-foreground"}
+        className={active ? "text-background" : "text-secondary-foreground"}
       >
         {text}
       </ThemedText>

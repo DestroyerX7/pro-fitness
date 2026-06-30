@@ -1,21 +1,20 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import useTheme from "@/hooks/useTheme";
 import { authClient } from "@/lib/auth-client";
-import { colors } from "@/lib/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link, router } from "expo-router";
-import { useColorScheme } from "nativewind";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const loginWithEmail = async () => {
     await authClient.signIn.email({
@@ -74,7 +73,14 @@ export default function Login() {
   };
 
   return (
-    <SafeAreaView className="p-4 gap-4">
+    <View
+      className="gap-4"
+      style={{
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom + 16,
+        paddingHorizontal: 16,
+      }}
+    >
       <ThemedText className="text-4xl font-bold">Login</ThemedText>
 
       <ThemedTextInput
@@ -94,7 +100,7 @@ export default function Login() {
       />
 
       <Pressable className="p-4 bg-primary rounded-xl" onPress={loginWithEmail}>
-        <ThemedText color="text-primary-foreground">Login</ThemedText>
+        <ThemedText className="text-primary-foreground">Login</ThemedText>
       </Pressable>
 
       <View className="h-[1px] bg-border " />
@@ -126,11 +132,9 @@ export default function Login() {
       <ThemedText className="text-center text-xl">
         Don&apos;t have an account?{" "}
         <Link href="/(auth)/sign-up">
-          <ThemedText color="text-primary" className="underline">
-            Sign Up
-          </ThemedText>
+          <ThemedText className="text-primary underline">Sign Up</ThemedText>
         </Link>
       </ThemedText>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -59,10 +59,7 @@ export default function Goal() {
         onPress={handleCreateGoal}
         className="bg-primary p-4 rounded-full"
       >
-        <ThemedText
-          color="text-primary-foreground"
-          className="text-center text-lg font-bold"
-        >
+        <ThemedText className="text-primary-foreground text-center text-lg font-bold">
           Create Goal
         </ThemedText>
       </Pressable>

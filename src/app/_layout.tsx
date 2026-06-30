@@ -79,9 +79,22 @@ function RootNavigator() {
             contentStyle: { backgroundColor: "transparent" },
           }}
         />
+
+        <Stack.Screen
+          name="edit/calorie-log-preset/[calorieLogPresetId]"
+          options={{
+            headerShown: true,
+            title: "Edit Calorie Log Preset",
+            presentation: "formSheet",
+            sheetAllowedDetents: [0.75, 1],
+            sheetLargestUndimmedDetentIndex: "last",
+            sheetGrabberVisible: true,
+            contentStyle: { backgroundColor: "transparent" },
+          }}
+        />
       </Stack.Protected>
 
-      <Stack.Protected guard={authData == null}>
+      <Stack.Protected guard={authData === null}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
     </Stack>

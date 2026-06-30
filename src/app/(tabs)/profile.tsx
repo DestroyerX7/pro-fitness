@@ -3,18 +3,29 @@ import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
 import useTheme from "@/hooks/useTheme";
 import useUser from "@/hooks/useUser";
-import { deleteUser } from "@/lib/api";
+import { deleteUser, updateUser, uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Profile() {
+  const queryClient = useQueryClient();
   const { user: authUser } = useAuthenticatedAuth();
   const { data: user, isPending, error } = useUser(authUser.id);
 
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+
+  const updateUserMutation = useMutation({
+    mutationFn: updateUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", authUser.id] });
+    },
+  });
 
   const handleDeleteUser = () => {
     Alert.alert(
@@ -37,6 +48,71 @@ export default function Profile() {
     );
   };
 
+  const pickImage = async () => {
+    Alert.alert("Select Image", "Choose an option", [
+      {
+        text: "Take Photo",
+        onPress: () => openCamera(),
+      },
+      {
+        text: "Choose from Library",
+        onPress: () => openLibrary(),
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
+  };
+
+  const openCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission required",
+        "Camera access is needed to take a photo.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const imageUrl = await uploadToCloudinary(result.assets[0].uri);
+    updateUserMutation.mutate({ image: imageUrl, userId: authUser.id });
+  };
+
+  const openLibrary = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission required",
+        "Photo library access is needed to select an image.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const imageUrl = await uploadToCloudinary(result.assets[0].uri);
+    updateUserMutation.mutate({ image: imageUrl, userId: authUser.id });
+  };
+
   if (error !== null) {
     return <ThemedText>{error.message}</ThemedText>;
   }
@@ -55,10 +131,29 @@ export default function Profile() {
       }}
       showsVerticalScrollIndicator={false}
     >
-      <View>
-        <ThemedText className="text-4xl font-bold">{user.name}</ThemedText>
+      <View className="flex-row gap-4 items-center">
+        {user.image !== null ? (
+          <Pressable onPress={pickImage}>
+            <Image
+              source={{ uri: user.image }}
+              style={{ width: 64, aspectRatio: 1, borderRadius: 32 }}
+            />
+          </Pressable>
+        ) : (
+          <MaterialCommunityIcons
+            name="account-circle"
+            size={64}
+            color={theme.foreground}
+          />
+        )}
 
-        <ThemedText color="text-muted-foreground">{user.email}</ThemedText>
+        <View>
+          <ThemedText className="text-4xl font-bold">{user.name}</ThemedText>
+
+          <ThemedText className="text-muted-foreground">
+            {user.email}
+          </ThemedText>
+        </View>
       </View>
 
       <Card className="gap-4">
@@ -66,7 +161,8 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Name</ThemedText>
-          <ThemedText color="text-muted-foreground" className="text-xl">
+
+          <ThemedText className="text-muted-foreground text-xl">
             {user.name}
           </ThemedText>
         </View>
@@ -75,7 +171,8 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Email</ThemedText>
-          <ThemedText color="text-muted-foreground" className="text-xl">
+
+          <ThemedText className="text-muted-foreground text-xl">
             {user.email}
           </ThemedText>
         </View>
@@ -84,7 +181,8 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Daily Calorie Goal</ThemedText>
-          <ThemedText color="text-muted-foreground" className="text-xl">
+
+          <ThemedText className="text-muted-foreground text-xl">
             {user.dailyCalorieGoal} calories
           </ThemedText>
         </View>
@@ -93,7 +191,8 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Daily Workout Goal</ThemedText>
-          <ThemedText color="text-muted-foreground" className="text-xl">
+
+          <ThemedText className="text-muted-foreground text-xl">
             {user.dailyWorkoutGoal} minutes
           </ThemedText>
         </View>
@@ -102,7 +201,8 @@ export default function Profile() {
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Account Created</ThemedText>
-          <ThemedText color="text-muted-foreground" className="text-xl">
+
+          <ThemedText className="text-muted-foreground text-xl">
             {new Date(user.createdAt).toLocaleDateString()}
           </ThemedText>
         </View>
@@ -156,7 +256,7 @@ export default function Profile() {
           color={theme.background}
         />
 
-        <ThemedText color="text-background">Log out</ThemedText>
+        <ThemedText className="text-background">Log out</ThemedText>
       </Pressable>
 
       <Pressable

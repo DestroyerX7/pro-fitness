@@ -122,7 +122,7 @@ export default function SignUp() {
         className="p-4 bg-primary rounded-xl"
         onPress={signUpWithEmail}
       >
-        <ThemedText color="text-primary-foreground">Sign Up</ThemedText>
+        <ThemedText className="text-primary-foreground">Sign Up</ThemedText>
       </Pressable>
 
       <View className="h-[2px] bg-border" />
@@ -160,9 +160,7 @@ export default function SignUp() {
       <ThemedText className="text-center text-xl">
         Already have an account?{" "}
         <Link href="/(auth)/login">
-          <ThemedText color="text-primary" className="underline">
-            Login
-          </ThemedText>
+          <ThemedText className="text-primary underline">Login</ThemedText>
         </Link>
       </ThemedText>
     </SafeAreaView>

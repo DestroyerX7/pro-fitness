@@ -1,8 +1,8 @@
+import useTheme from "@/hooks/useTheme";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 import Card from "./Card";
 import ThemedText from "./ThemedText";
-import useTheme from "@/hooks/useTheme";
 
 type Props = {
   id: string;
@@ -43,7 +43,7 @@ export default function GoalItem({
         <View className="gap-1 flex-1">
           <ThemedText className="text-lg font-bold">{name}</ThemedText>
 
-          <ThemedText color="text-muted-foreground" className="flex-wrap">
+          <ThemedText className="text-muted-foreground flex-wrap">
             {description}
           </ThemedText>
 

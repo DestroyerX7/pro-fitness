@@ -3,11 +3,13 @@ import { user } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
+import z from "zod";
 
 const updateUserSchema = createUpdateSchema(user, {
   dailyCalorieGoal: (schema) => schema.int().min(1),
   dailyWorkoutGoal: (schema) => schema.int().min(1),
-}).pick({ dailyCalorieGoal: true, dailyWorkoutGoal: true });
+  image: z.url().nullable().optional(),
+}).pick({ dailyCalorieGoal: true, dailyWorkoutGoal: true, image: true });
 
 export async function PATCH(
   request: Request,
