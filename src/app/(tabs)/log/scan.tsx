@@ -6,7 +6,7 @@ import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { ScanFormValues, scanSchema } from "@/lib/zodSchema";
-import DateTimePicker from "@expo/ui/community/datetime-picker";
+import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import {
   AntDesign,
   MaterialCommunityIcons,
@@ -34,7 +34,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import z from "zod";
+import { z } from "zod";
 
 type Product = {
   code: string;

@@ -1,9 +1,10 @@
+import { Icon } from "@/lib/icons";
 import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
   integer,
-  pgEnum,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -140,15 +141,6 @@ export const calorieLog = pgTable(
   (table) => [index("calorie_log_userId_idx").on(table.userId)],
 );
 
-export const iconLibraries = [
-  "MaterialIcons",
-  "MaterialCommunityIcons",
-] as const;
-
-export type IconLibrary = (typeof iconLibraries)[number];
-
-export const iconLibraryEnum = pgEnum("icon_library_enum", iconLibraries);
-
 export const workoutLog = pgTable(
   "workout_log",
   {
@@ -158,8 +150,13 @@ export const workoutLog = pgTable(
     performedAt: timestamp("performed_at", { mode: "string" })
       .defaultNow()
       .notNull(),
-    iconLibrary: iconLibraryEnum("icon_library").notNull(),
-    iconName: text("icon_name").notNull(),
+    icon: jsonb("icon")
+      .$type<Icon>()
+      .default({
+        library: "MaterialCommunityIcons",
+        name: "run",
+      })
+      .notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -215,8 +212,13 @@ export const workoutLogPreset = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
     duration: integer("duration").notNull(),
-    iconLibrary: iconLibraryEnum("icon_library").notNull(),
-    iconName: text("icon_name").notNull(),
+    icon: jsonb("icon")
+      .$type<Icon>()
+      .default({
+        library: "MaterialCommunityIcons",
+        name: "run",
+      })
+      .notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

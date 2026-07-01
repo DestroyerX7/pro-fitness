@@ -9,7 +9,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -21,7 +21,7 @@ import {
   View,
 } from "react-native";
 
-export default function Screen() {
+export default function EditGoal() {
   const { goalId } = useLocalSearchParams<{ goalId: string }>();
   const queryClient = useQueryClient();
   const { data: authData } = useAuth();
@@ -33,17 +33,16 @@ export default function Screen() {
           ?.find((c) => c.id === goalId)
       : undefined;
 
-  const { control, handleSubmit, formState, setValue } =
-    useForm<GoalFormValues>({
-      resolver: zodResolver(goalSchema),
-      defaultValues: {
-        name: goal !== undefined ? goal.name : "",
-        description:
-          goal !== undefined && goal.description !== null
-            ? goal.description
-            : "",
-      },
-    });
+  const { control, handleSubmit, formState } = useForm<GoalFormValues>({
+    resolver: zodResolver(goalSchema),
+    defaultValues: {
+      name: goal !== undefined ? goal.name : "",
+      description:
+        goal !== undefined && goal.description !== null ? goal.description : "",
+      completed: goal !== undefined && goal.completed,
+      hidden: goal !== undefined && goal.hidden,
+    },
+  });
 
   const theme = useTheme();
 
@@ -106,7 +105,12 @@ export default function Screen() {
 
   const onSubmit = async (data: GoalFormValues) => {
     // Could maybe use formState.isDirty
-    if (goal.name === data.name && goal.description === data.description) {
+    if (
+      goal.name === data.name &&
+      goal.description === data.description &&
+      goal.completed === data.completed &&
+      goal.hidden === data.hidden
+    ) {
       return;
     }
 
@@ -114,6 +118,8 @@ export default function Screen() {
       {
         name: data.name,
         description: data.description,
+        completed: data.completed,
+        hidden: data.hidden,
         goalId,
       },
       {
@@ -132,105 +138,179 @@ export default function Screen() {
   const hasUnsavedChanges = formState.isDirty;
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-6"
-        showsVerticalScrollIndicator={false}
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Controller
+              control={control}
+              name="hidden"
+              render={({ field }) => (
+                <Pressable
+                  onPress={() => field.onChange(!field.value)}
+                  onBlur={field.onBlur}
+                  className="p-2 justify-center items-center flex-row gap-2"
+                >
+                  <MaterialCommunityIcons
+                    name={field.value ? "eye" : "eye-off"}
+                    size={24}
+                    color={theme.foreground}
+                  />
+
+                  <ThemedText>{field.value ? "Show" : "Hide"}</ThemedText>
+                </Pressable>
+              )}
+            />
+          ),
+        }}
+      />
+
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View className="gap-2">
-          <ThemedText className="text-sm font-medium">Name</ThemedText>
-
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <ThemedTextInput
-                placeholder="Name"
-                value={field.value}
-                onChangeText={field.onChange}
-                onBlur={field.onBlur}
-                className={
-                  formState.errors.name !== undefined
-                    ? "border-destructive"
-                    : ""
-                }
-              />
-            )}
-          />
-
-          {formState.errors.name !== undefined && (
-            <ThemedText className="text-destructive text-xs">
-              {formState.errors.name.message}
-            </ThemedText>
-          )}
-        </View>
-
-        <View className="gap-2">
-          <ThemedText className="text-sm font-medium">Description</ThemedText>
-
-          <Controller
-            control={control}
-            name="description"
-            render={({ field }) => (
-              <ThemedTextInput
-                className={cn(
-                  "h-32",
-                  formState.errors.description !== undefined
-                    ? "border-destructive"
-                    : "",
-                )}
-                placeholder="Description..."
-                value={field.value}
-                onChangeText={field.onChange}
-                onBlur={field.onBlur}
-                textAlignVertical="top"
-                multiline
-              />
-            )}
-          />
-
-          {formState.errors.description !== undefined && (
-            <ThemedText className="text-destructive text-xs">
-              {formState.errors.description.message}
-            </ThemedText>
-          )}
-        </View>
-
-        {/* Save */}
-        <Pressable
-          onPress={handleSubmit(onSubmit)}
-          className={cn(
-            "items-center rounded-xl bg-primary p-4 active:opacity-80",
-            isSaving || !hasUnsavedChanges ? "opacity-50" : "",
-          )}
-          disabled={isSaving || !hasUnsavedChanges}
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerClassName="p-4 gap-6"
+          showsVerticalScrollIndicator={false}
         >
-          <ThemedText className="font-semibold text-primary-foreground">
-            {isSaving ? "Saving..." : "Save"}
-          </ThemedText>
-        </Pressable>
+          <View className="gap-2">
+            <ThemedText className="text-sm font-medium">Name</ThemedText>
 
-        {/* Delete */}
-        <Pressable
-          className="p-4 rounded-xl bg-muted flex-row items-center justify-center gap-2 active:opacity-80"
-          disabled={isDeleting}
-          onPress={handleDelete}
-        >
-          <MaterialCommunityIcons
-            name="trash-can"
-            size={16}
-            color={theme.destructive}
-          />
+            <Controller
+              control={control}
+              name="name"
+              render={({ field }) => (
+                <ThemedTextInput
+                  placeholder="Name"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  className={
+                    formState.errors.name !== undefined
+                      ? "border-destructive"
+                      : ""
+                  }
+                />
+              )}
+            />
 
-          <ThemedText className="text-destructive font-semibold">
-            {isDeleting ? "Deleting..." : "Delete"}
-          </ThemedText>
-        </Pressable>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            {formState.errors.name !== undefined && (
+              <ThemedText className="text-destructive text-xs">
+                {formState.errors.name.message}
+              </ThemedText>
+            )}
+          </View>
+
+          <View className="gap-2">
+            <ThemedText className="text-sm font-medium">Description</ThemedText>
+
+            <Controller
+              control={control}
+              name="description"
+              render={({ field }) => (
+                <ThemedTextInput
+                  className={cn(
+                    "h-32",
+                    formState.errors.description !== undefined
+                      ? "border-destructive"
+                      : "",
+                  )}
+                  placeholder="Description..."
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  textAlignVertical="top"
+                  multiline
+                />
+              )}
+            />
+
+            {formState.errors.description !== undefined && (
+              <ThemedText className="text-destructive text-xs">
+                {formState.errors.description.message}
+              </ThemedText>
+            )}
+          </View>
+
+          {/* Status */}
+          <View className="gap-2">
+            <ThemedText className="text-sm font-medium">Status</ThemedText>
+
+            <Controller
+              control={control}
+              name="completed"
+              render={({ field }) => (
+                <Pressable
+                  onPress={() => field.onChange(!field.value)}
+                  onBlur={field.onBlur}
+                  className="bg-muted p-4 rounded-xl border border-border flex-row items-center gap-2"
+                >
+                  <MaterialCommunityIcons
+                    name={
+                      field.value
+                        ? "check-circle"
+                        : "checkbox-blank-circle-outline"
+                    }
+                    size={32}
+                    color={field.value ? theme.primary : theme.mutedForeground}
+                  />
+
+                  <View className="flex-1 flex-row justify-between">
+                    <ThemedText className="font-semibold">
+                      {field.value ? "Completed" : "In progress"}
+                    </ThemedText>
+
+                    <ThemedText className="text-muted-foreground">
+                      {field.value ? "Nice work!" : "Keep going"}
+                    </ThemedText>
+                  </View>
+                </Pressable>
+              )}
+            />
+          </View>
+
+          {/* Created */}
+          <View className="gap-2">
+            <ThemedText className="text-sm font-medium">Created</ThemedText>
+
+            <ThemedText>
+              {new Date(goal.createdAt.toString()).toLocaleDateString()}
+            </ThemedText>
+          </View>
+
+          {/* Save */}
+          <Pressable
+            onPress={handleSubmit(onSubmit)}
+            className={cn(
+              "items-center rounded-xl bg-primary p-4 active:opacity-80",
+              isSaving || !hasUnsavedChanges ? "opacity-50" : "",
+            )}
+            disabled={isSaving || !hasUnsavedChanges}
+          >
+            <ThemedText className="font-semibold text-primary-foreground">
+              {isSaving ? "Saving..." : "Save"}
+            </ThemedText>
+          </Pressable>
+
+          {/* Delete */}
+          <Pressable
+            className="p-4 rounded-xl bg-muted flex-row items-center justify-center gap-2 active:opacity-80"
+            disabled={isDeleting}
+            onPress={handleDelete}
+          >
+            <MaterialCommunityIcons
+              name="trash-can"
+              size={16}
+              color={theme.destructive}
+            />
+
+            <ThemedText className="text-destructive font-semibold">
+              {isDeleting ? "Deleting..." : "Delete"}
+            </ThemedText>
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </>
   );
 }

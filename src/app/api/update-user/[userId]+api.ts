@@ -3,7 +3,7 @@ import { user } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
-import z from "zod";
+import { z } from "zod";
 
 const updateUserSchema = createUpdateSchema(user, {
   dailyCalorieGoal: (schema) => schema.int().min(1),

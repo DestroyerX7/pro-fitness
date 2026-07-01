@@ -5,6 +5,7 @@ import useTheme from "@/hooks/useTheme";
 import useUser from "@/hooks/useUser";
 import { deleteUser, updateUser, uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
+import { useThemePreference } from "@/lib/theme-init";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
@@ -17,6 +18,7 @@ export default function Profile() {
   const { user: authUser } = useAuthenticatedAuth();
   const { data: user, isPending, error } = useUser(authUser.id);
 
+  const { preference, resolvedScheme, setPreference } = useThemePreference();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -211,39 +213,50 @@ export default function Profile() {
       <Card className="gap-4">
         <ThemedText className="text-2xl font-bold">Appearence</ThemedText>
 
-        <Pressable className="p-4 border border-border rounded-xl flex-row items-center justify-between">
+        <Pressable
+          onPress={() => setPreference("system")}
+          className="p-4 border border-border rounded-xl flex-row items-center justify-between"
+        >
           <ThemedText className="text-xl">System</ThemedText>
 
-          <MaterialCommunityIcons
-            name="check-circle"
-            size={24}
-            color={theme.primary}
-          />
+          {preference === "system" && (
+            <MaterialCommunityIcons
+              name="check-circle"
+              size={24}
+              color={theme.primary}
+            />
+          )}
         </Pressable>
 
-        {/* <Pressable className="p-4 border border-border rounded-xl flex-row items-center justify-between">
-            <ThemedText className="text-xl">Light</ThemedText>
+        <Pressable
+          onPress={() => setPreference("light")}
+          className="p-4 border border-border rounded-xl flex-row items-center justify-between"
+        >
+          <ThemedText className="text-xl">Light</ThemedText>
 
-            {false && (
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={24}
-                color={theme.primary}
-              />
-            )}
-          </Pressable>
+          {preference === "light" && (
+            <MaterialCommunityIcons
+              name="check-circle"
+              size={24}
+              color={theme.primary}
+            />
+          )}
+        </Pressable>
 
-          <Pressable className="p-4 border border-border rounded-xl flex-row items-center justify-between">
-            <ThemedText className="text-xl">Dark</ThemedText>
+        <Pressable
+          onPress={() => setPreference("dark")}
+          className="p-4 border border-border rounded-xl flex-row items-center justify-between"
+        >
+          <ThemedText className="text-xl">Dark</ThemedText>
 
-            {false && (
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={24}
-                color={theme.primary}
-              />
-            )}
-          </Pressable> */}
+          {preference === "dark" && (
+            <MaterialCommunityIcons
+              name="check-circle"
+              size={24}
+              color={theme.primary}
+            />
+          )}
+        </Pressable>
       </Card>
 
       <Pressable

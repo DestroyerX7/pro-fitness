@@ -5,11 +5,10 @@ import WorkoutIconGrid from "@/components/WorkoutIconGrid";
 import { createWorkoutLog } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
 import { WorkoutLogFormValues, workoutLogSchema } from "@/lib/zodSchema";
-import DateTimePicker from "@expo/ui/community/datetime-picker";
+import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -32,8 +31,6 @@ export default function Workout() {
         },
       },
     });
-
-  const [logging, setLogging] = useState(false);
 
   const insets = useSafeAreaInsets();
 
@@ -74,8 +71,7 @@ export default function Workout() {
       name: data.name,
       duration: durationNum,
       performedAt: performedAtSqlTimestamp,
-      iconLibrary: data.icon.library,
-      iconName: data.icon.name,
+      icon: data.icon,
     });
   };
 

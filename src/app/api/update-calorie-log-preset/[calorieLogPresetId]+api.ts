@@ -3,7 +3,7 @@ import { calorieLogPreset } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
-import z from "zod";
+import { z } from "zod";
 
 const updateCalorieLogPresetSchema = createUpdateSchema(calorieLogPreset, {
   name: (schema) => schema.min(1),

@@ -20,8 +20,10 @@ module.exports = {
           DEFAULT: "var(--color-muted)",
           foreground: "var(--color-muted-foreground)",
         },
-        "card-background": "var(--color-card-background)",
-        "card-foreground": "var(--color-card-foreground)",
+        card: {
+          DEFAULT: "var(--color-card)",
+          foreground: "var(--color-card-foreground)",
+        },
         border: "var(--color-border)",
         input: "var(--color-input)",
         accent: {

@@ -369,8 +369,7 @@ export default function Index() {
               id={workoutLog.id}
               name={workoutLog.name}
               duration={workoutLog.duration}
-              iconLibrary={workoutLog.iconLibrary}
-              iconName={workoutLog.iconName}
+              icon={workoutLog.icon}
               onEdit={handleEditWorkoutLog}
             />
           ))

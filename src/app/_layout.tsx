@@ -80,6 +80,16 @@ function RootNavigator() {
             contentStyle: { backgroundColor: theme.background },
           }}
         />
+
+        <Stack.Screen
+          name="edit/workout-log-preset/[workoutLogPresetId]"
+          options={{
+            headerShown: true,
+            title: "Edit Workout Log Preset",
+            presentation: "modal",
+            contentStyle: { backgroundColor: theme.background },
+          }}
+        />
       </Stack.Protected>
 
       <Stack.Protected guard={authData === null}>

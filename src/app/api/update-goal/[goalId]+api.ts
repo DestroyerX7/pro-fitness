@@ -3,7 +3,7 @@ import { goal } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
-import z from "zod";
+import { z } from "zod";
 
 const updateGoalSchema = createUpdateSchema(goal, {
   name: (schema) => schema.min(1),

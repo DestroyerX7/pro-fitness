@@ -3,7 +3,7 @@ import { workoutLog } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
-import z from "zod";
+import { z } from "zod";
 
 const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
@@ -17,7 +17,7 @@ const updateWorkoutLogSchema = createUpdateSchema(workoutLog, {
         (val) => !Number.isNaN(new Date(val.replace(" ", "T")).getTime()),
         { message: "Invalid date" },
       ),
-});
+}).pick({ name: true, duration: true, performedAt: true, icon: true });
 
 export async function PATCH(
   request: Request,

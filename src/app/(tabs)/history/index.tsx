@@ -221,8 +221,7 @@ export default function History() {
                     id={workoutLog.id}
                     name={workoutLog.name}
                     duration={workoutLog.duration}
-                    iconLibrary={workoutLog.iconLibrary}
-                    iconName={workoutLog.iconName}
+                    icon={workoutLog.icon}
                   />
                 ))}
               </View>

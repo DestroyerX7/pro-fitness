@@ -1,5 +1,5 @@
-import { IconType } from "@/components/WorkoutIconGrid";
-import z from "zod";
+import { z } from "zod";
+import { Icon } from "./icons";
 
 export const calorieLogSchema = z.object({
   name: z.string().trim().min(1, "Please enter a name"),
@@ -24,7 +24,7 @@ export const workoutLogSchema = z.object({
     .regex(/^\d+$/, "Duration must be a whole number")
     .refine((val) => Number(val) > 0, "Duration must be greater than 0"),
   performedAt: z.date(),
-  icon: z.custom<IconType>(),
+  icon: z.custom<Icon>(),
 });
 
 export type WorkoutLogFormValues = z.infer<typeof workoutLogSchema>;
@@ -32,6 +32,8 @@ export type WorkoutLogFormValues = z.infer<typeof workoutLogSchema>;
 export const goalSchema = z.object({
   name: z.string().trim().min(1, "Please enter a name"),
   description: z.string().trim(),
+  completed: z.boolean().optional(),
+  hidden: z.boolean().optional(),
 });
 
 export type GoalFormValues = z.infer<typeof goalSchema>;
@@ -59,3 +61,29 @@ export const scanSchema = z.object({
 });
 
 export type ScanFormValues = z.infer<typeof scanSchema>;
+
+export const calorieLogPresetSchema = z.object({
+  name: z.string().trim().min(1, "Please enter a name"),
+  calories: z
+    .string()
+    .trim()
+    .min(1, "Please enter a calorie amount")
+    .regex(/^\d+$/, "Calories must be a whole number")
+    .refine((val) => Number(val) > 0, "Calories must be greater than 0"),
+  imageUri: z.string().nullable(),
+});
+
+export type CalorieLogPresetFormValues = z.infer<typeof calorieLogPresetSchema>;
+
+export const workoutLogPresetSchema = z.object({
+  name: z.string().trim().min(1, "Please enter a name"),
+  duration: z
+    .string()
+    .trim()
+    .min(1, "Please enter a duration")
+    .regex(/^\d+$/, "Duration must be a whole number")
+    .refine((val) => Number(val) > 0, "Duration must be greater than 0"),
+  icon: z.custom<Icon>(),
+});
+
+export type WorkoutLogPresetFormValues = z.infer<typeof workoutLogPresetSchema>;

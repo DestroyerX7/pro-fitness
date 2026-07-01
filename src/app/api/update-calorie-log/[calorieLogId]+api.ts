@@ -3,7 +3,7 @@ import { calorieLog } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
-import z from "zod";
+import { z } from "zod";
 
 const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 

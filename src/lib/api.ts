@@ -8,6 +8,7 @@ import {
 } from "@/db/schema";
 import axios from "axios";
 import { authClient } from "./auth-client";
+import { Icon } from "./icons";
 
 export type User = typeof user.$inferSelect;
 export type CalorieLog = typeof calorieLog.$inferSelect;
@@ -24,6 +25,7 @@ type CloudinarySignatureResponse = {
   folder: string;
 };
 
+// eslint-disable-next-line import/no-named-as-default-member
 const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_BACKEND_URL!,
 });
@@ -139,23 +141,20 @@ export const createWorkoutLog = async ({
   name,
   duration,
   performedAt,
-  iconLibrary,
-  iconName,
+  icon,
 }: {
   userId: string;
   name: string;
   duration: number;
   performedAt?: string;
-  iconLibrary: string;
-  iconName: string;
+  icon: Icon;
 }) => {
   const response = await api.post<WorkoutLog>("/api/create-workout-log", {
     userId,
     name,
     duration,
     performedAt,
-    iconLibrary,
-    iconName,
+    icon,
   });
 
   return response.data;
@@ -173,15 +172,13 @@ export const updateWorkoutLog = async ({
   name,
   duration,
   performedAt,
-  iconLibrary,
-  iconName,
+  icon,
   workoutLogId,
 }: {
   name?: string;
   duration?: number;
   performedAt?: string;
-  iconLibrary?: string;
-  iconName?: string;
+  icon?: Icon;
   workoutLogId: string;
 }) => {
   const response = await api.patch<WorkoutLog>(
@@ -190,8 +187,7 @@ export const updateWorkoutLog = async ({
       name,
       duration,
       performedAt,
-      iconLibrary,
-      iconName,
+      icon,
     },
   );
 
@@ -293,15 +289,15 @@ export const updateCalorieLogPreset = async ({
   name,
   calories,
   imageUrl,
-  calorieLogId,
+  calorieLogPresetId,
 }: {
   name?: string;
   calories?: number;
   imageUrl?: string | null | undefined;
-  calorieLogId: string;
+  calorieLogPresetId: string;
 }) => {
   const response = await api.patch<CalorieLogPreset>(
-    `/api/update-calorie-log-preset/${calorieLogId}`,
+    `/api/update-calorie-log-preset/${calorieLogPresetId}`,
     {
       name,
       calories,
@@ -324,21 +320,18 @@ export const createWorkoutLogPreset = async ({
   userId,
   name,
   duration,
-  iconLibrary,
-  iconName,
+  icon,
 }: {
   userId: string;
   name: string;
   duration: number;
-  iconLibrary: string;
-  iconName: string;
+  icon: Icon;
 }) => {
   const response = await api.post(`/api/create-workout-log-preset`, {
     userId,
     name,
     duration,
-    iconLibrary,
-    iconName,
+    icon,
   });
 
   return response.data;
@@ -356,15 +349,13 @@ export const updateWorkoutLogPreset = async ({
   name,
   duration,
   performedAt,
-  iconLibrary,
-  iconName,
+  icon,
   workoutLogPresetId,
 }: {
   name?: string;
   duration?: number;
   performedAt?: string;
-  iconLibrary?: string;
-  iconName?: string;
+  icon?: Icon;
   workoutLogPresetId: string;
 }) => {
   const response = await api.patch<WorkoutLog>(
@@ -373,8 +364,7 @@ export const updateWorkoutLogPreset = async ({
       name,
       duration,
       performedAt,
-      iconLibrary,
-      iconName,
+      icon,
     },
   );
 

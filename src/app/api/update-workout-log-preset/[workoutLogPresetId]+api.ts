@@ -3,12 +3,12 @@ import { workoutLogPreset } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
-import z from "zod";
+import { z } from "zod";
 
 const updateWorkoutLogPresetSchema = createUpdateSchema(workoutLogPreset, {
   name: (schema) => schema.min(1),
   duration: (schema) => schema.int().min(1),
-}).pick({ name: true, duration: true, iconLibrary: true, iconName: true });
+}).pick({ name: true, duration: true, icon: true });
 
 export async function PATCH(
   request: Request,

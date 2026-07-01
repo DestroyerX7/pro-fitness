@@ -1,16 +1,10 @@
 import useTheme from "@/hooks/useTheme";
+import { Icon } from "@/lib/icons";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 
-export type IconType =
-  | { library: "MaterialIcons"; name: keyof typeof MaterialIcons.glyphMap }
-  | {
-      library: "MaterialCommunityIcons";
-      name: keyof typeof MaterialCommunityIcons.glyphMap;
-    };
-
-const iconTypes: IconType[] = [
+const icons: Icon[] = [
   { library: "MaterialCommunityIcons", name: "run" },
   { library: "MaterialCommunityIcons", name: "dumbbell" },
   { library: "MaterialCommunityIcons", name: "weight-lifter" },
@@ -31,25 +25,21 @@ const iconTypes: IconType[] = [
   { library: "MaterialCommunityIcons", name: "bow-arrow" },
 ];
 
-export function Icon({
-  iconType,
+export function IconDisplay({
+  icon,
   size,
   color,
 }: {
-  iconType: IconType;
+  icon: Icon;
   size: number;
   color: string;
 }) {
-  switch (iconType.library) {
+  switch (icon.library) {
     case "MaterialIcons":
-      return <MaterialIcons name={iconType.name} size={size} color={color} />;
+      return <MaterialIcons name={icon.name} size={size} color={color} />;
     case "MaterialCommunityIcons":
       return (
-        <MaterialCommunityIcons
-          name={iconType.name}
-          size={size}
-          color={color}
-        />
+        <MaterialCommunityIcons name={icon.name} size={size} color={color} />
       );
   }
 }
@@ -60,10 +50,10 @@ export default function WorkoutIconGrid({
   gap = 8,
   onValueChange,
 }: {
-  value: IconType;
+  value: Icon;
   numColumns?: number;
   gap?: number;
-  onValueChange?: (iconType: IconType) => void;
+  onValueChange?: (icon: Icon) => void;
 }) {
   const [containerWidth, setContainerWidth] = useState(0);
   const theme = useTheme();
@@ -75,22 +65,22 @@ export default function WorkoutIconGrid({
   return (
     <View onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
       <View className="flex-row flex-wrap" style={{ gap }}>
-        {iconTypes.map((iconType, i) => (
+        {icons.map((icon, i) => (
           <Pressable
             key={i}
             className="items-center justify-center rounded-xl"
             style={[
               { width: itemWidth, height: itemWidth },
-              value.library === iconType.library &&
-                value.name === iconType.name && {
+              value.library === icon.library &&
+                value.name === icon.name && {
                   borderWidth: 2,
                   borderColor: theme.foreground,
                 },
             ]}
-            onPress={() => onValueChange?.(iconType)}
+            onPress={() => onValueChange?.(icon)}
           >
-            <Icon
-              iconType={iconType}
+            <IconDisplay
+              icon={icon}
               size={itemWidth * 0.75}
               color={theme.foreground}
             />

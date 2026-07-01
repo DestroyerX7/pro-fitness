@@ -1,0 +1,2 @@
+ALTER TABLE "workout_log" ALTER COLUMN "icon" SET DEFAULT '{"library":"MaterialCommunityIcons","name":"run"}'::jsonb;--> statement-breakpoint
+ALTER TABLE "workout_log_preset" ALTER COLUMN "icon" SET DEFAULT '{"library":"MaterialCommunityIcons","name":"run"}'::jsonb;

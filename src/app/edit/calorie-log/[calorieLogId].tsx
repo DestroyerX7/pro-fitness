@@ -12,7 +12,7 @@ import {
 import { fromSqlTimestampToLocalDate, toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { CalorieLogFormValues, calorieLogSchema } from "@/lib/zodSchema";
-import DateTimePicker from "@expo/ui/community/datetime-picker";
+import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -30,9 +30,9 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import z from "zod";
+import { z } from "zod";
 
-export default function Screen() {
+export default function EditCaloireLog() {
   const { calorieLogId } = useLocalSearchParams<{ calorieLogId: string }>();
   const queryClient = useQueryClient();
   const { data: authData } = useAuth();

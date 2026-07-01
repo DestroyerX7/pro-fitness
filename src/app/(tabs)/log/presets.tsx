@@ -8,8 +8,6 @@ import {
   CalorieLogPreset,
   createCalorieLog,
   createWorkoutLog,
-  deleteCalorieLogPreset,
-  deleteWorkoutLogPreset,
   getCalorieLogPresets,
   getWorkoutLogPresets,
   WorkoutLogPreset,
@@ -73,27 +71,6 @@ export default function Favorites() {
     },
   });
 
-  const deleteCalorieLogPresetMutation = useMutation({
-    mutationFn: deleteCalorieLogPreset,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["calorieLogPresets", user.id],
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    },
-    onError: (error) => {
-      Toast.show({
-        type: "error",
-        text1: "Something went wrong",
-        text2: error.message,
-        topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    },
-  });
-
   const createWorkoutLogMutation = useMutation({
     mutationFn: createWorkoutLog,
     onSuccess: (data) => {
@@ -106,27 +83,6 @@ export default function Favorites() {
         text1: "Logged!",
         text2: `${data.name} • ${data.duration} mins`,
         topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    },
-    onError: (error) => {
-      Toast.show({
-        type: "error",
-        text1: "Something went wrong",
-        text2: error.message,
-        topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    },
-  });
-
-  const deleteWorkoutLogPresetMutation = useMutation({
-    mutationFn: deleteWorkoutLogPreset,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["workoutLogPresets", user.id],
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -163,8 +119,7 @@ export default function Favorites() {
       name: workoutLogPreset.name,
       duration: workoutLogPreset.duration,
       performedAt: performedAtSqlTimestamp,
-      iconLibrary: workoutLogPreset.iconLibrary,
-      iconName: workoutLogPreset.iconName,
+      icon: workoutLogPreset.icon,
     });
   };
 
@@ -172,6 +127,13 @@ export default function Favorites() {
     router.push({
       pathname: "/edit/calorie-log-preset/[calorieLogPresetId]",
       params: { calorieLogPresetId },
+    });
+  };
+
+  const handleEditWorkoutLogPreset = (workoutLogPresetId: string) => {
+    router.push({
+      pathname: "/edit/workout-log-preset/[workoutLogPresetId]",
+      params: { workoutLogPresetId },
     });
   };
 
@@ -209,9 +171,6 @@ export default function Favorites() {
           calorieLogPresets.map((calorieLogPreset) => (
             <Pressable
               onPress={() => logCalories(calorieLogPreset)}
-              onLongPress={() =>
-                deleteCalorieLogPresetMutation.mutate(calorieLogPreset.id)
-              }
               key={calorieLogPreset.id}
             >
               <CalorieLogItem
@@ -245,17 +204,14 @@ export default function Favorites() {
         workoutLogPresets.map((workoutLogPreset) => (
           <Pressable
             onPress={() => logWorkout(workoutLogPreset)}
-            onLongPress={() =>
-              deleteWorkoutLogPresetMutation.mutate(workoutLogPreset.id)
-            }
             key={workoutLogPreset.id}
           >
             <WorkoutLogItem
               id={workoutLogPreset.id}
               name={workoutLogPreset.name}
               duration={workoutLogPreset.duration}
-              iconLibrary={workoutLogPreset.iconLibrary}
-              iconName={workoutLogPreset.iconName}
+              icon={workoutLogPreset.icon}
+              onEdit={handleEditWorkoutLogPreset}
             />
           </Pressable>
         ))

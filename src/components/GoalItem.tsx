@@ -23,25 +23,15 @@ export default function GoalItem({
 
   return (
     <Card className="flex-row">
-      <View className="flex-row flex-1 gap-4">
-        <View className="w-16 h-16 rounded-full items-center justify-center bg-border">
-          {completed ? (
-            <MaterialCommunityIcons
-              name="check"
-              color={theme.foreground}
-              size={32}
-            />
-          ) : (
-            <MaterialCommunityIcons
-              name="close"
-              color={theme.muted}
-              size={32}
-            />
-          )}
-        </View>
+      <View className="flex-row flex-1 gap-2">
+        <MaterialCommunityIcons
+          name={completed ? "check-circle" : "checkbox-blank-circle-outline"}
+          size={32}
+          color={completed ? theme.primary : theme.mutedForeground}
+        />
 
         <View className="gap-1 flex-1">
-          <ThemedText className="text-lg font-bold">{name}</ThemedText>
+          <ThemedText className={"text-lg font-bold"}>{name}</ThemedText>
 
           <ThemedText className="text-muted-foreground flex-wrap">
             {description}

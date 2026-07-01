@@ -6,7 +6,7 @@ import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { CalorieLogFormValues, calorieLogSchema } from "@/lib/zodSchema";
-import DateTimePicker from "@expo/ui/community/datetime-picker";
+import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -131,26 +131,20 @@ export default function Calories() {
   };
 
   const onSubmit = async (data: CalorieLogFormValues) => {
-    try {
-      if (logging) {
-        return;
-      }
+    setLogging(true);
 
-      setLogging(true);
+    const caloriesNum = Number(data.calories);
+    const imageUrl =
+      data.imageUri !== null ? await uploadToCloudinary(data.imageUri) : null;
+    const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
 
-      const caloriesNum = Number(data.calories);
-      const imageUrl =
-        data.imageUri !== null ? await uploadToCloudinary(data.imageUri) : null;
-      const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
-
-      createCalorieLogMutation.mutate({
-        userId: user.id,
-        name: data.name,
-        calories: caloriesNum,
-        imageUrl,
-        consumedAt: consumedAtSqlTimestamp,
-      });
-    } catch (error) {}
+    createCalorieLogMutation.mutate({
+      userId: user.id,
+      name: data.name,
+      calories: caloriesNum,
+      imageUrl,
+      consumedAt: consumedAtSqlTimestamp,
+    });
   };
 
   return (

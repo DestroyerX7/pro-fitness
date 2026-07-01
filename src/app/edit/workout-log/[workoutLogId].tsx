@@ -1,7 +1,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import WorkoutIconGrid, { IconType } from "@/components/WorkoutIconGrid";
+import WorkoutIconGrid from "@/components/WorkoutIconGrid";
 import useTheme from "@/hooks/useTheme";
 import {
   createWorkoutLogPreset,
@@ -12,7 +12,7 @@ import {
 import { fromSqlTimestampToLocalDate, toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { WorkoutLogFormValues, workoutLogSchema } from "@/lib/zodSchema";
-import DateTimePicker from "@expo/ui/community/datetime-picker";
+import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -29,7 +29,7 @@ import {
   View,
 } from "react-native";
 
-export default function Screen() {
+export default function EditWorkoutLog() {
   const { workoutLogId } = useLocalSearchParams<{ workoutLogId: string }>();
   const queryClient = useQueryClient();
   const { data: authData } = useAuth();
@@ -54,10 +54,7 @@ export default function Screen() {
             : new Date(),
         icon:
           workoutLog !== undefined
-            ? ({
-                library: workoutLog.iconLibrary,
-                name: workoutLog.iconName,
-              } as IconType)
+            ? workoutLog.icon
             : {
                 library: "MaterialCommunityIcons",
                 name: "run",
@@ -123,8 +120,7 @@ export default function Screen() {
       userId: workoutLog.userId,
       name: workoutLog.name,
       duration: workoutLog.duration,
-      iconLibrary: workoutLog.iconLibrary,
-      iconName: workoutLog.iconName,
+      icon: workoutLog.icon,
     });
   };
 
@@ -163,8 +159,8 @@ export default function Screen() {
       workoutLog.name === data.name &&
       workoutLog.duration === durationNum &&
       workoutLog.performedAt === performedAtSqlTimestamp &&
-      workoutLog.iconLibrary === data.icon.library &&
-      workoutLog.iconName === data.icon.name
+      workoutLog.icon.library === data.icon.library &&
+      workoutLog.icon.name === data.icon.name
     ) {
       return;
     }
@@ -174,8 +170,7 @@ export default function Screen() {
         name: data.name,
         duration: durationNum,
         performedAt: performedAtSqlTimestamp,
-        iconLibrary: data.icon.library,
-        iconName: data.icon.name,
+        icon: data.icon,
         workoutLogId,
       },
       {
