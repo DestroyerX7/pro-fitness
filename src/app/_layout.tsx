@@ -1,8 +1,8 @@
-import AuthProvider, { useAuth } from "@/components/AuthProvider";
 import { SplashScreenController } from "@/components/SplashScreenController";
 import ThemeProvider from "@/components/ThemeProvider";
 import "@/global.css";
 import useTheme from "@/hooks/useTheme";
+import { authClient } from "@/lib/auth-client";
 import { toastConfig } from "@/lib/toastConfig";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
@@ -12,23 +12,21 @@ const queryClient = new QueryClient();
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <SplashScreenController />
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <SplashScreenController />
 
-          <RootNavigator />
+        <RootNavigator />
 
-          <Toast config={toastConfig} />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </AuthProvider>
+        <Toast config={toastConfig} />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
 // Create a new component that can access the SessionProvider context later.
 function RootNavigator() {
-  const { data: authData } = useAuth();
+  const { data: authData } = authClient.useSession();
   const theme = useTheme();
 
   return (

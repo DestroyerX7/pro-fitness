@@ -1,4 +1,3 @@
-import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import WorkoutIconGrid from "@/components/WorkoutIconGrid";
@@ -9,6 +8,7 @@ import {
   updateWorkoutLog,
   WorkoutLog,
 } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import { fromSqlTimestampToLocalDate, toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { WorkoutLogFormValues, workoutLogSchema } from "@/lib/zodSchema";
@@ -32,7 +32,7 @@ import {
 export default function EditWorkoutLog() {
   const { workoutLogId } = useLocalSearchParams<{ workoutLogId: string }>();
   const queryClient = useQueryClient();
-  const { data: authData } = useAuth();
+  const { data: authData } = authClient.useSession();
 
   const workoutLog =
     authData !== null

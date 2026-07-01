@@ -1,11 +1,11 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
+import { useThemePreference } from "@/components/ThemeProvider";
 import useTheme from "@/hooks/useTheme";
 import useUser from "@/hooks/useUser";
 import { deleteUser, updateUser, uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
-import { useThemePreference } from "@/lib/theme-init";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
@@ -18,7 +18,7 @@ export default function Profile() {
   const { user: authUser } = useAuthenticatedAuth();
   const { data: user, isPending, error } = useUser(authUser.id);
 
-  const { preference, resolvedScheme, setPreference } = useThemePreference();
+  const { preference, setPreference } = useThemePreference();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -273,7 +273,7 @@ export default function Profile() {
       </Pressable>
 
       <Pressable
-        className="bg-destructive-accent p-4 rounded-xl flex-row gap-2 items-center border border-destructive"
+        className="bg-muted p-4 rounded-xl flex-row gap-2 items-center"
         onPress={handleDeleteUser}
       >
         <MaterialCommunityIcons
@@ -281,7 +281,8 @@ export default function Profile() {
           size={24}
           color={theme.destructive}
         />
-        <ThemedText>Delete Account</ThemedText>
+
+        <ThemedText className="text-destructive">Delete Account</ThemedText>
       </Pressable>
     </ScrollView>
   );

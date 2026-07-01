@@ -1,4 +1,3 @@
-import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import WorkoutIconGrid from "@/components/WorkoutIconGrid";
@@ -8,6 +7,7 @@ import {
   updateWorkoutLogPreset,
   WorkoutLogPreset,
 } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import {
   WorkoutLogPresetFormValues,
@@ -34,7 +34,7 @@ export default function EditWorkoutLogPreset() {
     workoutLogPresetId: string;
   }>();
   const queryClient = useQueryClient();
-  const { data: authData } = useAuth();
+  const { data: authData } = authClient.useSession();
 
   const workoutLogPreset =
     authData !== null

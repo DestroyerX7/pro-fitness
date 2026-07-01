@@ -1,8 +1,8 @@
-import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import { deleteGoal, Goal, updateGoal } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { GoalFormValues, goalSchema } from "@/lib/zodSchema";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -24,7 +24,7 @@ import {
 export default function EditGoal() {
   const { goalId } = useLocalSearchParams<{ goalId: string }>();
   const queryClient = useQueryClient();
-  const { data: authData } = useAuth();
+  const { data: authData } = authClient.useSession();
 
   const goal =
     authData !== null

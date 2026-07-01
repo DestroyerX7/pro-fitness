@@ -1,4 +1,3 @@
-import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
@@ -9,6 +8,7 @@ import {
   updateCalorieLog,
   uploadToCloudinary,
 } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import { fromSqlTimestampToLocalDate, toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { CalorieLogFormValues, calorieLogSchema } from "@/lib/zodSchema";
@@ -35,7 +35,7 @@ import { z } from "zod";
 export default function EditCaloireLog() {
   const { calorieLogId } = useLocalSearchParams<{ calorieLogId: string }>();
   const queryClient = useQueryClient();
-  const { data: authData } = useAuth();
+  const { data: authData } = authClient.useSession();
 
   const calorieLog =
     authData !== null

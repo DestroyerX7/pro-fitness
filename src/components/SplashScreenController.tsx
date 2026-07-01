@@ -1,17 +1,19 @@
+import { authClient } from "@/lib/auth-client";
 import { SplashScreen } from "expo-router";
 import { useEffect } from "react";
-import { useAuth } from "./AuthProvider";
+import { useThemePreference } from "./ThemeProvider";
 
 SplashScreen.preventAutoHideAsync();
 
 export function SplashScreenController() {
-  const { isPending } = useAuth();
+  const { isPending } = authClient.useSession();
+  const { isLoaded } = useThemePreference();
 
   useEffect(() => {
-    if (!isPending) {
+    if (!isPending && isLoaded) {
       SplashScreen.hide();
     }
-  }, [isPending]);
+  }, [isPending, isLoaded]);
 
   return null;
 }

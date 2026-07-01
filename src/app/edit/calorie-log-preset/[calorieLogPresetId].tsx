@@ -1,4 +1,3 @@
-import { useAuth } from "@/components/AuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
@@ -8,6 +7,7 @@ import {
   updateCalorieLogPreset,
   uploadToCloudinary,
 } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import {
   CalorieLogPresetFormValues,
@@ -37,7 +37,7 @@ export default function EditCaloireLogPreset() {
     calorieLogPresetId: string;
   }>();
   const queryClient = useQueryClient();
-  const { data: authData } = useAuth();
+  const { data: authData } = authClient.useSession();
 
   const calorieLogPreset =
     authData !== null

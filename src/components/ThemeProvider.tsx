@@ -1,12 +1,32 @@
 import { colors } from "@/lib/colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider as ExpoRouterThemeProvider,
 } from "expo-router";
 import { useColorScheme, vars } from "nativewind";
-import { PropsWithChildren } from "react";
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { View } from "react-native";
+
+type ThemePreference = "light" | "dark" | "system";
+const storageKey = "theme-preference";
+
+type ThemePreferenceContextValue = {
+  preference: ThemePreference;
+  setPreference: (theme: ThemePreference) => void;
+  isLoaded: boolean;
+};
+
+const ThemePreferenceContext =
+  createContext<ThemePreferenceContextValue | null>(null);
 
 const themes = {
   light: vars({
@@ -50,8 +70,33 @@ const themes = {
 };
 
 export default function ThemeProvider({ children }: PropsWithChildren) {
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "dark" ? themes.dark : themes.light;
+  const { colorScheme, setColorScheme } = useColorScheme();
+  const [preference, setPreferenceState] = useState<ThemePreference>("system");
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load saved preference on mount
+  useEffect(() => {
+    AsyncStorage.getItem(storageKey)
+      .then((stored) => {
+        if (stored === "light" || stored === "dark" || stored === "system") {
+          setPreferenceState(stored);
+          setColorScheme(stored);
+        }
+      })
+      .catch((e) => console.warn("Failed to load theme preference", e))
+      .finally(() => setIsLoaded(true));
+  }, []);
+
+  const setPreference = useCallback(
+    (next: ThemePreference) => {
+      setPreferenceState(next);
+      setColorScheme(next);
+      AsyncStorage.setItem(storageKey, next).catch((e) =>
+        console.warn("Failed to save theme preference", e),
+      );
+    },
+    [setColorScheme],
+  );
 
   const navigationTheme =
     colorScheme === "dark"
@@ -79,10 +124,31 @@ export default function ThemeProvider({ children }: PropsWithChildren) {
         };
 
   return (
-    <ExpoRouterThemeProvider value={navigationTheme}>
-      <View className="flex-1" style={theme}>
-        {children}
-      </View>
-    </ExpoRouterThemeProvider>
+    <ThemePreferenceContext.Provider
+      value={{
+        preference,
+        setPreference,
+        isLoaded,
+      }}
+    >
+      <ExpoRouterThemeProvider value={navigationTheme}>
+        <View
+          className="flex-1"
+          style={colorScheme === "dark" ? themes.dark : themes.light}
+        >
+          {children}
+        </View>
+      </ExpoRouterThemeProvider>
+    </ThemePreferenceContext.Provider>
   );
+}
+
+export function useThemePreference() {
+  const ctx = useContext(ThemePreferenceContext);
+
+  if (ctx === null) {
+    throw new Error("useThemePreference must be used within a ThemeProvider");
+  }
+
+  return ctx;
 }

@@ -1,5 +1,5 @@
+import { authClient } from "@/lib/auth-client";
 import { createContext, PropsWithChildren, useContext } from "react";
-import { useAuth } from "./AuthProvider";
 
 type AuthenticatedAuthState = {
   user: {
@@ -40,7 +40,7 @@ export function useAuthenticatedAuth() {
 }
 
 export function AuthenticatedAuthProvider({ children }: PropsWithChildren) {
-  const { data } = useAuth();
+  const { data } = authClient.useSession();
 
   if (data === null) {
     // Should be unreachable in practice since Stack.Protected gates this,
