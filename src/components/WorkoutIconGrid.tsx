@@ -1,10 +1,9 @@
 import useTheme from "@/hooks/useTheme";
-import { Icon } from "@/lib/icons";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
+import WorkoutLogIconDisplay, { WorkoutLogIcon } from "./WorkoutLogIconDisplay";
 
-const icons: Icon[] = [
+const workoutLogIcons: WorkoutLogIcon[] = [
   { library: "MaterialCommunityIcons", name: "run" },
   { library: "MaterialCommunityIcons", name: "dumbbell" },
   { library: "MaterialCommunityIcons", name: "weight-lifter" },
@@ -25,35 +24,16 @@ const icons: Icon[] = [
   { library: "MaterialCommunityIcons", name: "bow-arrow" },
 ];
 
-export function IconDisplay({
-  icon,
-  size,
-  color,
-}: {
-  icon: Icon;
-  size: number;
-  color: string;
-}) {
-  switch (icon.library) {
-    case "MaterialIcons":
-      return <MaterialIcons name={icon.name} size={size} color={color} />;
-    case "MaterialCommunityIcons":
-      return (
-        <MaterialCommunityIcons name={icon.name} size={size} color={color} />
-      );
-  }
-}
-
 export default function WorkoutIconGrid({
   value,
-  numColumns = 5,
+  numColumns = 6,
   gap = 8,
   onValueChange,
 }: {
-  value: Icon;
+  value: WorkoutLogIcon;
   numColumns?: number;
   gap?: number;
-  onValueChange?: (icon: Icon) => void;
+  onValueChange?: (workoutLogIcon: WorkoutLogIcon) => void;
 }) {
   const [containerWidth, setContainerWidth] = useState(0);
   const theme = useTheme();
@@ -65,22 +45,22 @@ export default function WorkoutIconGrid({
   return (
     <View onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
       <View className="flex-row flex-wrap" style={{ gap }}>
-        {icons.map((icon, i) => (
+        {workoutLogIcons.map((workoutLogIcon, i) => (
           <Pressable
             key={i}
             className="items-center justify-center rounded-xl"
             style={[
               { width: itemWidth, height: itemWidth },
-              value.library === icon.library &&
-                value.name === icon.name && {
+              value.library === workoutLogIcon.library &&
+                value.name === workoutLogIcon.name && {
                   borderWidth: 2,
                   borderColor: theme.foreground,
                 },
             ]}
-            onPress={() => onValueChange?.(icon)}
+            onPress={() => onValueChange?.(workoutLogIcon)}
           >
-            <IconDisplay
-              icon={icon}
+            <WorkoutLogIconDisplay
+              workoutLogIcon={workoutLogIcon}
               size={itemWidth * 0.75}
               color={theme.foreground}
             />

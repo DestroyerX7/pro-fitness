@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/nativewind";
 import { Text, TextProps } from "react-native";
 
 export default function ThemedText({

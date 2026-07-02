@@ -1,4 +1,4 @@
-import { colors } from "@/lib/colors";
+import { colors } from "@/constants/colors";
 import { useColorScheme } from "nativewind";
 
 export default function useTheme() {

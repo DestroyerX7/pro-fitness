@@ -1,4 +1,4 @@
-import { colors } from "@/lib/colors";
+import { colors } from "@/constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   DarkTheme,

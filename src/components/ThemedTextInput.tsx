@@ -1,5 +1,5 @@
 import useTheme from "@/hooks/useTheme";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/nativewind";
 import { TextInput, TextInputProps } from "react-native";
 
 export default function ThemedTextInput({

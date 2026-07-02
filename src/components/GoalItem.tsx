@@ -1,4 +1,5 @@
 import useTheme from "@/hooks/useTheme";
+import { cn } from "@/lib/nativewind";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 import Card from "./Card";
@@ -23,12 +24,23 @@ export default function GoalItem({
 
   return (
     <Card className="flex-row">
-      <View className="flex-row flex-1 gap-2">
-        <MaterialCommunityIcons
-          name={completed ? "check-circle" : "checkbox-blank-circle-outline"}
-          size={32}
-          color={completed ? theme.primary : theme.mutedForeground}
-        />
+      <View className="flex-row flex-1 gap-4">
+        <View
+          className={cn(
+            "w-8 h-8 border-2 rounded-full items-center justify-center",
+            completed
+              ? "bg-primary border-primary"
+              : "bg-transparent border-border",
+          )}
+        >
+          {completed && (
+            <MaterialCommunityIcons
+              name="check"
+              size={16}
+              color={theme.primaryForeground}
+            />
+          )}
+        </View>
 
         <View className="gap-1 flex-1">
           <ThemedText className={"text-lg font-bold"}>{name}</ThemedText>

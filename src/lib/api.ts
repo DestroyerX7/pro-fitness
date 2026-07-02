@@ -1,3 +1,4 @@
+import { WorkoutLogIcon } from "@/components/WorkoutLogIconDisplay";
 import {
   calorieLog,
   calorieLogPreset,
@@ -8,7 +9,6 @@ import {
 } from "@/db/schema";
 import axios from "axios";
 import { authClient } from "./auth-client";
-import { Icon } from "./icons";
 
 export type User = typeof user.$inferSelect;
 export type CalorieLog = typeof calorieLog.$inferSelect;
@@ -40,8 +40,8 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const getUser = async (userId: string) => {
-  const response = await api.get<User>(`/api/get-user/${userId}`);
+export const getUser = async (userId: string): Promise<User> => {
+  const response = await api.get<User>(`/api/user/${userId}`);
   return response.data;
 };
 
@@ -55,8 +55,8 @@ export const updateUser = async ({
   dailyWorkoutGoal?: number;
   image?: string | null | undefined;
   userId: string;
-}) => {
-  const response = await api.patch<User>(`/api/update-user/${userId}`, {
+}): Promise<User> => {
+  const response = await api.patch<User>(`/api/user/${userId}`, {
     dailyCalorieGoal,
     dailyWorkoutGoal,
     image,
@@ -65,8 +65,8 @@ export const updateUser = async ({
   return response.data;
 };
 
-export const deleteUser = async (userId: string) => {
-  const response = await api.get<User>(`/api/delete-user/${userId}`);
+export const deleteUser = async (userId: string): Promise<User> => {
+  const response = await api.get<User>(`/api/user/${userId}`);
   return response.data;
 };
 
@@ -82,8 +82,8 @@ export const createCalorieLog = async ({
   calories: number;
   consumedAt?: string;
   imageUrl?: string | null | undefined;
-}) => {
-  const response = await api.post<CalorieLog>("/api/create-calorie-log", {
+}): Promise<CalorieLog> => {
+  const response = await api.post<CalorieLog>("/api/calorie-logs", {
     userId,
     name,
     calories,
@@ -94,9 +94,16 @@ export const createCalorieLog = async ({
   return response.data;
 };
 
-export const getCalorieLogs = async (userId: string): Promise<CalorieLog[]> => {
-  const response = await api.get<CalorieLog[]>(
-    `/api/get-calorie-logs/${userId}`,
+export const getCalorieLogs = async (): Promise<CalorieLog[]> => {
+  const response = await api.get<CalorieLog[]>("/api/calorie-logs");
+  return response.data;
+};
+
+export const getCalorieLog = async (
+  calorieLogId: string,
+): Promise<CalorieLog> => {
+  const response = await api.get<CalorieLog>(
+    `/api/calorie-log/${calorieLogId}`,
   );
 
   return response.data;
@@ -114,9 +121,9 @@ export const updateCalorieLog = async ({
   consumedAt?: string;
   imageUrl?: string | null | undefined;
   calorieLogId: string;
-}) => {
+}): Promise<CalorieLog> => {
   const response = await api.patch<CalorieLog>(
-    `/api/update-calorie-log/${calorieLogId}`,
+    `/api/calorie-log/${calorieLogId}`,
     {
       name,
       calories,
@@ -128,9 +135,11 @@ export const updateCalorieLog = async ({
   return response.data;
 };
 
-export const deleteCalorieLog = async (calorieLogId: string) => {
+export const deleteCalorieLog = async (
+  calorieLogId: string,
+): Promise<CalorieLog> => {
   const response = await api.delete<CalorieLog>(
-    `/api/delete-calorie-log/${calorieLogId}`,
+    `/api/calorie-log/${calorieLogId}`,
   );
 
   return response.data;
@@ -147,9 +156,9 @@ export const createWorkoutLog = async ({
   name: string;
   duration: number;
   performedAt?: string;
-  icon: Icon;
-}) => {
-  const response = await api.post<WorkoutLog>("/api/create-workout-log", {
+  icon: WorkoutLogIcon;
+}): Promise<WorkoutLog> => {
+  const response = await api.post<WorkoutLog>("/api/workout-logs", {
     userId,
     name,
     duration,
@@ -160,9 +169,16 @@ export const createWorkoutLog = async ({
   return response.data;
 };
 
-export const getWorkoutLogs = async (userId: string) => {
-  const response = await api.get<WorkoutLog[]>(
-    `/api/get-workout-logs/${userId}`,
+export const getWorkoutLogs = async (): Promise<WorkoutLog[]> => {
+  const response = await api.get<WorkoutLog[]>("/api/workout-logs");
+  return response.data;
+};
+
+export const getWorkoutLog = async (
+  workoutLogId: string,
+): Promise<WorkoutLog> => {
+  const response = await api.get<WorkoutLog>(
+    `/api/workout-log/${workoutLogId}`,
   );
 
   return response.data;
@@ -178,11 +194,11 @@ export const updateWorkoutLog = async ({
   name?: string;
   duration?: number;
   performedAt?: string;
-  icon?: Icon;
+  icon?: WorkoutLogIcon;
   workoutLogId: string;
-}) => {
+}): Promise<WorkoutLog> => {
   const response = await api.patch<WorkoutLog>(
-    `/api/update-workout-log/${workoutLogId}`,
+    `/api/workout-log/${workoutLogId}`,
     {
       name,
       duration,
@@ -194,9 +210,11 @@ export const updateWorkoutLog = async ({
   return response.data;
 };
 
-export const deleteWorkoutLog = async (workoutLogId: string) => {
+export const deleteWorkoutLog = async (
+  workoutLogId: string,
+): Promise<WorkoutLog> => {
   const response = await api.delete<WorkoutLog>(
-    `/api/delete-workout-log/${workoutLogId}`,
+    `/api/workout-log/${workoutLogId}`,
   );
 
   return response.data;
@@ -210,8 +228,8 @@ export const createGoal = async ({
   userId: string;
   name: string;
   description?: string;
-}) => {
-  const response = await api.post<Goal>("/api/create-goal", {
+}): Promise<Goal> => {
+  const response = await api.post<Goal>("/api/goals", {
     userId,
     name,
     description,
@@ -220,8 +238,13 @@ export const createGoal = async ({
   return response.data;
 };
 
-export const getGoals = async (userId: string) => {
-  const response = await api.get<Goal[]>(`/api/get-goals/${userId}`);
+export const getGoals = async (): Promise<Goal[]> => {
+  const response = await api.get<Goal[]>("/api/goals");
+  return response.data;
+};
+
+export const getGoal = async (goalId: string): Promise<Goal> => {
+  const response = await api.get<Goal>(`/api/goal/${goalId}`);
   return response.data;
 };
 
@@ -237,8 +260,8 @@ export const updateGoal = async ({
   completed?: boolean;
   hidden?: boolean;
   goalId: string;
-}) => {
-  const response = await api.patch<Goal>(`/api/update-goal/${goalId}`, {
+}): Promise<Goal> => {
+  const response = await api.patch<Goal>(`/api/goal/${goalId}`, {
     name,
     description,
     completed,
@@ -248,8 +271,8 @@ export const updateGoal = async ({
   return response.data;
 };
 
-export const deleteGoal = async (goalId: string) => {
-  const response = await api.delete<Goal>(`/api/delete-goal/${goalId}`);
+export const deleteGoal = async (goalId: string): Promise<Goal> => {
+  const response = await api.delete<Goal>(`/api/goal/${goalId}`);
   return response.data;
 };
 
@@ -263,9 +286,9 @@ export const createCalorieLogPreset = async ({
   name: string;
   calories: number;
   imageUrl?: string | null | undefined;
-}) => {
+}): Promise<CalorieLogPreset> => {
   const response = await api.post<CalorieLogPreset>(
-    "/api/create-calorie-log-preset",
+    "/api/calorie-log-presets",
     {
       userId,
       name,
@@ -277,9 +300,19 @@ export const createCalorieLogPreset = async ({
   return response.data;
 };
 
-export const getCalorieLogPresets = async (userId: string) => {
+export const getCalorieLogPresets = async (): Promise<CalorieLogPreset[]> => {
   const response = await api.get<CalorieLogPreset[]>(
-    `/api/get-calorie-log-presets/${userId}`,
+    "/api/calorie-log-presets",
+  );
+
+  return response.data;
+};
+
+export const getCalorieLogPreset = async (
+  calorieLogPresetId: string,
+): Promise<CalorieLogPreset> => {
+  const response = await api.get<CalorieLogPreset>(
+    `/api/calorie-log-preset/${calorieLogPresetId}`,
   );
 
   return response.data;
@@ -295,9 +328,9 @@ export const updateCalorieLogPreset = async ({
   calories?: number;
   imageUrl?: string | null | undefined;
   calorieLogPresetId: string;
-}) => {
+}): Promise<CalorieLogPreset> => {
   const response = await api.patch<CalorieLogPreset>(
-    `/api/update-calorie-log-preset/${calorieLogPresetId}`,
+    `/api/calorie-log-preset/${calorieLogPresetId}`,
     {
       name,
       calories,
@@ -308,9 +341,11 @@ export const updateCalorieLogPreset = async ({
   return response.data;
 };
 
-export const deleteCalorieLogPreset = async (calorieLogPresetId: string) => {
+export const deleteCalorieLogPreset = async (
+  calorieLogPresetId: string,
+): Promise<CalorieLogPreset> => {
   const response = await api.delete<CalorieLogPreset>(
-    `/api/delete-calorie-log-preset/${calorieLogPresetId}`,
+    `/api/calorie-log-preset/${calorieLogPresetId}`,
   );
 
   return response.data;
@@ -325,21 +360,34 @@ export const createWorkoutLogPreset = async ({
   userId: string;
   name: string;
   duration: number;
-  icon: Icon;
-}) => {
-  const response = await api.post(`/api/create-workout-log-preset`, {
-    userId,
-    name,
-    duration,
-    icon,
-  });
+  icon: WorkoutLogIcon;
+}): Promise<WorkoutLogPreset> => {
+  const response = await api.post<WorkoutLogPreset>(
+    `/api/workout-log-presets`,
+    {
+      userId,
+      name,
+      duration,
+      icon,
+    },
+  );
 
   return response.data;
 };
 
-export const getWorkoutLogPresets = async (userId: string) => {
+export const getWorkoutLogPresets = async (): Promise<WorkoutLogPreset[]> => {
   const response = await api.get<WorkoutLogPreset[]>(
-    `/api/get-workout-log-presets/${userId}`,
+    "/api/workout-log-presets",
+  );
+
+  return response.data;
+};
+
+export const getWorkoutLogPreset = async (
+  workoutLogPresetId: string,
+): Promise<WorkoutLogPreset> => {
+  const response = await api.get<WorkoutLogPreset>(
+    `/api/workout-log-preset/${workoutLogPresetId}`,
   );
 
   return response.data;
@@ -355,11 +403,11 @@ export const updateWorkoutLogPreset = async ({
   name?: string;
   duration?: number;
   performedAt?: string;
-  icon?: Icon;
+  icon?: WorkoutLogIcon;
   workoutLogPresetId: string;
-}) => {
-  const response = await api.patch<WorkoutLog>(
-    `/api/update-workout-log-preset/${workoutLogPresetId}`,
+}): Promise<WorkoutLogPreset> => {
+  const response = await api.patch<WorkoutLogPreset>(
+    `/api/workout-log-preset/${workoutLogPresetId}`,
     {
       name,
       duration,
@@ -371,15 +419,17 @@ export const updateWorkoutLogPreset = async ({
   return response.data;
 };
 
-export const deleteWorkoutLogPreset = async (workoutLogPresetId: string) => {
+export const deleteWorkoutLogPreset = async (
+  workoutLogPresetId: string,
+): Promise<WorkoutLogPreset> => {
   const response = await api.delete<WorkoutLogPreset>(
-    `/api/delete-workout-log-preset/${workoutLogPresetId}`,
+    `/api/workout-log-preset/${workoutLogPresetId}`,
   );
 
   return response.data;
 };
 
-export const uploadToCloudinary = async (imageUri: string) => {
+export const uploadToCloudinary = async (imageUri: string): Promise<string> => {
   const signResponse = await api.post<CloudinarySignatureResponse>(
     `/api/sign-cloudinary-upload`,
   );

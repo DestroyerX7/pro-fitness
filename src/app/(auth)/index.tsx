@@ -1,37 +1,26 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { colors } from "@/constants/colors";
+import useTheme from "@/hooks/useTheme";
 import { authClient } from "@/lib/auth-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link, router } from "expo-router";
-import { useColorScheme } from "nativewind";
 import { useState } from "react";
-import { Alert, Pressable, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function SignUp() {
+export default function Login() {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
-  const signUpWithEmail = async () => {
-    if (password !== confirmPassword) {
-      Alert.alert("Passwords do not match.");
-      return;
-    }
-
-    await authClient.signUp.email(
-      {
-        email,
-        password,
-        name,
-      },
-      {
+  const loginWithEmail = async () => {
+    await authClient.signIn.email({
+      email,
+      password,
+      fetchOptions: {
         onSuccess: () => {
           router.replace("/(protected)/(tabs)/home");
         },
@@ -39,10 +28,10 @@ export default function SignUp() {
           console.log(ctx.error);
         },
       },
-    );
+    });
   };
 
-  const signUpWithGoogle = async () => {
+  const loginWithGoogle = async () => {
     const { error } = await authClient.signIn.social({
       provider: "google",
       callbackURL: "/(protected)/(tabs)/home", // Callback url is required or it breaks
@@ -56,7 +45,7 @@ export default function SignUp() {
     router.replace("/(protected)/(tabs)/home");
   };
 
-  const signUpWithApple = async () => {
+  const loginWithApple = async () => {
     const credential = await AppleAuthentication.signInAsync({
       requestedScopes: [
         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -84,19 +73,19 @@ export default function SignUp() {
   };
 
   return (
-    <SafeAreaView className="p-4 gap-4">
-      <ThemedText className="text-4xl font-bold">Sign Up</ThemedText>
+    <View
+      className="gap-4"
+      style={{
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom + 16,
+        paddingHorizontal: 16,
+      }}
+    >
+      <ThemedText className="text-4xl font-bold">Login</ThemedText>
 
       <ThemedTextInput
-        placeholder="Name"
-        textContentType="name"
-        value={name}
-        onChangeText={setName}
-      />
-
-      <ThemedTextInput
-        textContentType="emailAddress"
         placeholder="Email"
+        textContentType="emailAddress"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
@@ -104,65 +93,48 @@ export default function SignUp() {
 
       <ThemedTextInput
         placeholder="Password"
-        textContentType="newPassword"
+        textContentType="password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
-      <ThemedTextInput
-        placeholder="Confirm Password"
-        textContentType="password"
-        secureTextEntry
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-      />
-
-      <Pressable
-        className="p-4 bg-primary rounded-xl"
-        onPress={signUpWithEmail}
-      >
-        <ThemedText className="text-primary-foreground">Sign Up</ThemedText>
+      <Pressable className="p-4 bg-primary rounded-xl" onPress={loginWithEmail}>
+        <ThemedText className="text-primary-foreground">Login</ThemedText>
       </Pressable>
 
-      <View className="h-[2px] bg-border" />
+      <View className="h-[1px] bg-border " />
 
       <Pressable
         className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"
-        onPress={signUpWithGoogle}
+        onPress={loginWithGoogle}
       >
-        {/* <Image
-          className="w-8 h-8"
-          source={{
-            uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/500px-Google_%22G%22_logo.svg.png",
-          }}
-        /> */}
         <MaterialCommunityIcons
           name="google"
           size={32}
           color={theme.foreground}
         />
-        <ThemedText>Sign up with Google</ThemedText>
+        <ThemedText>Login with Google</ThemedText>
       </Pressable>
 
       <Pressable
         className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"
-        onPress={signUpWithApple}
+        onPress={loginWithApple}
       >
         <MaterialCommunityIcons
           name="apple"
           size={32}
           color={theme.foreground}
         />
-        <ThemedText>Sign up with Apple</ThemedText>
+        <ThemedText>Login with Apple</ThemedText>
       </Pressable>
 
       <ThemedText className="text-center text-xl">
-        Already have an account?{" "}
-        <Link href="/(auth)">
-          <ThemedText className="text-primary underline">Login</ThemedText>
+        Don&apos;t have an account?{" "}
+        <Link href="/(auth)/sign-up">
+          <ThemedText className="text-primary underline">Sign Up</ThemedText>
         </Link>
       </ThemedText>
-    </SafeAreaView>
+    </View>
   );
 }

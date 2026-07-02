@@ -1,4 +1,4 @@
-import { Icon } from "@/lib/icons";
+import { WorkoutLogIcon } from "@/components/WorkoutLogIconDisplay";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -151,7 +151,7 @@ export const workoutLog = pgTable(
       .defaultNow()
       .notNull(),
     icon: jsonb("icon")
-      .$type<Icon>()
+      .$type<WorkoutLogIcon>()
       .default({
         library: "MaterialCommunityIcons",
         name: "run",
@@ -213,7 +213,7 @@ export const workoutLogPreset = pgTable(
     name: text("name").notNull(),
     duration: integer("duration").notNull(),
     icon: jsonb("icon")
-      .$type<Icon>()
+      .$type<WorkoutLogIcon>()
       .default({
         library: "MaterialCommunityIcons",
         name: "run",

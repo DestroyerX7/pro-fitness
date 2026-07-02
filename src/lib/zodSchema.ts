@@ -1,5 +1,5 @@
+import { WorkoutLogIcon } from "@/components/WorkoutLogIconDisplay";
 import { z } from "zod";
-import { Icon } from "./icons";
 
 export const calorieLogSchema = z.object({
   name: z.string().trim().min(1, "Please enter a name"),
@@ -24,7 +24,7 @@ export const workoutLogSchema = z.object({
     .regex(/^\d+$/, "Duration must be a whole number")
     .refine((val) => Number(val) > 0, "Duration must be greater than 0"),
   performedAt: z.date(),
-  icon: z.custom<Icon>(),
+  icon: z.custom<WorkoutLogIcon>(),
 });
 
 export type WorkoutLogFormValues = z.infer<typeof workoutLogSchema>;
@@ -83,7 +83,7 @@ export const workoutLogPresetSchema = z.object({
     .min(1, "Please enter a duration")
     .regex(/^\d+$/, "Duration must be a whole number")
     .refine((val) => Number(val) > 0, "Duration must be greater than 0"),
-  icon: z.custom<Icon>(),
+  icon: z.custom<WorkoutLogIcon>(),
 });
 
 export type WorkoutLogPresetFormValues = z.infer<typeof workoutLogPresetSchema>;

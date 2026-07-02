@@ -1,5 +1,5 @@
 import useTheme from "@/hooks/useTheme";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/nativewind";
 import { Pressable, PressableProps, StyleProp } from "react-native";
 import ThemedText from "./ThemedText";
 
