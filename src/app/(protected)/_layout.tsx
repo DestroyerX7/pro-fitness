@@ -19,6 +19,7 @@ export default function ProtectedLayout() {
             contentStyle: { backgroundColor: theme.background },
           }}
         />
+
         <Stack.Screen
           name="edit/workout-log/[workoutLogId]"
           options={{
@@ -28,6 +29,7 @@ export default function ProtectedLayout() {
             contentStyle: { backgroundColor: theme.background },
           }}
         />
+
         <Stack.Screen
           name="edit/goal/[goalId]"
           options={{
@@ -37,6 +39,7 @@ export default function ProtectedLayout() {
             contentStyle: { backgroundColor: theme.background },
           }}
         />
+
         <Stack.Screen
           name="edit/calorie-log-preset/[calorieLogPresetId]"
           options={{
@@ -46,11 +49,22 @@ export default function ProtectedLayout() {
             contentStyle: { backgroundColor: theme.background },
           }}
         />
+
         <Stack.Screen
           name="edit/workout-log-preset/[workoutLogPresetId]"
           options={{
             headerShown: true,
             title: "Edit Workout Log Preset",
+            presentation: "modal",
+            contentStyle: { backgroundColor: theme.background },
+          }}
+        />
+
+        <Stack.Screen
+          name="edit/user"
+          options={{
+            headerShown: true,
+            title: "Edit Profile",
             presentation: "modal",
             contentStyle: { backgroundColor: theme.background },
           }}

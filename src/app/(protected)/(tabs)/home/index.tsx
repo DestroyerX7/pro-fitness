@@ -433,7 +433,7 @@ export default function Index() {
             </ThemedText>
 
             <Pressable
-              className="bg-secondary p-4 rounded-xl"
+              className="bg-secondary p-4 rounded-xl active:opacity-80"
               onPress={() => router.push("/(protected)/(tabs)/log/calories")}
             >
               <ThemedText className="text-secondary-foreground">
@@ -469,7 +469,7 @@ export default function Index() {
             </ThemedText>
 
             <Pressable
-              className="bg-secondary p-4 rounded-xl"
+              className="bg-secondary p-4 rounded-xl active:opacity-80"
               onPress={() => router.push("/(protected)/(tabs)/log/workout")}
             >
               <ThemedText className="text-secondary-foreground">
@@ -519,7 +519,7 @@ export default function Index() {
             </ThemedText>
 
             <Pressable
-              className="bg-secondary p-4 rounded-xl"
+              className="bg-secondary p-4 rounded-xl active:opacity-80"
               onPress={() => router.push("/(protected)/(tabs)/log/goal")}
             >
               <ThemedText className="text-secondary-foreground">

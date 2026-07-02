@@ -22,7 +22,7 @@ export default function TabButton({
 
   return (
     <Pressable
-      className={cn("p-4 rounded-xl", className)}
+      className={cn("p-4 rounded-xl active:opacity-80", className)}
       style={[
         {
           backgroundColor: active ? theme.foreground : theme.secondary,

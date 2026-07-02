@@ -4,13 +4,14 @@ import ThemedText from "@/components/ThemedText";
 import { useThemePreference } from "@/components/ThemeProvider";
 import useTheme from "@/hooks/useTheme";
 import useUser from "@/hooks/useUser";
-import { deleteUser, updateUser, uploadToCloudinary } from "@/lib/api";
+import { updateUser, uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/nativewind";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -29,27 +30,6 @@ export default function Profile() {
       queryClient.invalidateQueries({ queryKey: ["user", authUser.id] });
     },
   });
-
-  const handleDeleteUser = () => {
-    Alert.alert(
-      "Delete account",
-      "Are you sure you want to permanently delete your account?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          onPress: async () => {
-            await deleteUser(authUser.id);
-            await authClient.signOut();
-          },
-          style: "destructive",
-        },
-      ],
-    );
-  };
 
   const pickImage = async () => {
     Alert.alert("Select Image", "Choose an option", [
@@ -134,7 +114,10 @@ export default function Profile() {
       }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="flex-row gap-4 items-center">
+      <Pressable
+        onPress={() => router.push("/(protected)/edit/user")}
+        className="flex-row gap-4 items-center"
+      >
         {user.image !== null ? (
           <Pressable onPress={pickImage}>
             <Image
@@ -157,7 +140,7 @@ export default function Profile() {
             {user.email}
           </ThemedText>
         </View>
-      </View>
+      </Pressable>
 
       <Card className="gap-4">
         <ThemedText className="text-2xl font-bold">Profile Info</ThemedText>
@@ -243,7 +226,7 @@ export default function Profile() {
       </Card>
 
       <Pressable
-        className="bg-foreground p-4 rounded-xl flex-row gap-2 items-center border"
+        className="bg-foreground p-4 rounded-xl flex-row gap-2 items-center border active:opacity-80"
         onPress={async () => await authClient.signOut()}
       >
         <MaterialCommunityIcons
@@ -253,19 +236,6 @@ export default function Profile() {
         />
 
         <ThemedText className="text-background">Log out</ThemedText>
-      </Pressable>
-
-      <Pressable
-        className="bg-muted p-4 rounded-xl flex-row gap-2 items-center"
-        onPress={handleDeleteUser}
-      >
-        <MaterialCommunityIcons
-          name="trash-can"
-          size={24}
-          color={theme.destructive}
-        />
-
-        <ThemedText className="text-destructive">Delete Account</ThemedText>
       </Pressable>
     </ScrollView>
   );

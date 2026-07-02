@@ -103,7 +103,7 @@ export default function Login() {
         <ThemedText className="text-primary-foreground">Login</ThemedText>
       </Pressable>
 
-      <View className="h-[1px] bg-border " />
+      <View className="h-px bg-border " />
 
       <Pressable
         className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"

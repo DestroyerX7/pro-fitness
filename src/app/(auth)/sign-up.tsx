@@ -1,11 +1,10 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
-import { colors } from "@/constants/colors";
+import useTheme from "@/hooks/useTheme";
 import { authClient } from "@/lib/auth-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link, router } from "expo-router";
-import { useColorScheme } from "nativewind";
 import { useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,8 +15,7 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const { colorScheme } = useColorScheme();
-  const theme = colorScheme === "light" ? colors.light : colors.dark;
+  const theme = useTheme();
 
   const signUpWithEmail = async () => {
     if (password !== confirmPassword) {
@@ -125,7 +123,7 @@ export default function SignUp() {
         <ThemedText className="text-primary-foreground">Sign Up</ThemedText>
       </Pressable>
 
-      <View className="h-[2px] bg-border" />
+      <View className="h-px bg-border" />
 
       <Pressable
         className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"

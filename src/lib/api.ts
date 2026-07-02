@@ -66,7 +66,7 @@ export const updateUser = async ({
 };
 
 export const deleteUser = async (userId: string): Promise<User> => {
-  const response = await api.get<User>(`/api/user/${userId}`);
+  const response = await api.delete<User>(`/api/user/${userId}`);
   return response.data;
 };
 
