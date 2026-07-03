@@ -9,9 +9,9 @@ import WorkoutLogItem from "@/components/WorkoutLogItem";
 import useCalorieLogs from "@/hooks/useCalorieLogs";
 import useGoals from "@/hooks/useGoals";
 import useTheme from "@/hooks/useTheme";
-import useUser from "@/hooks/useUser";
 import useWorkoutLogs from "@/hooks/useWorkoutLogs";
-import { Goal, updateGoal, updateUser, User } from "@/lib/api";
+import { Goal, updateGoal, User } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
 import { toSqlTimestamp } from "@/lib/dates";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -28,31 +28,25 @@ import {
 
 export default function Index() {
   const queryClient = useQueryClient();
-  const { user: authUser } = useAuthenticatedAuth();
-  const {
-    data: user,
-    refetch: refetchUser,
-    isPending: isPendingUser,
-    error: userError,
-  } = useUser(authUser.id);
+  const { user } = useAuthenticatedAuth();
   const {
     data: calorieLogs,
     refetch: refetchCalorieLogs,
     isPending: isPendingCalorieLogs,
     error: calorieLogsError,
-  } = useCalorieLogs(authUser.id);
+  } = useCalorieLogs(user.id);
   const {
     data: workoutLogs,
     refetch: refetchWorkoutLogs,
     isPending: isPendingWorkoutLogs,
     error: workoutLogsError,
-  } = useWorkoutLogs(authUser.id);
+  } = useWorkoutLogs(user.id);
   const {
     data: goals,
     refetch: refetchGoals,
     isPending: isPendingGoals,
     error: goalsError,
-  } = useGoals(authUser.id);
+  } = useGoals(user.id);
 
   const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
     "calories",
@@ -63,27 +57,20 @@ export default function Index() {
 
   const theme = useTheme();
 
-  const updateUserMutation = useMutation({
-    mutationFn: updateUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", authUser.id] });
-    },
-  });
-
   const updateGoalMutation = useMutation({
     mutationFn: updateGoal,
     onMutate: async (variables) => {
       // Stop any in-flight refetches so they don't clobber our optimistic update
-      await queryClient.cancelQueries({ queryKey: ["goals", authUser.id] });
+      await queryClient.cancelQueries({ queryKey: ["goals", user.id] });
 
       // Snapshot the current cache so we can roll back on error
       const previousGoals = queryClient.getQueryData<Goal[]>([
         "goals",
-        authUser.id,
+        user.id,
       ]);
 
       // Optimistically write the new value into the cache
-      queryClient.setQueryData<Goal[]>(["goals", authUser.id], (old) =>
+      queryClient.setQueryData<Goal[]>(["goals", user.id], (old) =>
         old?.map((goal) =>
           goal.id === variables.goalId ? { ...goal, ...variables } : goal,
         ),
@@ -95,12 +82,12 @@ export default function Index() {
     onError: (_error, _variables, context) => {
       // Roll back to the pre-mutation state
       if (context !== undefined && context.previousGoals !== undefined) {
-        queryClient.setQueryData(["goals", authUser.id], context.previousGoals);
+        queryClient.setQueryData(["goals", user.id], context.previousGoals);
       }
     },
     onSettled: () => {
       // Always resync with the server afterward, success or failure
-      queryClient.invalidateQueries({ queryKey: ["goals", authUser.id] });
+      queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
     },
   });
 
@@ -109,10 +96,7 @@ export default function Index() {
       "Edit calorie goal",
       "Update your daily calorie goal",
       (calorieGoalText) =>
-        updateUserMutation.mutate({
-          dailyCalorieGoal: Number(calorieGoalText),
-          userId: user.id,
-        }),
+        authClient.updateUser({ dailyCalorieGoal: Number(calorieGoalText) }),
       "plain-text",
       user.dailyCalorieGoal.toString(),
       "number-pad",
@@ -126,10 +110,10 @@ export default function Index() {
       "Edit workout goal",
       "Update your daily workout goal",
       (workoutGoalText) =>
-        updateUserMutation.mutate({
-          dailyWorkoutGoal: Number(workoutGoalText),
-          userId: user.id,
-        }),
+        authClient.updateUser({ dailyWorkoutGoal: Number(workoutGoalText) }),
+      // updateUserMutation.mutate({
+      //   dailyWorkoutGoal: Number(workoutGoalText),
+      // }),
       "plain-text",
       user.dailyWorkoutGoal.toString(),
       "number-pad",
@@ -183,7 +167,6 @@ export default function Index() {
 
     try {
       await Promise.allSettled([
-        refetchUser(),
         refetchCalorieLogs(),
         refetchWorkoutLogs(),
         refetchGoals(),
@@ -195,7 +178,6 @@ export default function Index() {
   };
 
   if (
-    userError !== null ||
     calorieLogsError !== null ||
     workoutLogsError !== null ||
     goalsError !== null
@@ -234,12 +216,7 @@ export default function Index() {
     );
   }
 
-  if (
-    isPendingUser ||
-    isPendingCalorieLogs ||
-    isPendingWorkoutLogs ||
-    isPendingGoals
-  ) {
+  if (isPendingCalorieLogs || isPendingWorkoutLogs || isPendingGoals) {
     return (
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"

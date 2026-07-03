@@ -7,7 +7,6 @@ import WorkoutLogItem from "@/components/WorkoutLogItem";
 import useCalorieLogs from "@/hooks/useCalorieLogs";
 import useGoals from "@/hooks/useGoals";
 import useTheme from "@/hooks/useTheme";
-import useUser from "@/hooks/useUser";
 import useWorkoutLogs from "@/hooks/useWorkoutLogs";
 import { CalorieLog, Goal, WorkoutLog } from "@/lib/api";
 import { toSqlDate } from "@/lib/dates";
@@ -19,11 +18,10 @@ const halfwayColor = "#108010";
 const completedColor = "#20b020";
 
 export default function History() {
-  const { user: authUser } = useAuthenticatedAuth();
-  const { data: user } = useUser(authUser.id);
-  const { data: calorieLogs } = useCalorieLogs(authUser.id);
-  const { data: workoutLogs } = useWorkoutLogs(authUser.id);
-  const { data: goals } = useGoals(authUser.id);
+  const { user } = useAuthenticatedAuth();
+  const { data: calorieLogs } = useCalorieLogs(user.id);
+  const { data: workoutLogs } = useWorkoutLogs(user.id);
+  const { data: goals } = useGoals(user.id);
 
   const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
     "calories",
@@ -32,7 +30,6 @@ export default function History() {
   const theme = useTheme();
 
   if (
-    user === undefined ||
     calorieLogs === undefined ||
     workoutLogs === undefined ||
     goals === undefined

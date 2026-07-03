@@ -183,7 +183,7 @@ function CalorieLogPresetForm({
     const imageUrl =
       data.imageUri === null
         ? null
-        : z.url({ protocol: /^https?$/ }).safeParse(data.imageUri).success
+        : z.httpUrl().safeParse(data.imageUri).success
           ? data.imageUri
           : await uploadToCloudinary(data.imageUri);
 
@@ -292,12 +292,16 @@ function CalorieLogPresetForm({
                 onBlur={field.onBlur}
                 placeholder="Name"
                 placeholderTextColor={theme.mutedForeground}
-                className={formState.errors.name ? "border-destructive" : ""}
+                className={
+                  formState.errors.name !== undefined
+                    ? "border-destructive"
+                    : ""
+                }
               />
             )}
           />
 
-          {formState.errors.name && (
+          {formState.errors.name !== undefined && (
             <ThemedText className="text-xs text-destructive">
               {formState.errors.name.message}
             </ThemedText>
@@ -345,13 +349,15 @@ function CalorieLogPresetForm({
                 placeholderTextColor={theme.mutedForeground}
                 keyboardType="number-pad"
                 className={
-                  formState.errors.calories ? "border-destructive" : ""
+                  formState.errors.calories !== undefined
+                    ? "border-destructive"
+                    : ""
                 }
               />
             )}
           />
 
-          {formState.errors.calories && (
+          {formState.errors.calories !== undefined && (
             <ThemedText className="text-xs text-destructive">
               {formState.errors.calories.message}
             </ThemedText>
@@ -412,20 +418,6 @@ export default function EditCaloireLogPreset() {
       user.id,
     ])?.dataUpdatedAt,
   });
-
-  const { control, handleSubmit, formState, setValue } =
-    useForm<CalorieLogPresetFormValues>({
-      resolver: zodResolver(calorieLogPresetSchema),
-      defaultValues: {
-        name: calorieLogPreset !== undefined ? calorieLogPreset.name : "",
-        calories:
-          calorieLogPreset !== undefined
-            ? calorieLogPreset.calories.toString()
-            : "",
-        imageUri:
-          calorieLogPreset !== undefined ? calorieLogPreset.imageUrl : "",
-      },
-    });
 
   useEffect(() => {
     if (!isPending && calorieLogPreset === undefined) {

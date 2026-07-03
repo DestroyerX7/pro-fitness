@@ -3,33 +3,20 @@ import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
 import { useThemePreference } from "@/components/ThemeProvider";
 import useTheme from "@/hooks/useTheme";
-import useUser from "@/hooks/useUser";
-import { updateUser, uploadToCloudinary } from "@/lib/api";
+import { uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/nativewind";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { Alert, Pressable, ScrollView, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Profile() {
-  const queryClient = useQueryClient();
-  const { user: authUser } = useAuthenticatedAuth();
-  const { data: user, isPending, error } = useUser(authUser.id);
+  const { user } = useAuthenticatedAuth();
 
   const { preference, setPreference } = useThemePreference();
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
-
-  const updateUserMutation = useMutation({
-    mutationFn: updateUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", authUser.id] });
-    },
-  });
 
   const pickImage = async () => {
     Alert.alert("Select Image", "Choose an option", [
@@ -69,7 +56,7 @@ export default function Profile() {
     }
 
     const imageUrl = await uploadToCloudinary(result.assets[0].uri);
-    updateUserMutation.mutate({ image: imageUrl, userId: authUser.id });
+    authClient.updateUser({ image: imageUrl });
   };
 
   const openLibrary = async () => {
@@ -93,45 +80,33 @@ export default function Profile() {
     }
 
     const imageUrl = await uploadToCloudinary(result.assets[0].uri);
-    updateUserMutation.mutate({ image: imageUrl, userId: authUser.id });
+    authClient.updateUser({ image: imageUrl });
   };
-
-  if (error !== null) {
-    return <ThemedText>{error.message}</ThemedText>;
-  }
-
-  if (isPending) {
-    return <ThemedText>Loading...</ThemedText>;
-  }
 
   return (
     <ScrollView
-      contentContainerClassName="gap-4"
-      contentContainerStyle={{
-        paddingTop: insets.top + 16,
-        paddingBottom: insets.bottom + 16,
-        paddingHorizontal: 16,
-      }}
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="gap-4 p-4"
       showsVerticalScrollIndicator={false}
     >
       <Pressable
         onPress={() => router.push("/(protected)/edit/user")}
         className="flex-row gap-4 items-center"
       >
-        {user.image !== null ? (
-          <Pressable onPress={pickImage}>
+        <Pressable onPress={pickImage}>
+          {user.image !== null ? (
             <Image
               source={{ uri: user.image }}
               style={{ width: 64, aspectRatio: 1, borderRadius: 32 }}
             />
-          </Pressable>
-        ) : (
-          <MaterialCommunityIcons
-            name="account-circle"
-            size={64}
-            color={theme.foreground}
-          />
-        )}
+          ) : (
+            <MaterialCommunityIcons
+              name="account-circle"
+              size={64}
+              color={theme.foreground}
+            />
+          )}
+        </Pressable>
 
         <View>
           <ThemedText className="text-4xl font-bold">{user.name}</ThemedText>

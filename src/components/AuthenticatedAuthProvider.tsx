@@ -1,27 +1,8 @@
 import { authClient } from "@/lib/auth-client";
 import { createContext, PropsWithChildren, useContext } from "react";
 
-type AuthenticatedAuthState = {
-  user: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    email: string;
-    emailVerified: boolean;
-    name: string;
-    image?: string | null;
-  };
-  session: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    userId: string;
-    expiresAt: Date;
-    token: string;
-    ipAddress?: string | null;
-    userAgent?: string | null;
-  };
-};
+type UseSessionResult = ReturnType<typeof authClient.useSession>;
+type AuthenticatedAuthState = NonNullable<UseSessionResult["data"]>;
 
 const AuthenticatedAuthContext = createContext<
   AuthenticatedAuthState | undefined
@@ -30,7 +11,7 @@ const AuthenticatedAuthContext = createContext<
 export function useAuthenticatedAuth() {
   const value = useContext(AuthenticatedAuthContext);
 
-  if (!value) {
+  if (value === undefined) {
     throw new Error(
       "useAuthenticatedAuth must be used within an authenticated route (inside <AuthenticatedAuthProvider />)",
     );

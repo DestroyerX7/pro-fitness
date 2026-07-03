@@ -2,30 +2,34 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
-import useUser from "@/hooks/useUser";
-import { deleteUser, updateUser, uploadToCloudinary } from "@/lib/api";
+import { uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/nativewind";
+import { UserFormValues, userSchema } from "@/lib/zodSchema";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
+import { Controller, useForm } from "react-hook-form";
 import { Alert, Pressable, ScrollView, View } from "react-native";
+import { z } from "zod";
 
 export default function EditUser() {
-  const { user: authUser } = useAuthenticatedAuth();
-  const { data: user } = useUser(authUser.id);
+  const { user } = useAuthenticatedAuth();
 
-  const queryClient = useQueryClient();
+  const { control, handleSubmit, formState, setValue } =
+    useForm<UserFormValues>({
+      resolver: zodResolver(userSchema),
+      defaultValues: {
+        name: user.name,
+        dailyCalorieGoal: user.dailyCalorieGoal.toString(),
+        dailyWorkoutGoal: user.dailyWorkoutGoal.toString(),
+        imageUri: user.image,
+      },
+    });
+
   const theme = useTheme();
-
-  const updateUserMutation = useMutation({
-    mutationFn: updateUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", authUser.id] });
-    },
-  });
 
   const handleDeleteUser = () => {
     Alert.alert(
@@ -39,7 +43,19 @@ export default function EditUser() {
         {
           text: "Delete",
           onPress: async () => {
-            await deleteUser(authUser.id);
+            const result = await authClient.deleteUser({
+              callbackURL: "/(auth)",
+            });
+
+            if (result.error !== null) {
+              Alert.alert(
+                result.error.message ??
+                  "Something went wrong, please try again",
+              );
+
+              return;
+            }
+
             await authClient.signOut();
           },
           style: "destructive",
@@ -85,8 +101,11 @@ export default function EditUser() {
       return;
     }
 
-    const imageUrl = await uploadToCloudinary(result.assets[0].uri);
-    updateUserMutation.mutate({ image: imageUrl, userId: authUser.id });
+    setValue("imageUri", result.assets[0].uri, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
   };
 
   const openLibrary = async () => {
@@ -109,13 +128,52 @@ export default function EditUser() {
       return;
     }
 
-    const imageUrl = await uploadToCloudinary(result.assets[0].uri);
-    updateUserMutation.mutate({ image: imageUrl, userId: authUser.id });
+    setValue("imageUri", result.assets[0].uri, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
   };
 
-  if (user === undefined) {
-    return;
-  }
+  const onSubmit = async (data: UserFormValues) => {
+    const dailyCalorieGoalNum = Number(data.dailyCalorieGoal);
+    const dailyWorkoutGoalNum = Number(data.dailyWorkoutGoal);
+
+    // Could maybe use formState.isDirty
+    if (
+      user.name === data.name &&
+      user.dailyCalorieGoal === dailyCalorieGoalNum &&
+      user.dailyWorkoutGoal === dailyWorkoutGoalNum &&
+      user.image === data.imageUri
+    ) {
+      return;
+    }
+
+    const imageUrl =
+      data.imageUri === null
+        ? null
+        : z.httpUrl().safeParse(data.imageUri).success
+          ? data.imageUri
+          : await uploadToCloudinary(data.imageUri);
+
+    authClient.updateUser({
+      name: data.name,
+      image: imageUrl,
+      dailyCalorieGoal: dailyCalorieGoalNum,
+      dailyWorkoutGoal: dailyCalorieGoalNum,
+      fetchOptions: {
+        onSuccess: () => router.back(),
+        onError: () =>
+          Alert.alert(
+            "Couldn't save",
+            "Something went wrong while saving. Please try again.",
+          ),
+      },
+    });
+  };
+
+  const isSaving = formState.isSubmitting;
+  const hasUnsavedChanges = formState.isDirty;
 
   return (
     <>
@@ -130,21 +188,44 @@ export default function EditUser() {
         contentContainerClassName="p-4 gap-6"
         showsVerticalScrollIndicator={false}
       >
+        {/* Image picker */}
         <View className="items-center gap-2">
-          <Pressable onPress={pickImage}>
-            {user.image !== null ? (
-              <Image
-                source={{ uri: user.image }}
-                style={{ width: 128, aspectRatio: 1, borderRadius: 64 }}
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name="account-circle"
-                size={128}
-                color={theme.foreground}
-              />
+          <Controller
+            control={control}
+            name="imageUri"
+            render={({ field }) => (
+              <View className="relative">
+                <Pressable onPress={pickImage}>
+                  {field.value !== null ? (
+                    <Image
+                      source={{ uri: field.value }}
+                      style={{ width: 192, aspectRatio: 1, borderRadius: 96 }}
+                    />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name="account-circle"
+                      size={192}
+                      color={theme.foreground}
+                    />
+                  )}
+                </Pressable>
+
+                {field.value !== null && (
+                  <Pressable
+                    onPress={() => field.onChange(null)}
+                    hitSlop={8}
+                    className="absolute right-3 top-3 h-8 w-8 items-center justify-center rounded-full bg-destructive shadow active:opacity-80"
+                  >
+                    <MaterialCommunityIcons
+                      name="trash-can-outline"
+                      size={16}
+                      color={theme.destructiveForeground}
+                    />
+                  </Pressable>
+                )}
+              </View>
             )}
-          </Pressable>
+          />
 
           <View className="items-center">
             <ThemedText className="text-sm font-medium">
@@ -157,10 +238,34 @@ export default function EditUser() {
           </View>
         </View>
 
+        {/* Name */}
         <View className="gap-2">
           <ThemedText className="font-medium text-sm">Name</ThemedText>
 
-          <ThemedTextInput value={user.name} />
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <ThemedTextInput
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="Name"
+                placeholderTextColor={theme.mutedForeground}
+                className={
+                  formState.errors.name !== undefined
+                    ? "border-destructive"
+                    : ""
+                }
+              />
+            )}
+          />
+
+          {formState.errors.name !== undefined && (
+            <ThemedText className="text-xs text-destructive">
+              {formState.errors.name.message}
+            </ThemedText>
+          )}
         </View>
 
         <View className="gap-2">
@@ -168,7 +273,30 @@ export default function EditUser() {
             Daily Calorie Goal
           </ThemedText>
 
-          <ThemedTextInput value={user.dailyCalorieGoal.toString()} />
+          <Controller
+            control={control}
+            name="dailyCalorieGoal"
+            render={({ field }) => (
+              <ThemedTextInput
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="Daily calorie goal"
+                placeholderTextColor={theme.mutedForeground}
+                className={
+                  formState.errors.dailyCalorieGoal !== undefined
+                    ? "border-destructive"
+                    : ""
+                }
+              />
+            )}
+          />
+
+          {formState.errors.dailyCalorieGoal !== undefined && (
+            <ThemedText className="text-xs text-destructive">
+              {formState.errors.dailyCalorieGoal.message}
+            </ThemedText>
+          )}
         </View>
 
         <View className="gap-2">
@@ -176,21 +304,44 @@ export default function EditUser() {
             Daily Workout Goal
           </ThemedText>
 
-          <ThemedTextInput value={user.dailyWorkoutGoal.toString()} />
+          <Controller
+            control={control}
+            name="dailyWorkoutGoal"
+            render={({ field }) => (
+              <ThemedTextInput
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="Daily workout goal"
+                placeholderTextColor={theme.mutedForeground}
+                className={
+                  formState.errors.dailyWorkoutGoal !== undefined
+                    ? "border-destructive"
+                    : ""
+                }
+              />
+            )}
+          />
+
+          {formState.errors.dailyWorkoutGoal !== undefined && (
+            <ThemedText className="text-xs text-destructive">
+              {formState.errors.dailyWorkoutGoal.message}
+            </ThemedText>
+          )}
         </View>
 
         <View className="gap-4">
           {/* Save */}
           <Pressable
-            //   onPress={handleSubmit(onSubmit)}
+            onPress={handleSubmit(onSubmit)}
             className={cn(
               "h-12 items-center justify-center rounded-xl bg-primary active:opacity-80",
-              false ? "opacity-50" : "",
+              isSaving || !hasUnsavedChanges ? "opacity-50" : "",
             )}
-            disabled={false}
+            disabled={isSaving || !hasUnsavedChanges}
           >
             <ThemedText className="font-semibold text-primary-foreground">
-              {false ? "Saving..." : "Save"}
+              {isSaving ? "Saving..." : "Save"}
             </ThemedText>
           </Pressable>
 

@@ -39,9 +39,7 @@ import { z } from "zod";
 type Product = {
   code: string;
   product_name?: string;
-  serving_size?: string;
   nutriments: {
-    "energy-kcal_100g"?: number;
     "energy-kcal_serving"?: number;
   };
   image_url?: string;
@@ -241,9 +239,12 @@ export default function Scan() {
   if (!status.granted) {
     return (
       <View className="flex-1 justify-center items-center gap-4">
-        <ThemedText>We need camera permission</ThemedText>
+        <ThemedText className="text-xl font-semibold">
+          We need camera permission
+        </ThemedText>
+
         <Pressable
-          className="p-4 bg-primary rounded-xl"
+          className="p-4 bg-primary rounded-xl active:opacity-80"
           onPress={requestPermission}
         >
           <ThemedText>Grant Permission</ThemedText>
@@ -254,27 +255,32 @@ export default function Scan() {
 
   if (error !== null) {
     return (
-      <View className="p-4 gap-4">
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="p-4 gap-6"
+        showsVerticalScrollIndicator={false}
+      >
         <Pressable
-          className="bg-secondary p-4 rounded-full flex-row items-center justify-center gap-2"
+          className="bg-secondary p-4 rounded-xl flex-row items-center justify-center gap-1 active:opacity-80"
           onPress={rescan}
         >
           <MaterialCommunityIcons
             name="refresh"
-            size={24}
+            size={16}
             color={theme.primaryForeground}
           />
 
-          <ThemedText className="text-primary-foreground text-center text-lg font-bold">
+          <ThemedText className="text-primary-foreground text-center text-lg font-semibold">
             Rescan
           </ThemedText>
         </Pressable>
 
         <View className="flex-row gap-2 items-center justify-center">
           <MaterialIcons name="error" size={32} color={theme.foreground} />
+
           <ThemedText className="text-2xl">{error}</ThemedText>
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
