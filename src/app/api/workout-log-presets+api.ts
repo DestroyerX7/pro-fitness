@@ -6,7 +6,7 @@ import { createInsertSchema } from "drizzle-zod";
 
 const createWorkoutLogSchema = createInsertSchema(workoutLogPreset, {
   name: (schema) => schema.min(1),
-  duration: (schema) => schema.int().min(1),
+  durationMinutes: (schema) => schema.int().min(1),
 }).omit({ id: true, createdAt: true, updatedAt: true });
 
 export async function POST(request: Request) {

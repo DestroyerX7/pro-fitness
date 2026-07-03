@@ -2,10 +2,10 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
-import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
+import { createNutritionLog, uploadToCloudinary } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/nativewind";
-import { CalorieLogFormValues, calorieLogSchema } from "@/lib/zodSchema";
+import { NutritionLogFormValues, nutritionLogSchema } from "@/lib/zodSchema";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,8 +23,8 @@ export default function Calories() {
   const { user } = useAuthenticatedAuth();
 
   const { control, handleSubmit, setValue, formState } =
-    useForm<CalorieLogFormValues>({
-      resolver: zodResolver(calorieLogSchema),
+    useForm<NutritionLogFormValues>({
+      resolver: zodResolver(nutritionLogSchema),
       defaultValues: {
         name: "",
         calories: "",
@@ -38,11 +38,11 @@ export default function Calories() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const createCalorieLogMutation = useMutation({
-    mutationFn: createCalorieLog,
+  const createNutritionLogMutation = useMutation({
+    mutationFn: createNutritionLog,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", user.id],
+        queryKey: ["nutritionLogs", user.id],
       });
 
       Toast.show({
@@ -130,7 +130,7 @@ export default function Calories() {
     setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
   };
 
-  const onSubmit = async (data: CalorieLogFormValues) => {
+  const onSubmit = async (data: NutritionLogFormValues) => {
     setLogging(true);
 
     const caloriesNum = Number(data.calories);
@@ -138,7 +138,7 @@ export default function Calories() {
       data.imageUri !== null ? await uploadToCloudinary(data.imageUri) : null;
     const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
 
-    createCalorieLogMutation.mutate({
+    createNutritionLogMutation.mutate({
       userId: user.id,
       name: data.name,
       calories: caloriesNum,

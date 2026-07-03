@@ -6,8 +6,8 @@ import { createUpdateSchema } from "drizzle-zod";
 
 const updateWorkoutLogPresetSchema = createUpdateSchema(workoutLogPreset, {
   name: (schema) => schema.min(1),
-  duration: (schema) => schema.int().min(1),
-}).pick({ name: true, duration: true, icon: true });
+  durationMinutes: (schema) => schema.int().min(1),
+}).pick({ name: true, durationMinutes: true, icon: true });
 
 export async function GET(
   request: Request,

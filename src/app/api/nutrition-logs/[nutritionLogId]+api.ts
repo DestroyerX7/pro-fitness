@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { calorieLog } from "@/db/schema";
+import { nutritionLog } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
-const updateCalorieLogSchema = createUpdateSchema(calorieLog, {
+const updateNutritionLogSchema = createUpdateSchema(nutritionLog, {
   name: (schema) => schema.min(1),
   calories: (schema) => schema.int().min(1),
   consumedAt: (schema) =>
@@ -17,12 +17,12 @@ const updateCalorieLogSchema = createUpdateSchema(calorieLog, {
         (val) => !Number.isNaN(new Date(val.replace(" ", "T")).getTime()),
         { message: "Invalid date" },
       ),
-  imageUrl: z.url().nullable().optional(),
+  imageUrl: z.httpUrl().nullable().optional(),
 }).pick({ name: true, calories: true, consumedAt: true, imageUrl: true });
 
 export async function GET(
   request: Request,
-  { calorieLogId }: Record<string, string>,
+  { nutritionLogId }: Record<string, string>,
 ) {
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -32,26 +32,26 @@ export async function GET(
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [selectedCalorieLog] = await db
+  const [selectedNutritionLog] = await db
     .select()
-    .from(calorieLog)
+    .from(nutritionLog)
     .where(
       and(
-        eq(calorieLog.id, calorieLogId),
-        eq(calorieLog.userId, session.user.id),
+        eq(nutritionLog.id, nutritionLogId),
+        eq(nutritionLog.userId, session.user.id),
       ),
     );
 
-  if (selectedCalorieLog === undefined) {
-    return Response.json({ error: "Calorie log not found" }, { status: 404 });
+  if (selectedNutritionLog === undefined) {
+    return Response.json({ error: "Nutrition log not found" }, { status: 404 });
   }
 
-  return Response.json(selectedCalorieLog);
+  return Response.json(selectedNutritionLog);
 }
 
 export async function PATCH(
   request: Request,
-  { calorieLogId }: Record<string, string>,
+  { nutritionLogId }: Record<string, string>,
 ) {
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -61,12 +61,8 @@ export async function PATCH(
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!z.uuid().safeParse(calorieLogId).success) {
-    return Response.json({ error: "Invalid calorie log id" }, { status: 400 });
-  }
-
   const body = await request.json();
-  const parsed = updateCalorieLogSchema.safeParse(body);
+  const parsed = updateNutritionLogSchema.safeParse(body);
 
   if (!parsed.success) {
     return Response.json(
@@ -82,27 +78,27 @@ export async function PATCH(
     );
   }
 
-  const [updatedCalorieLog] = await db
-    .update(calorieLog)
+  const [updatedNutritionLog] = await db
+    .update(nutritionLog)
     .set(parsed.data)
     .where(
       and(
-        eq(calorieLog.id, calorieLogId),
-        eq(calorieLog.userId, session.user.id),
+        eq(nutritionLog.id, nutritionLogId),
+        eq(nutritionLog.userId, session.user.id),
       ),
     )
     .returning();
 
-  if (updatedCalorieLog === undefined) {
-    return Response.json({ error: "Calorie log not found" }, { status: 404 });
+  if (updatedNutritionLog === undefined) {
+    return Response.json({ error: "Nutrition log not found" }, { status: 404 });
   }
 
-  return Response.json(updatedCalorieLog);
+  return Response.json(updatedNutritionLog);
 }
 
 export async function DELETE(
   request: Request,
-  { calorieLogId }: Record<string, string>,
+  { nutritionLogId }: Record<string, string>,
 ) {
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -112,19 +108,19 @@ export async function DELETE(
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [deletedCalorieLog] = await db
-    .delete(calorieLog)
+  const [deletedNutritionLog] = await db
+    .delete(nutritionLog)
     .where(
       and(
-        eq(calorieLog.id, calorieLogId),
-        eq(calorieLog.userId, session.user.id),
+        eq(nutritionLog.id, nutritionLogId),
+        eq(nutritionLog.userId, session.user.id),
       ),
     )
     .returning();
 
-  if (deletedCalorieLog === undefined) {
-    return Response.json({ error: "Calorie log not found" }, { status: 404 });
+  if (deletedNutritionLog === undefined) {
+    return Response.json({ error: "Nutrition log not found" }, { status: 404 });
   }
 
-  return Response.json(deletedCalorieLog);
+  return Response.json(deletedNutritionLog);
 }

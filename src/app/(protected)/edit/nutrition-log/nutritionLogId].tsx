@@ -3,16 +3,16 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import {
-  CalorieLog,
-  createCalorieLogPreset,
-  deleteCalorieLog,
-  getCalorieLog,
-  updateCalorieLog,
+  createNutritionLogPreset,
+  deleteNutritionLog,
+  getNutritionLog,
+  NutritionLog,
+  updateNutritionLog,
   uploadToCloudinary,
 } from "@/lib/api";
-import { fromSqlTimestampToLocalDate, toSqlTimestamp } from "@/lib/dates";
+import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/nativewind";
-import { CalorieLogFormValues, calorieLogSchema } from "@/lib/zodSchema";
+import { NutritionLogFormValues, nutritionLogSchema } from "@/lib/zodSchema";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,53 +33,53 @@ import {
 } from "react-native";
 import { z } from "zod";
 
-function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
+function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
 
   const { control, handleSubmit, formState, setValue } =
-    useForm<CalorieLogFormValues>({
-      resolver: zodResolver(calorieLogSchema),
+    useForm<NutritionLogFormValues>({
+      resolver: zodResolver(nutritionLogSchema),
       defaultValues: {
-        name: calorieLog.name,
-        calories: calorieLog.calories.toString(),
-        consumedAt: fromSqlTimestampToLocalDate(calorieLog.consumedAt),
-        imageUri: calorieLog.imageUrl,
+        name: nutritionLog.name,
+        calories: nutritionLog.calories.toString(),
+        consumedAt: nutritionLog.consumedAt,
+        imageUri: nutritionLog.imageUrl,
       },
     });
 
   const theme = useTheme();
 
-  const updateCalorieLogMutation = useMutation({
-    mutationFn: updateCalorieLog,
+  const updateNutritionLogMutation = useMutation({
+    mutationFn: updateNutritionLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", user.id],
+        queryKey: ["nutritionLogs", user.id],
       });
     },
   });
 
-  const deleteCalorieLogMutation = useMutation({
-    mutationFn: deleteCalorieLog,
+  const deleteNutritionLogMutation = useMutation({
+    mutationFn: deleteNutritionLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", user.id],
+        queryKey: ["nutritionLogs", user.id],
       });
     },
   });
 
-  const createCalorieLogPresetMutation = useMutation({
-    mutationFn: createCalorieLogPreset,
+  const createNutritionLogPresetMutation = useMutation({
+    mutationFn: createNutritionLogPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogPresets", calorieLog.userId],
+        queryKey: ["nutritionLogPresets", nutritionLog.userId],
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
   });
 
-  const handleCreateCalorieLogPreset = () => {
+  const handleCreateNutritionLogPreset = () => {
     if (formState.isDirty) {
       Alert.alert(
         "Save changes to create preset",
@@ -89,11 +89,11 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
       return;
     }
 
-    createCalorieLogPresetMutation.mutate({
-      userId: calorieLog.userId,
-      name: calorieLog.name,
-      calories: calorieLog.calories,
-      imageUrl: calorieLog.imageUrl,
+    createNutritionLogPresetMutation.mutate({
+      userId: nutritionLog.userId,
+      name: nutritionLog.name,
+      calories: nutritionLog.calories,
+      imageUrl: nutritionLog.imageUrl,
     });
   };
 
@@ -172,7 +172,7 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
     await Haptics.selectionAsync();
 
     Alert.alert(
-      `Delete ${calorieLog.name}`,
+      `Delete ${nutritionLog.name}`,
       "Are you sure you want to delete this calorie log?",
       [
         { text: "Cancel", style: "cancel" },
@@ -180,7 +180,7 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            deleteCalorieLogMutation.mutate(calorieLog.id, {
+            deleteNutritionLogMutation.mutate(nutritionLog.id, {
               onSuccess: () => router.back(),
               onError: () =>
                 Alert.alert(
@@ -194,20 +194,20 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
     );
   };
 
-  const onSubmit = async (data: CalorieLogFormValues) => {
+  const onSubmit = async (data: NutritionLogFormValues) => {
     const caloriesNum = Number(data.calories);
-    const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
 
     // Could maybe use formState.isDirty
     if (
-      calorieLog.name === data.name &&
-      calorieLog.calories === caloriesNum &&
-      calorieLog.consumedAt === consumedAtSqlTimestamp &&
-      calorieLog.imageUrl === data.imageUri
+      nutritionLog.name === data.name &&
+      nutritionLog.calories === caloriesNum &&
+      nutritionLog.consumedAt.getTime() === data.consumedAt.getTime() &&
+      nutritionLog.imageUrl === data.imageUri
     ) {
       return;
     }
 
+    const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
     const imageUrl =
       data.imageUri === null
         ? null
@@ -215,13 +215,13 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
           ? data.imageUri
           : await uploadToCloudinary(data.imageUri);
 
-    updateCalorieLogMutation.mutate(
+    updateNutritionLogMutation.mutate(
       {
         name: data.name,
         calories: caloriesNum,
         consumedAt: consumedAtSqlTimestamp,
         imageUrl,
-        calorieLogId: calorieLog.id,
+        nutritionLogId: nutritionLog.id,
       },
       {
         onSuccess: () => router.back(),
@@ -234,8 +234,9 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
     );
   };
 
-  const isSaving = formState.isSubmitting || updateCalorieLogMutation.isPending;
-  const isDeleting = deleteCalorieLogMutation.isPending;
+  const isSaving =
+    formState.isSubmitting || updateNutritionLogMutation.isPending;
+  const isDeleting = deleteNutritionLogMutation.isPending;
   const hasUnsavedChanges = formState.isDirty;
 
   return (
@@ -245,8 +246,8 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
           headerRight: () => (
             <Pressable
               className="p-2 justify-center items-center flex-row gap-2"
-              disabled={createCalorieLogPresetMutation.isPending}
-              onPress={handleCreateCalorieLogPreset}
+              disabled={createNutritionLogPresetMutation.isPending}
+              onPress={handleCreateNutritionLogPreset}
             >
               <MaterialCommunityIcons
                 name="tune"
@@ -468,31 +469,31 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
   );
 }
 
-export default function EditCalorieLog() {
-  const { calorieLogId } = useLocalSearchParams<{ calorieLogId: string }>();
+export default function EditNutritionLog() {
+  const { nutritionLogId } = useLocalSearchParams<{ nutritionLogId: string }>();
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
 
-  const { isPending, data: calorieLog } = useQuery({
-    queryKey: ["calorieLogs", user.id, calorieLogId],
-    queryFn: () => getCalorieLog(calorieLogId),
+  const { isPending, data: nutritionLog } = useQuery({
+    queryKey: ["nutritionLogs", user.id, nutritionLogId],
+    queryFn: () => getNutritionLog(nutritionLogId),
     initialData: () =>
       queryClient
-        .getQueryData<CalorieLog[]>(["calorieLogs", user.id])
-        ?.find((c) => c.id === calorieLogId),
+        .getQueryData<NutritionLog[]>(["nutritionLogs", user.id])
+        ?.find((c) => c.id === nutritionLogId),
     initialDataUpdatedAt: () =>
-      queryClient.getQueryState(["calorieLogs", user.id])?.dataUpdatedAt,
+      queryClient.getQueryState(["nutritionLogs", user.id])?.dataUpdatedAt,
   });
 
   useEffect(() => {
-    if (!isPending && calorieLog === undefined) {
+    if (!isPending && nutritionLog === undefined) {
       router.back();
     }
-  }, [isPending, calorieLog]);
+  }, [isPending, nutritionLog]);
 
-  if (calorieLog === undefined) {
+  if (nutritionLog === undefined) {
     return;
   }
 
-  return <CalorieLogForm calorieLog={calorieLog} />;
+  return <NutritionLogForm nutritionLog={nutritionLog} />;
 }

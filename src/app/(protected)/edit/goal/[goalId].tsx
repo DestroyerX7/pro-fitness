@@ -29,7 +29,7 @@ function GoalForm({ goal }: { goal: Goal }) {
     resolver: zodResolver(goalSchema),
     defaultValues: {
       name: goal.name,
-      description: goal.description ?? "",
+      description: goal.description,
       completed: goal.completed,
       hidden: goal.hidden,
     },
@@ -195,7 +195,7 @@ function GoalForm({ goal }: { goal: Goal }) {
                       : "",
                   )}
                   placeholder="Description..."
-                  value={field.value}
+                  value={field.value ?? ""}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
                   textAlignVertical="top"

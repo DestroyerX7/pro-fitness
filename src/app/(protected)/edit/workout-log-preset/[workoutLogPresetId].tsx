@@ -43,7 +43,7 @@ function WorkoutLogPresetForm({
       resolver: zodResolver(workoutLogPresetSchema),
       defaultValues: {
         name: workoutLogPreset.name,
-        duration: workoutLogPreset.duration.toString(),
+        durationMinutes: workoutLogPreset.durationMinutes.toString(),
         icon: workoutLogPreset.icon,
       },
     });
@@ -95,12 +95,12 @@ function WorkoutLogPresetForm({
   };
 
   const onSubmit = async (data: WorkoutLogPresetFormValues) => {
-    const durationNum = Number(data.duration);
+    const durationMinutesNum = Number(data.durationMinutes);
 
     // Could maybe use formState.isDirty
     if (
       workoutLogPreset.name === data.name &&
-      workoutLogPreset.duration === durationNum &&
+      workoutLogPreset.durationMinutes === durationMinutesNum &&
       workoutLogPreset.icon.library === data.icon.library &&
       workoutLogPreset.icon.name === data.icon.name
     ) {
@@ -110,7 +110,7 @@ function WorkoutLogPresetForm({
     updateWorkoutLogMutation.mutate(
       {
         name: data.name,
-        duration: durationNum,
+        durationMinutes: durationMinutesNum,
         icon: data.icon,
         workoutLogPresetId: workoutLogPreset.id,
       },
@@ -202,7 +202,7 @@ function WorkoutLogPresetForm({
 
           <Controller
             control={control}
-            name="duration"
+            name="durationMinutes"
             render={({ field }) => (
               <ThemedTextInput
                 placeholder="Duration"
@@ -211,7 +211,7 @@ function WorkoutLogPresetForm({
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 className={
-                  formState.errors.duration !== undefined
+                  formState.errors.durationMinutes !== undefined
                     ? "border-destructive"
                     : ""
                 }
@@ -219,9 +219,9 @@ function WorkoutLogPresetForm({
             )}
           />
 
-          {formState.errors.duration !== undefined && (
+          {formState.errors.durationMinutes !== undefined && (
             <ThemedText className="text-destructive text-xs">
-              {formState.errors.duration.message}
+              {formState.errors.durationMinutes.message}
             </ThemedText>
           )}
 
@@ -230,7 +230,7 @@ function WorkoutLogPresetForm({
               <Pressable
                 key={label}
                 onPress={() =>
-                  setValue("duration", label, {
+                  setValue("durationMinutes", label, {
                     shouldValidate: true,
                     shouldDirty: true,
                     shouldTouch: true,

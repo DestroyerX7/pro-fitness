@@ -2,6 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
 import { useThemePreference } from "@/components/ThemeProvider";
+import useDailyTarget from "@/hooks/useDailyTarget";
 import useTheme from "@/hooks/useTheme";
 import { uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
@@ -14,6 +15,7 @@ import { Alert, Pressable, ScrollView, View } from "react-native";
 
 export default function Profile() {
   const { user } = useAuthenticatedAuth();
+  const { data: dailyTarget, isPending, error } = useDailyTarget(user.id);
 
   const { preference, setPreference } = useThemePreference();
   const theme = useTheme();
@@ -83,6 +85,10 @@ export default function Profile() {
     authClient.updateUser({ image: imageUrl });
   };
 
+  if (dailyTarget === undefined) {
+    return;
+  }
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -90,7 +96,7 @@ export default function Profile() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable
-        onPress={() => router.push("/(protected)/edit/user")}
+        onPress={() => router.push("/(protected)/edit/profile")}
         className="flex-row gap-4 items-center"
       >
         <Pressable onPress={pickImage}>
@@ -144,7 +150,7 @@ export default function Profile() {
           <ThemedText className="text-xl">Daily Calorie Goal</ThemedText>
 
           <ThemedText className="text-muted-foreground text-xl">
-            {user.dailyCalorieGoal} calories
+            {dailyTarget.calorieTarget} calories
           </ThemedText>
         </View>
 
@@ -154,7 +160,7 @@ export default function Profile() {
           <ThemedText className="text-xl">Daily Workout Goal</ThemedText>
 
           <ThemedText className="text-muted-foreground text-xl">
-            {user.dailyWorkoutGoal} minutes
+            {dailyTarget.workoutMinutesTarget} minutes
           </ThemedText>
         </View>
 

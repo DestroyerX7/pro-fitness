@@ -11,10 +11,10 @@ export default function ProtectedLayout() {
         <Stack.Screen name="(tabs)" />
 
         <Stack.Screen
-          name="edit/calorie-log/[calorieLogId]"
+          name="edit/nutrition-log/[nutritionLogId]"
           options={{
             headerShown: true,
-            title: "Edit Calorie Log",
+            title: "Edit Nutrition Log",
             presentation: "modal",
             contentStyle: { backgroundColor: theme.background },
           }}
@@ -41,10 +41,10 @@ export default function ProtectedLayout() {
         />
 
         <Stack.Screen
-          name="edit/calorie-log-preset/[calorieLogPresetId]"
+          name="edit/nutrition-log-preset/[nutritionLogPresetId]"
           options={{
             headerShown: true,
-            title: "Edit Calorie Log Preset",
+            title: "Edit Nutrition Log Preset",
             presentation: "modal",
             contentStyle: { backgroundColor: theme.background },
           }}
@@ -61,7 +61,7 @@ export default function ProtectedLayout() {
         />
 
         <Stack.Screen
-          name="edit/user"
+          name="edit/profile"
           options={{
             headerShown: true,
             title: "Edit Profile",

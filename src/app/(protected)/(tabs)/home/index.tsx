@@ -1,18 +1,18 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
-import CalorieLogItem from "@/components/CalorieLogItem";
 import Card from "@/components/Card";
-import DailyGoalCard from "@/components/DailyGoalCard";
+import DailyGoalCard from "@/components/DailyTargetCard";
 import GoalItem from "@/components/GoalItem";
+import NutritionLogItem from "@/components/NutritionLogItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
-import useCalorieLogs from "@/hooks/useCalorieLogs";
+import useDailyTarget from "@/hooks/useDailyTarget";
 import useGoals from "@/hooks/useGoals";
+import useNutritionLogs from "@/hooks/useNutritionLogs";
 import useTheme from "@/hooks/useTheme";
 import useWorkoutLogs from "@/hooks/useWorkoutLogs";
-import { Goal, updateGoal, User } from "@/lib/api";
-import { authClient } from "@/lib/auth-client";
-import { toSqlTimestamp } from "@/lib/dates";
+import { Goal, updateDailyTarget, updateGoal } from "@/lib/api";
+import { toSqlDate } from "@/lib/dates";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -30,11 +30,17 @@ export default function Index() {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
   const {
-    data: calorieLogs,
-    refetch: refetchCalorieLogs,
-    isPending: isPendingCalorieLogs,
-    error: calorieLogsError,
-  } = useCalorieLogs(user.id);
+    data: dailyTarget,
+    refetch: refetchDailyTarget,
+    isPending: isPendingDailyTarget,
+    error: dailyTargetError,
+  } = useDailyTarget(user.id);
+  const {
+    data: nutritionLogs,
+    refetch: refetchNutritionLogs,
+    isPending: isPendingNutritionLogs,
+    error: nutritionLogsError,
+  } = useNutritionLogs(user.id);
   const {
     data: workoutLogs,
     refetch: refetchWorkoutLogs,
@@ -56,6 +62,13 @@ export default function Index() {
   const isRefreshingRef = useRef(false);
 
   const theme = useTheme();
+
+  const updateDailyTargetMutation = useMutation({
+    mutationFn: updateDailyTarget,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dailyTarget", user.id] });
+    },
+  });
 
   const updateGoalMutation = useMutation({
     mutationFn: updateGoal,
@@ -91,41 +104,50 @@ export default function Index() {
     },
   });
 
-  const handleEditDailyCalorieGoal = async (user: User) => {
+  const handleEditDailyCalorieTarget = async () => {
+    if (dailyTarget === undefined) {
+      return;
+    }
+
     Alert.prompt(
-      "Edit calorie goal",
-      "Update your daily calorie goal",
-      (calorieGoalText) =>
-        authClient.updateUser({ dailyCalorieGoal: Number(calorieGoalText) }),
+      "Edit calorie target",
+      "Update your daily calorie target",
+      (calorieTargetText) =>
+        updateDailyTargetMutation.mutate({
+          calorieTarget: Number(calorieTargetText),
+        }),
       "plain-text",
-      user.dailyCalorieGoal.toString(),
+      dailyTarget.calorieTarget.toString(),
       "number-pad",
     );
 
     await Haptics.selectionAsync();
   };
 
-  const handleEditDailyWorkoutGoal = async (user: User) => {
+  const handleEditDailyWorkoutMinutesTarget = async () => {
+    if (dailyTarget === undefined) {
+      return;
+    }
+
     Alert.prompt(
-      "Edit workout goal",
-      "Update your daily workout goal",
-      (workoutGoalText) =>
-        authClient.updateUser({ dailyWorkoutGoal: Number(workoutGoalText) }),
-      // updateUserMutation.mutate({
-      //   dailyWorkoutGoal: Number(workoutGoalText),
-      // }),
+      "Edit workout target",
+      "Update your daily workout target",
+      (workoutMinutesTargetText) =>
+        updateDailyTargetMutation.mutate({
+          workoutMinutesTarget: Number(workoutMinutesTargetText),
+        }),
       "plain-text",
-      user.dailyWorkoutGoal.toString(),
+      dailyTarget.workoutMinutesTarget.toString(),
       "number-pad",
     );
 
     await Haptics.selectionAsync();
   };
 
-  const handleEditCalorieLog = async (calorieLogId: string) => {
+  const handleEditNutritionLog = async (nutritionLogId: string) => {
     router.push({
-      pathname: "/(protected)/edit/calorie-log/[calorieLogId]",
-      params: { calorieLogId },
+      pathname: "/(protected)/edit/nutrition-log/nutritionLogId]",
+      params: { nutritionLogId },
     });
 
     await Haptics.selectionAsync();
@@ -167,7 +189,8 @@ export default function Index() {
 
     try {
       await Promise.allSettled([
-        refetchCalorieLogs(),
+        refetchDailyTarget(),
+        refetchNutritionLogs(),
         refetchWorkoutLogs(),
         refetchGoals(),
       ]);
@@ -178,7 +201,8 @@ export default function Index() {
   };
 
   if (
-    calorieLogsError !== null ||
+    dailyTargetError !== null ||
+    nutritionLogsError !== null ||
     workoutLogsError !== null ||
     goalsError !== null
   ) {
@@ -216,7 +240,12 @@ export default function Index() {
     );
   }
 
-  if (isPendingCalorieLogs || isPendingWorkoutLogs || isPendingGoals) {
+  if (
+    isPendingDailyTarget ||
+    isPendingNutritionLogs ||
+    isPendingWorkoutLogs ||
+    isPendingGoals
+  ) {
     return (
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
@@ -300,19 +329,19 @@ export default function Index() {
     );
   }
 
-  const todayString = toSqlTimestamp(new Date()).slice(0, 10);
+  const todayString = toSqlDate(new Date());
 
-  const todaysCalorieLogs = calorieLogs.filter(
-    (c) => c.consumedAt.slice(0, 10) === todayString,
+  const todaysNutritionLogs = nutritionLogs.filter(
+    (c) => toSqlDate(c.consumedAt) === todayString,
   );
 
   const todaysWorkoutLogs = workoutLogs.filter(
-    (w) => w.performedAt.slice(0, 10) === todayString,
+    (w) => toSqlDate(w.performedAt) === todayString,
   );
 
-  const loggedCalories = todaysCalorieLogs.reduce((a, b) => a + b.calories, 0);
+  const loggedCalories = todaysNutritionLogs.reduce((a, b) => a + b.calories, 0);
   const loggedWorkoutTime = todaysWorkoutLogs.reduce(
-    (a, b) => a + b.duration,
+    (a, b) => a + b.durationMinutes,
     0,
   );
   const goalsVisable = goals.filter((g) => !g.hidden);
@@ -330,10 +359,10 @@ export default function Index() {
       <DailyGoalCard
         title="Today's Calories"
         completedAmount={loggedCalories}
-        goalAmount={user.dailyCalorieGoal}
+        targetAmount={dailyTarget.calorieTarget}
         remainingText="calories"
         topRight={
-          <Pressable onPress={() => handleEditDailyCalorieGoal(user)}>
+          <Pressable onPress={handleEditDailyCalorieTarget}>
             <MaterialIcons
               name="mode-edit"
               size={24}
@@ -346,11 +375,11 @@ export default function Index() {
       <DailyGoalCard
         title="Workout Time"
         completedAmount={loggedWorkoutTime}
-        goalAmount={user.dailyWorkoutGoal}
+        targetAmount={dailyTarget.workoutMinutesTarget}
         remainingText="minutes"
         fillColor={theme.primary}
         topRight={
-          <Pressable onPress={() => handleEditDailyWorkoutGoal(user)}>
+          <Pressable onPress={handleEditDailyWorkoutMinutesTarget}>
             <MaterialIcons
               name="mode-edit"
               size={24}
@@ -385,15 +414,15 @@ export default function Index() {
       </ScrollView>
 
       {activeTab === "calories" &&
-        (todaysCalorieLogs.length > 0 ? (
-          todaysCalorieLogs.map((calorieLog) => (
-            <CalorieLogItem
-              key={calorieLog.id}
-              id={calorieLog.id}
-              name={calorieLog.name}
-              calories={calorieLog.calories}
-              imageUrl={calorieLog.imageUrl}
-              onEdit={handleEditCalorieLog}
+        (todaysNutritionLogs.length > 0 ? (
+          todaysNutritionLogs.map((nutritionLog) => (
+            <NutritionLogItem
+              key={nutritionLog.id}
+              id={nutritionLog.id}
+              name={nutritionLog.name}
+              calories={nutritionLog.calories}
+              imageUrl={nutritionLog.imageUrl}
+              onEdit={handleEditNutritionLog}
             />
           ))
         ) : (
@@ -427,7 +456,7 @@ export default function Index() {
               key={workoutLog.id}
               id={workoutLog.id}
               name={workoutLog.name}
-              duration={workoutLog.duration}
+              durationMinutes={workoutLog.durationMinutes}
               workoutLogIcon={workoutLog.icon}
               onEdit={handleEditWorkoutLog}
             />

@@ -107,7 +107,7 @@ export default function Goal() {
                   : "",
               )}
               placeholder="Description..."
-              value={field.value}
+              value={field.value ?? ""}
               onChangeText={field.onChange}
               onBlur={field.onBlur}
               textAlignVertical="top"

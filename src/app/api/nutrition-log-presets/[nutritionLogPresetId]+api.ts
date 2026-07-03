@@ -1,19 +1,19 @@
 import { db } from "@/db";
-import { calorieLogPreset } from "@/db/schema";
+import { nutritionLogPreset } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { and, eq } from "drizzle-orm";
 import { createUpdateSchema } from "drizzle-zod";
 import { z } from "zod";
 
-const updateCalorieLogPresetSchema = createUpdateSchema(calorieLogPreset, {
+const updateNutritionLogPresetSchema = createUpdateSchema(nutritionLogPreset, {
   name: (schema) => schema.min(1),
   calories: (schema) => schema.int().min(1),
-  imageUrl: z.url().nullable().optional(),
+  imageUrl: z.httpUrl().nullable().optional(),
 }).pick({ name: true, calories: true, imageUrl: true });
 
 export async function GET(
   request: Request,
-  { calorieLogPresetId }: Record<string, string>,
+  { nutritionLogPresetId }: Record<string, string>,
 ) {
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -23,29 +23,29 @@ export async function GET(
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [selectedCalorieLogPreset] = await db
+  const [selectedNutritionLogPreset] = await db
     .select()
-    .from(calorieLogPreset)
+    .from(nutritionLogPreset)
     .where(
       and(
-        eq(calorieLogPreset.id, calorieLogPresetId),
-        eq(calorieLogPreset.userId, session.user.id),
+        eq(nutritionLogPreset.id, nutritionLogPresetId),
+        eq(nutritionLogPreset.userId, session.user.id),
       ),
     );
 
-  if (selectedCalorieLogPreset === undefined) {
+  if (selectedNutritionLogPreset === undefined) {
     return Response.json(
-      { error: "Calorie log preset not found" },
+      { error: "Nutrition log preset not found" },
       { status: 404 },
     );
   }
 
-  return Response.json(selectedCalorieLogPreset);
+  return Response.json(selectedNutritionLogPreset);
 }
 
 export async function PATCH(
   request: Request,
-  { calorieLogPresetId }: Record<string, string>,
+  { nutritionLogPresetId }: Record<string, string>,
 ) {
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -56,7 +56,7 @@ export async function PATCH(
   }
 
   const body = await request.json();
-  const parsed = updateCalorieLogPresetSchema.safeParse(body);
+  const parsed = updateNutritionLogPresetSchema.safeParse(body);
 
   if (!parsed.success) {
     return Response.json(
@@ -72,30 +72,30 @@ export async function PATCH(
     );
   }
 
-  const [updatedCalorieLogPreset] = await db
-    .update(calorieLogPreset)
+  const [updatedNutritionLogPreset] = await db
+    .update(nutritionLogPreset)
     .set(parsed.data)
     .where(
       and(
-        eq(calorieLogPreset.id, calorieLogPresetId),
-        eq(calorieLogPreset.userId, session.user.id),
+        eq(nutritionLogPreset.id, nutritionLogPresetId),
+        eq(nutritionLogPreset.userId, session.user.id),
       ),
     )
     .returning();
 
-  if (updatedCalorieLogPreset === undefined) {
+  if (updatedNutritionLogPreset === undefined) {
     return Response.json(
-      { error: "Calorie log preset not found" },
+      { error: "Nutrition log preset not found" },
       { status: 404 },
     );
   }
 
-  return Response.json(updatedCalorieLogPreset);
+  return Response.json(updatedNutritionLogPreset);
 }
 
 export async function DELETE(
   request: Request,
-  { calorieLogPresetId }: Record<string, string>,
+  { nutritionLogPresetId }: Record<string, string>,
 ) {
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -105,22 +105,22 @@ export async function DELETE(
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [deletedCalorieLogPreset] = await db
-    .delete(calorieLogPreset)
+  const [deletedNutritionLogPreset] = await db
+    .delete(nutritionLogPreset)
     .where(
       and(
-        eq(calorieLogPreset.id, calorieLogPresetId),
-        eq(calorieLogPreset.userId, session.user.id),
+        eq(nutritionLogPreset.id, nutritionLogPresetId),
+        eq(nutritionLogPreset.userId, session.user.id),
       ),
     )
     .returning();
 
-  if (deletedCalorieLogPreset === undefined) {
+  if (deletedNutritionLogPreset === undefined) {
     return Response.json(
-      { error: "Calorie log preset not found" },
+      { error: "Nutrition log preset not found" },
       { status: 404 },
     );
   }
 
-  return Response.json(deletedCalorieLogPreset);
+  return Response.json(deletedNutritionLogPreset);
 }

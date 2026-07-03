@@ -11,20 +11,17 @@ export const auth = betterAuth({
     schema,
   }),
   user: {
-    additionalFields: {
-      dailyCalorieGoal: {
-        type: "number",
-        required: true,
-        defaultValue: 2000,
-      },
-      dailyWorkoutGoal: {
-        type: "number",
-        required: true,
-        defaultValue: 60,
-      },
-    },
     deleteUser: {
       enabled: true,
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await db.insert(schema.dailyTarget).values({ userId: user.id });
+        },
+      },
     },
   },
   emailAndPassword: {

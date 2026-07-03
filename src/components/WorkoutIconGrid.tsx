@@ -1,7 +1,8 @@
 import useTheme from "@/hooks/useTheme";
+import { WorkoutLogIcon } from "@/lib/types/workout-log-icon";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
-import WorkoutLogIconDisplay, { WorkoutLogIcon } from "./WorkoutLogIconDisplay";
+import WorkoutLogIconDisplay from "./WorkoutLogIconDisplay";
 
 const workoutLogIcons: WorkoutLogIcon[] = [
   { library: "MaterialCommunityIcons", name: "run" },

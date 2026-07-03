@@ -1,15 +1,15 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
-import CalorieLogItem from "@/components/CalorieLogItem";
+import NutritionLogItem from "@/components/NutritionLogItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
 import useTheme from "@/hooks/useTheme";
 import {
-  CalorieLogPreset,
-  createCalorieLog,
+  createNutritionLog,
   createWorkoutLog,
-  getCalorieLogPresets,
+  getNutritionLogPresets,
   getWorkoutLogPresets,
+  NutritionLogPreset,
   WorkoutLogPreset,
 } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
@@ -33,9 +33,9 @@ export default function Favorites() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const { data: calorieLogPresets } = useQuery({
-    queryKey: ["calorieLogPresets", user.id],
-    queryFn: getCalorieLogPresets,
+  const { data: nutritionLogPresets } = useQuery({
+    queryKey: ["nutritionLogPresets", user.id],
+    queryFn: getNutritionLogPresets,
   });
 
   const { data: workoutLogPresets } = useQuery({
@@ -43,11 +43,11 @@ export default function Favorites() {
     queryFn: getWorkoutLogPresets,
   });
 
-  const createCalorieLogMutation = useMutation({
-    mutationFn: createCalorieLog,
+  const createNutritionLogMutation = useMutation({
+    mutationFn: createNutritionLog,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", user.id],
+        queryKey: ["nutritionLogs", user.id],
       });
 
       Toast.show({
@@ -81,7 +81,7 @@ export default function Favorites() {
       Toast.show({
         type: "loggedWorkout",
         text1: "Logged!",
-        text2: `${data.name} • ${data.duration} mins`,
+        text2: `${data.name} • ${data.durationMinutes} mins`,
         topOffset: insets.top + 16,
       });
 
@@ -99,14 +99,14 @@ export default function Favorites() {
     },
   });
 
-  const logCalories = async (calorieLogPreset: CalorieLogPreset) => {
+  const logCalories = async (nutritionLogPreset: NutritionLogPreset) => {
     const consumedAtSqlTimestamp = toSqlTimestamp(new Date());
 
-    createCalorieLogMutation.mutate({
+    createNutritionLogMutation.mutate({
       userId: user.id,
-      name: calorieLogPreset.name,
-      calories: calorieLogPreset.calories,
-      imageUrl: calorieLogPreset.imageUrl,
+      name: nutritionLogPreset.name,
+      calories: nutritionLogPreset.calories,
+      imageUrl: nutritionLogPreset.imageUrl,
       consumedAt: consumedAtSqlTimestamp,
     });
   };
@@ -117,16 +117,16 @@ export default function Favorites() {
     createWorkoutLogMutation.mutate({
       userId: user.id,
       name: workoutLogPreset.name,
-      duration: workoutLogPreset.duration,
+      durationMinutes: workoutLogPreset.durationMinutes,
       performedAt: performedAtSqlTimestamp,
       icon: workoutLogPreset.icon,
     });
   };
 
-  const handleEditCalorieLogPreset = async (calorieLogPresetId: string) => {
+  const handleEditNutritionLogPreset = async (nutritionLogPresetId: string) => {
     router.push({
-      pathname: "/edit/calorie-log-preset/[calorieLogPresetId]",
-      params: { calorieLogPresetId },
+      pathname: "/(protected)/edit/nutrition-log-preset/nutritionLogPresetId]",
+      params: { nutritionLogPresetId },
     });
 
     await Haptics.selectionAsync();
@@ -141,7 +141,7 @@ export default function Favorites() {
     await Haptics.selectionAsync();
   };
 
-  if (calorieLogPresets === undefined || workoutLogPresets === undefined) {
+  if (nutritionLogPresets === undefined || workoutLogPresets === undefined) {
     return;
   }
 
@@ -170,18 +170,18 @@ export default function Favorites() {
       </ScrollView>
 
       {activeTab === "calories" ? (
-        calorieLogPresets.length > 0 ? (
-          calorieLogPresets.map((calorieLogPreset) => (
+        nutritionLogPresets.length > 0 ? (
+          nutritionLogPresets.map((nutritionLogPreset) => (
             <Pressable
-              onPress={() => logCalories(calorieLogPreset)}
-              key={calorieLogPreset.id}
+              onPress={() => logCalories(nutritionLogPreset)}
+              key={nutritionLogPreset.id}
             >
-              <CalorieLogItem
-                id={calorieLogPreset.id}
-                name={calorieLogPreset.name}
-                imageUrl={calorieLogPreset.imageUrl}
-                calories={calorieLogPreset.calories}
-                onEdit={handleEditCalorieLogPreset}
+              <NutritionLogItem
+                id={nutritionLogPreset.id}
+                name={nutritionLogPreset.name}
+                imageUrl={nutritionLogPreset.imageUrl}
+                calories={nutritionLogPreset.calories}
+                onEdit={handleEditNutritionLogPreset}
               />
             </Pressable>
           ))
@@ -212,7 +212,7 @@ export default function Favorites() {
             <WorkoutLogItem
               id={workoutLogPreset.id}
               name={workoutLogPreset.name}
-              duration={workoutLogPreset.duration}
+              durationMinutes={workoutLogPreset.durationMinutes}
               workoutLogIcon={workoutLogPreset.icon}
               onEdit={handleEditWorkoutLogPreset}
             />

@@ -2,7 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
-import { createCalorieLog, uploadToCloudinary } from "@/lib/api";
+import { createNutritionLog, uploadToCloudinary } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/nativewind";
 import { ScanFormValues, scanSchema } from "@/lib/zodSchema";
@@ -71,11 +71,11 @@ export default function Scan() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const createCalorieLogMutation = useMutation({
-    mutationFn: createCalorieLog,
+  const createNutritionLogMutation = useMutation({
+    mutationFn: createNutritionLog,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["calorieLogs", user.id],
+        queryKey: ["nutritionLogs", user.id],
       });
 
       Toast.show({
@@ -214,7 +214,7 @@ export default function Scan() {
           ? data.imageUri
           : await uploadToCloudinary(data.imageUri);
 
-    createCalorieLogMutation.mutate({
+    createNutritionLogMutation.mutate({
       userId: user.id,
       name: data.name,
       calories,

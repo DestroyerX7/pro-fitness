@@ -1,35 +1,47 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import useDailyTarget from "@/hooks/useDailyTarget";
 import useTheme from "@/hooks/useTheme";
-import { uploadToCloudinary } from "@/lib/api";
+import { DailyTarget, updateDailyTarget, uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/nativewind";
-import { UserFormValues, userSchema } from "@/lib/zodSchema";
+import { ProfileFormValues, profileSchema } from "@/lib/zodSchema";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router, Stack } from "expo-router";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 import { z } from "zod";
 
-export default function EditUser() {
+function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
   const { user } = useAuthenticatedAuth();
+  const queryClient = useQueryClient();
 
   const { control, handleSubmit, formState, setValue } =
-    useForm<UserFormValues>({
-      resolver: zodResolver(userSchema),
+    useForm<ProfileFormValues>({
+      resolver: zodResolver(profileSchema),
       defaultValues: {
         name: user.name,
-        dailyCalorieGoal: user.dailyCalorieGoal.toString(),
-        dailyWorkoutGoal: user.dailyWorkoutGoal.toString(),
+        dailyCalorieTarget: dailyTarget.calorieTarget.toString(),
+        dailyWorkoutMinutesTarget: dailyTarget.workoutMinutesTarget.toString(),
         imageUri: user.image,
       },
     });
 
   const theme = useTheme();
+
+  const updateDailyTargetMutation = useMutation({
+    mutationKey: ["dailyTarget", user.id],
+    mutationFn: updateDailyTarget,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dailyTarget", user.id] });
+    },
+  });
 
   const handleDeleteUser = () => {
     Alert.alert(
@@ -135,41 +147,41 @@ export default function EditUser() {
     });
   };
 
-  const onSubmit = async (data: UserFormValues) => {
-    const dailyCalorieGoalNum = Number(data.dailyCalorieGoal);
-    const dailyWorkoutGoalNum = Number(data.dailyWorkoutGoal);
+  const onSubmit = async (data: ProfileFormValues) => {
+    const dailyCalorieTargetNum = Number(data.dailyCalorieTarget);
+    const dailyWorkoutMinutesTargetNum = Number(data.dailyWorkoutMinutesTarget);
 
-    // Could maybe use formState.isDirty
-    if (
-      user.name === data.name &&
-      user.dailyCalorieGoal === dailyCalorieGoalNum &&
-      user.dailyWorkoutGoal === dailyWorkoutGoalNum &&
-      user.image === data.imageUri
-    ) {
-      return;
+    if (user.name !== data.name || user.image !== data.imageUri) {
+      const imageUrl =
+        data.imageUri === null
+          ? null
+          : z.httpUrl().safeParse(data.imageUri).success
+            ? data.imageUri
+            : await uploadToCloudinary(data.imageUri);
+
+      authClient.updateUser({
+        name: data.name,
+        image: imageUrl,
+        fetchOptions: {
+          onSuccess: () => router.back(),
+          onError: () =>
+            Alert.alert(
+              "Couldn't save",
+              "Something went wrong while saving. Please try again.",
+            ),
+        },
+      });
     }
 
-    const imageUrl =
-      data.imageUri === null
-        ? null
-        : z.httpUrl().safeParse(data.imageUri).success
-          ? data.imageUri
-          : await uploadToCloudinary(data.imageUri);
-
-    authClient.updateUser({
-      name: data.name,
-      image: imageUrl,
-      dailyCalorieGoal: dailyCalorieGoalNum,
-      dailyWorkoutGoal: dailyCalorieGoalNum,
-      fetchOptions: {
-        onSuccess: () => router.back(),
-        onError: () =>
-          Alert.alert(
-            "Couldn't save",
-            "Something went wrong while saving. Please try again.",
-          ),
-      },
-    });
+    if (
+      dailyTarget.calorieTarget !== dailyCalorieTargetNum ||
+      dailyTarget.workoutMinutesTarget !== dailyWorkoutMinutesTargetNum
+    ) {
+      updateDailyTargetMutation.mutate({
+        calorieTarget: dailyCalorieTargetNum,
+        workoutMinutesTarget: dailyWorkoutMinutesTargetNum,
+      });
+    }
   };
 
   const isSaving = formState.isSubmitting;
@@ -270,21 +282,21 @@ export default function EditUser() {
 
         <View className="gap-2">
           <ThemedText className="font-medium text-sm">
-            Daily Calorie Goal
+            Daily Calorie Target
           </ThemedText>
 
           <Controller
             control={control}
-            name="dailyCalorieGoal"
+            name="dailyCalorieTarget"
             render={({ field }) => (
               <ThemedTextInput
                 value={field.value}
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
-                placeholder="Daily calorie goal"
+                placeholder="Daily calorie target"
                 placeholderTextColor={theme.mutedForeground}
                 className={
-                  formState.errors.dailyCalorieGoal !== undefined
+                  formState.errors.dailyCalorieTarget !== undefined
                     ? "border-destructive"
                     : ""
                 }
@@ -292,30 +304,30 @@ export default function EditUser() {
             )}
           />
 
-          {formState.errors.dailyCalorieGoal !== undefined && (
+          {formState.errors.dailyCalorieTarget !== undefined && (
             <ThemedText className="text-xs text-destructive">
-              {formState.errors.dailyCalorieGoal.message}
+              {formState.errors.dailyCalorieTarget.message}
             </ThemedText>
           )}
         </View>
 
         <View className="gap-2">
           <ThemedText className="font-medium text-sm">
-            Daily Workout Goal
+            Daily Workout Target
           </ThemedText>
 
           <Controller
             control={control}
-            name="dailyWorkoutGoal"
+            name="dailyWorkoutMinutesTarget"
             render={({ field }) => (
               <ThemedTextInput
                 value={field.value}
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
-                placeholder="Daily workout goal"
+                placeholder="Daily workout target"
                 placeholderTextColor={theme.mutedForeground}
                 className={
-                  formState.errors.dailyWorkoutGoal !== undefined
+                  formState.errors.dailyWorkoutMinutesTarget !== undefined
                     ? "border-destructive"
                     : ""
                 }
@@ -323,9 +335,9 @@ export default function EditUser() {
             )}
           />
 
-          {formState.errors.dailyWorkoutGoal !== undefined && (
+          {formState.errors.dailyWorkoutMinutesTarget !== undefined && (
             <ThemedText className="text-xs text-destructive">
-              {formState.errors.dailyWorkoutGoal.message}
+              {formState.errors.dailyWorkoutMinutesTarget.message}
             </ThemedText>
           )}
         </View>
@@ -374,4 +386,21 @@ export default function EditUser() {
       </ScrollView>
     </>
   );
+}
+
+export default function EditUser() {
+  const { user } = useAuthenticatedAuth();
+  const { data: dailyTarget, isPending } = useDailyTarget(user.id);
+
+  useEffect(() => {
+    if (!isPending && dailyTarget === undefined) {
+      router.back();
+    }
+  }, [isPending, dailyTarget]);
+
+  if (dailyTarget === undefined) {
+    return;
+  }
+
+  return <ProfileForm dailyTarget={dailyTarget} />;
 }

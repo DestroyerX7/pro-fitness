@@ -147,7 +147,7 @@ export const workoutLog = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
-    minutes: integer("minutes").notNull(),
+    durationMinutes: integer("duration_minutes").notNull(),
     performedAt: timestamp("performed_at", { mode: "string" })
       .defaultNow()
       .notNull(),
@@ -212,7 +212,7 @@ export const workoutLogPreset = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
-    minutes: integer("minutes").notNull(),
+    durationMinutes: integer("duration_minutes").notNull(),
     icon: jsonb("icon")
       .$type<WorkoutLogIcon>()
       .default({

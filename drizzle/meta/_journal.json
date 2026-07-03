@@ -71,6 +71,13 @@
       "when": 1782879551449,
       "tag": "0009_tan_jane_foster",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1783108084276,
+      "tag": "0010_huge_madelyne_pryor",
+      "breakpoints": true
     }
   ]
 }

@@ -8,7 +8,7 @@ const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
 const updateWorkoutLogSchema = createUpdateSchema(workoutLog, {
   name: (schema) => schema.min(1),
-  duration: (schema) => schema.int().min(1),
+  durationMinutes: (schema) => schema.int().min(1),
   performedAt: (schema) =>
     schema
       .regex(datetimeRegex, "Expected format: YYYY-MM-DD HH:mm:ss")
@@ -16,7 +16,7 @@ const updateWorkoutLogSchema = createUpdateSchema(workoutLog, {
         (val) => !Number.isNaN(new Date(val.replace(" ", "T")).getTime()),
         { message: "Invalid date" },
       ),
-}).pick({ name: true, duration: true, performedAt: true, icon: true });
+}).pick({ name: true, durationMinutes: true, performedAt: true, icon: true });
 
 export async function GET(
   request: Request,

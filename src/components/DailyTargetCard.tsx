@@ -6,7 +6,7 @@ import ThemedText from "./ThemedText";
 type Props = {
   title: string;
   completedAmount: number;
-  goalAmount: number;
+  targetAmount: number;
   fillColor?: string;
   remainingText?: string;
   topRight?: React.ReactNode;
@@ -15,7 +15,7 @@ type Props = {
 export default function DailyGoalCard({
   title,
   completedAmount,
-  goalAmount,
+  targetAmount,
   fillColor = "#30d030",
   remainingText,
   topRight,
@@ -32,14 +32,14 @@ export default function DailyGoalCard({
         <ThemedText className="text-4xl font-bold">
           {completedAmount}
         </ThemedText>{" "}
-        / {goalAmount}
+        / {targetAmount}
       </ThemedText>
 
       <View className="h-8 bg-border rounded-full">
         <View
           className="h-full rounded-full"
           style={{
-            width: `${Math.min((completedAmount / goalAmount) * 100, 100)}%`,
+            width: `${Math.min((completedAmount / targetAmount) * 100, 100)}%`,
             backgroundColor: fillColor,
           }}
         />
@@ -47,13 +47,13 @@ export default function DailyGoalCard({
 
       <View className="flex-row justify-between">
         <ThemedText>
-          {Math.max(goalAmount - completedAmount, 0)}{" "}
+          {Math.max(targetAmount - completedAmount, 0)}{" "}
           {remainingText !== undefined && remainingText + " "}
           remaining
         </ThemedText>
 
         <ThemedText>
-          {((completedAmount / goalAmount) * 100).toFixed(2)}%
+          {((completedAmount / targetAmount) * 100).toFixed(2)}%
         </ThemedText>
       </View>
     </Card>

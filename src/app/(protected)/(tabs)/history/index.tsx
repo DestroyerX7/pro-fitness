@@ -1,14 +1,15 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
-import CalorieLogItem from "@/components/CalorieLogItem";
 import GoalItem from "@/components/GoalItem";
+import NutritionLogItem from "@/components/NutritionLogItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
-import useCalorieLogs from "@/hooks/useCalorieLogs";
+import useDailyTarget from "@/hooks/useDailyTarget";
 import useGoals from "@/hooks/useGoals";
+import useNutritionLogs from "@/hooks/useNutritionLogs";
 import useTheme from "@/hooks/useTheme";
 import useWorkoutLogs from "@/hooks/useWorkoutLogs";
-import { CalorieLog, Goal, WorkoutLog } from "@/lib/api";
+import { Goal, NutritionLog, WorkoutLog } from "@/lib/api";
 import { toSqlDate } from "@/lib/dates";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -19,7 +20,8 @@ const completedColor = "#20b020";
 
 export default function History() {
   const { user } = useAuthenticatedAuth();
-  const { data: calorieLogs } = useCalorieLogs(user.id);
+  const { data: dailyTarget } = useDailyTarget(user.id);
+  const { data: nutritionLogs } = useNutritionLogs(user.id);
   const { data: workoutLogs } = useWorkoutLogs(user.id);
   const { data: goals } = useGoals(user.id);
 
@@ -30,7 +32,8 @@ export default function History() {
   const theme = useTheme();
 
   if (
-    calorieLogs === undefined ||
+    dailyTarget === undefined ||
+    nutritionLogs === undefined ||
     workoutLogs === undefined ||
     goals === undefined
   ) {
@@ -43,38 +46,38 @@ export default function History() {
     return toSqlDate(date);
   });
 
-  const calorieLogsGroupedByDate = calorieLogs.reduce<
-    Record<string, { calorieLogs: CalorieLog[]; totalCalories: number }>
-  >((dict, calorieLog) => {
-    const dateString = calorieLog.consumedAt.slice(0, 10);
+  const nutritionLogsGroupedByDate = nutritionLogs.reduce<
+    Record<string, { nutritionLogs: NutritionLog[]; totalCalories: number }>
+  >((dict, nutritionLog) => {
+    const dateString = toSqlDate(nutritionLog.consumedAt);
 
     if (dict[dateString] === undefined) {
       dict[dateString] = {
-        calorieLogs: [],
+        nutritionLogs: [],
         totalCalories: 0,
       };
     }
 
-    dict[dateString].calorieLogs.push(calorieLog);
-    dict[dateString].totalCalories += calorieLog.calories;
+    dict[dateString].nutritionLogs.push(nutritionLog);
+    dict[dateString].totalCalories += nutritionLog.calories;
 
     return dict;
   }, {});
 
   const workoutLogsGroupedByDate = workoutLogs.reduce<
-    Record<string, { workoutLogs: WorkoutLog[]; totalDuration: number }>
+    Record<string, { workoutLogs: WorkoutLog[]; totalDurationMinutes: number }>
   >((dict, workoutLog) => {
-    const dateString = workoutLog.performedAt.slice(0, 10);
+    const dateString = toSqlDate(workoutLog.performedAt);
 
     if (dict[dateString] === undefined) {
       dict[dateString] = {
         workoutLogs: [],
-        totalDuration: 0,
+        totalDurationMinutes: 0,
       };
     }
 
     dict[dateString].workoutLogs.push(workoutLog);
-    dict[dateString].totalDuration += workoutLog.duration;
+    dict[dateString].totalDurationMinutes += workoutLog.durationMinutes;
 
     return dict;
   }, {});
@@ -127,18 +130,18 @@ export default function History() {
       <View className="flex-row flex-wrap">
         {dateStrings.map((dateString) => {
           const totalCalories =
-            calorieLogsGroupedByDate[dateString]?.totalCalories ?? 0;
+            nutritionLogsGroupedByDate[dateString]?.totalCalories ?? 0;
           const backgroundColor =
-            totalCalories >= user.dailyCalorieGoal
+            totalCalories >= dailyTarget.calorieTarget
               ? completedColor
-              : totalCalories >= user.dailyCalorieGoal * 0.5
+              : totalCalories >= dailyTarget.calorieTarget * 0.5
                 ? halfwayColor
                 : totalCalories > 0
                   ? startedColor
                   : theme.secondary;
 
           const percentComplete = (
-            (totalCalories / user.dailyCalorieGoal) *
+            (totalCalories / dailyTarget.calorieTarget) *
             100
           ).toFixed(0);
 
@@ -158,8 +161,8 @@ export default function History() {
       </View>
 
       {activeTab === "calories" &&
-        Object.entries(calorieLogsGroupedByDate).map(
-          ([dateString, { calorieLogs, totalCalories }]) => {
+        Object.entries(nutritionLogsGroupedByDate).map(
+          ([dateString, { nutritionLogs, totalCalories }]) => {
             const [year, month, day] = dateString.split("-").map(Number);
             const localeDateString = new Date(
               year,
@@ -175,13 +178,13 @@ export default function History() {
                   <ThemedText>{totalCalories} calories</ThemedText>
                 </View>
 
-                {calorieLogs.map((calorieLog) => (
-                  <CalorieLogItem
-                    key={calorieLog.id}
-                    id={calorieLog.id}
-                    name={calorieLog.name}
-                    calories={calorieLog.calories}
-                    imageUrl={calorieLog.imageUrl}
+                {nutritionLogs.map((nutritionLog) => (
+                  <NutritionLogItem
+                    key={nutritionLog.id}
+                    id={nutritionLog.id}
+                    name={nutritionLog.name}
+                    calories={nutritionLog.calories}
+                    imageUrl={nutritionLog.imageUrl}
                   />
                 ))}
               </View>
@@ -191,7 +194,10 @@ export default function History() {
 
       {activeTab === "workouts" &&
         Object.entries(workoutLogsGroupedByDate).map(
-          ([dateString, { workoutLogs, totalDuration }]) => {
+          ([
+            dateString,
+            { workoutLogs, totalDurationMinutes: totalDuration },
+          ]) => {
             const [year, month, day] = dateString.split("-").map(Number);
             const localeDateString = new Date(
               year,
@@ -212,7 +218,7 @@ export default function History() {
                     key={workoutLog.id}
                     id={workoutLog.id}
                     name={workoutLog.name}
-                    duration={workoutLog.duration}
+                    durationMinutes={workoutLog.durationMinutes}
                     workoutLogIcon={workoutLog.icon}
                   />
                 ))}

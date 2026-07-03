@@ -1,14 +1,15 @@
 import useTheme from "@/hooks/useTheme";
+import { WorkoutLogIcon } from "@/lib/types/workout-log-icon";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, View } from "react-native";
 import Card from "./Card";
 import ThemedText from "./ThemedText";
-import WorkoutLogIconDisplay, { WorkoutLogIcon } from "./WorkoutLogIconDisplay";
+import WorkoutLogIconDisplay from "./WorkoutLogIconDisplay";
 
 type Props = {
   id: string;
   name: string;
-  duration: number;
+  durationMinutes: number;
   workoutLogIcon: WorkoutLogIcon;
   onEdit?: (id: string) => void;
 };
@@ -16,7 +17,7 @@ type Props = {
 export default function WorkoutLogItem({
   id,
   name,
-  duration,
+  durationMinutes,
   workoutLogIcon,
   onEdit,
 }: Props) {
@@ -34,7 +35,7 @@ export default function WorkoutLogItem({
         <ThemedText className="text-lg font-bold">{name}</ThemedText>
 
         <ThemedText className="text-muted-foreground">
-          {duration} minutes
+          {durationMinutes} minutes
         </ThemedText>
       </View>
 

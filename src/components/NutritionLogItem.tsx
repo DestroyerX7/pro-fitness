@@ -12,7 +12,7 @@ type Props = {
   onEdit?: (id: string) => void;
 };
 
-export default function CalorieLogItem({
+export default function NutritionLogItem({
   id,
   name,
   calories,

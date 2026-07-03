@@ -23,7 +23,7 @@ export default function Workout() {
       resolver: zodResolver(workoutLogSchema),
       defaultValues: {
         name: "",
-        duration: "",
+        durationMinutes: "",
         performedAt: new Date(),
         icon: {
           library: "MaterialCommunityIcons",
@@ -44,7 +44,7 @@ export default function Workout() {
       Toast.show({
         type: "loggedWorkout",
         text1: "Logged!",
-        text2: `${data.name} • ${data.duration} mins`,
+        text2: `${data.name} • ${data.durationMinutes} mins`,
         topOffset: insets.top + 16,
       });
 
@@ -63,13 +63,13 @@ export default function Workout() {
   });
 
   const onSubmit = async (data: WorkoutLogFormValues) => {
-    const durationNum = Number(data.duration);
+    const durationMinutesNum = Number(data.durationMinutes);
     const performedAtSqlTimestamp = toSqlTimestamp(data.performedAt);
 
     createWorkoutLogMutation.mutate({
       userId: user.id,
       name: data.name,
-      duration: durationNum,
+      durationMinutes: durationMinutesNum,
       performedAt: performedAtSqlTimestamp,
       icon: data.icon,
     });
@@ -134,7 +134,7 @@ export default function Workout() {
 
         <Controller
           control={control}
-          name="duration"
+          name="durationMinutes"
           render={({ field }) => (
             <ThemedTextInput
               placeholder="Duration"
@@ -143,7 +143,7 @@ export default function Workout() {
               onChangeText={field.onChange}
               onBlur={field.onBlur}
               className={
-                formState.errors.duration !== undefined
+                formState.errors.durationMinutes !== undefined
                   ? "border-destructive"
                   : ""
               }
@@ -151,9 +151,9 @@ export default function Workout() {
           )}
         />
 
-        {formState.errors.duration !== undefined && (
+        {formState.errors.durationMinutes !== undefined && (
           <ThemedText className="text-destructive text-xs">
-            {formState.errors.duration.message}
+            {formState.errors.durationMinutes.message}
           </ThemedText>
         )}
 
@@ -162,7 +162,7 @@ export default function Workout() {
             <Pressable
               key={label}
               onPress={() =>
-                setValue("duration", label, { shouldValidate: true })
+                setValue("durationMinutes", label, { shouldValidate: true })
               }
               className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
             >

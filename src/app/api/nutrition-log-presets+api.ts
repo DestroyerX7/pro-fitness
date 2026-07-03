@@ -1,10 +1,10 @@
 import { db } from "@/db";
-import { calorieLogPreset } from "@/db/schema";
+import { nutritionLogPreset } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { desc, eq } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 
-const createCalorieLogPresetSchema = createInsertSchema(calorieLogPreset, {
+const createNutritionLogPresetSchema = createInsertSchema(nutritionLogPreset, {
   name: (schema) => schema.min(1),
   calories: (schema) => schema.int().min(1),
 }).omit({ id: true, createdAt: true, updatedAt: true });
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const parsed = createCalorieLogPresetSchema.safeParse(body);
+  const parsed = createNutritionLogPresetSchema.safeParse(body);
 
   if (!parsed.success) {
     return Response.json(
@@ -28,12 +28,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const [createdCalorieLogPreset] = await db
-    .insert(calorieLogPreset)
+  const [createdNutritionLogPreset] = await db
+    .insert(nutritionLogPreset)
     .values(parsed.data)
     .returning();
 
-  return Response.json(createdCalorieLogPreset);
+  return Response.json(createdNutritionLogPreset);
 }
 
 export async function GET(request: Request) {
@@ -45,11 +45,11 @@ export async function GET(request: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const calorieLogPresets = await db
+  const nutritionLogPresets = await db
     .select()
-    .from(calorieLogPreset)
-    .where(eq(calorieLogPreset.userId, session.user.id))
-    .orderBy(desc(calorieLogPreset.createdAt));
+    .from(nutritionLogPreset)
+    .where(eq(nutritionLogPreset.userId, session.user.id))
+    .orderBy(desc(nutritionLogPreset.createdAt));
 
-  return Response.json(calorieLogPresets);
+  return Response.json(nutritionLogPresets);
 }

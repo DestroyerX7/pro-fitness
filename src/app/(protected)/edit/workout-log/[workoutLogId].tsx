@@ -10,7 +10,7 @@ import {
   updateWorkoutLog,
   WorkoutLog,
 } from "@/lib/api";
-import { fromSqlTimestampToLocalDate, toSqlTimestamp } from "@/lib/dates";
+import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/nativewind";
 import { WorkoutLogFormValues, workoutLogSchema } from "@/lib/zodSchema";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
@@ -39,8 +39,8 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
       resolver: zodResolver(workoutLogSchema),
       defaultValues: {
         name: workoutLog.name,
-        duration: workoutLog.duration.toString(),
-        performedAt: fromSqlTimestampToLocalDate(workoutLog.performedAt),
+        durationMinutes: workoutLog.durationMinutes.toString(),
+        performedAt: workoutLog.performedAt,
         icon: workoutLog.icon,
       },
     });
@@ -89,7 +89,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
     createWorkoutLogPresetMutation.mutate({
       userId: workoutLog.userId,
       name: workoutLog.name,
-      duration: workoutLog.duration,
+      durationMinutes: workoutLog.durationMinutes,
       icon: workoutLog.icon,
     });
   };
@@ -121,24 +121,25 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
   };
 
   const onSubmit = async (data: WorkoutLogFormValues) => {
-    const durationNum = Number(data.duration);
-    const performedAtSqlTimestamp = toSqlTimestamp(data.performedAt);
+    const durationMinutesNum = Number(data.durationMinutes);
 
     // Could maybe use formState.isDirty
     if (
       workoutLog.name === data.name &&
-      workoutLog.duration === durationNum &&
-      workoutLog.performedAt === performedAtSqlTimestamp &&
+      workoutLog.durationMinutes === durationMinutesNum &&
+      workoutLog.performedAt.getTime() === data.performedAt.getTime() &&
       workoutLog.icon.library === data.icon.library &&
       workoutLog.icon.name === data.icon.name
     ) {
       return;
     }
 
+    const performedAtSqlTimestamp = toSqlTimestamp(data.performedAt);
+
     updateWorkoutLogMutation.mutate(
       {
         name: data.name,
-        duration: durationNum,
+        durationMinutes: durationMinutesNum,
         performedAt: performedAtSqlTimestamp,
         icon: data.icon,
         workoutLogId: workoutLog.id,
@@ -250,7 +251,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
 
             <Controller
               control={control}
-              name="duration"
+              name="durationMinutes"
               render={({ field }) => (
                 <ThemedTextInput
                   placeholder="Duration"
@@ -259,7 +260,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
                   className={
-                    formState.errors.duration !== undefined
+                    formState.errors.durationMinutes !== undefined
                       ? "border-destructive"
                       : ""
                   }
@@ -267,9 +268,9 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
               )}
             />
 
-            {formState.errors.duration !== undefined && (
+            {formState.errors.durationMinutes !== undefined && (
               <ThemedText className="text-destructive text-xs">
-                {formState.errors.duration.message}
+                {formState.errors.durationMinutes.message}
               </ThemedText>
             )}
 
@@ -279,7 +280,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
                   <Pressable
                     key={label}
                     onPress={() =>
-                      setValue("duration", label, {
+                      setValue("durationMinutes", label, {
                         shouldValidate: true,
                         shouldDirty: true,
                         shouldTouch: true,
