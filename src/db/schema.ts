@@ -1,4 +1,4 @@
-import { WorkoutLogIcon } from "@/components/WorkoutLogIconDisplay";
+import { WorkoutLogIcon } from "@/lib/types/workout-log-icon";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -17,8 +17,6 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
-  dailyCalorieGoal: integer("daily_calorie_goal").default(2000).notNull(),
-  dailyWorkoutGoal: integer("daily_workout_goal").default(60).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -32,12 +30,13 @@ export const session = pgTable(
   "session",
   {
     id: text("id").primaryKey(),
-    expiresAt: timestamp("expires_at").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
     ipAddress: text("ip_address"),
@@ -69,6 +68,7 @@ export const account = pgTable(
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
@@ -93,14 +93,15 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ one, many }) => ({
   sessions: many(session),
   accounts: many(account),
-  calorieLogs: many(calorieLog),
+  nutritionLogs: many(nutritionLog),
   workoutLogs: many(workoutLog),
-  calorieLogPresets: many(calorieLogPreset),
+  nutritionLogPresets: many(nutritionLogPreset),
   workoutLogPresets: many(workoutLogPreset),
   goals: many(goal),
+  dailyTarget: one(dailyTarget),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -117,8 +118,8 @@ export const accountRelations = relations(account, ({ one }) => ({
   }),
 }));
 
-export const calorieLog = pgTable(
-  "calorie_log",
+export const nutritionLog = pgTable(
+  "nutrition_log",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
@@ -138,7 +139,7 @@ export const calorieLog = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("calorie_log_userId_idx").on(table.userId)],
+  (table) => [index("nutrition_log_userId_idx").on(table.userId)],
 );
 
 export const workoutLog = pgTable(
@@ -146,7 +147,7 @@ export const workoutLog = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
-    duration: integer("duration").notNull(),
+    minutes: integer("minutes").notNull(),
     performedAt: timestamp("performed_at", { mode: "string" })
       .defaultNow()
       .notNull(),
@@ -171,9 +172,9 @@ export const workoutLog = pgTable(
   (table) => [index("workout_log_userId_idx").on(table.userId)],
 );
 
-export const calorieLogRelations = relations(calorieLog, ({ one }) => ({
+export const nutritionLogRelations = relations(nutritionLog, ({ one }) => ({
   user: one(user, {
-    fields: [calorieLog.userId],
+    fields: [nutritionLog.userId],
     references: [user.id],
   }),
 }));
@@ -185,8 +186,8 @@ export const workoutLogRelations = relations(workoutLog, ({ one }) => ({
   }),
 }));
 
-export const calorieLogPreset = pgTable(
-  "calorie_log_preset",
+export const nutritionLogPreset = pgTable(
+  "nutrition_log_preset",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
@@ -203,7 +204,7 @@ export const calorieLogPreset = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("calorie_log_preset_userId_idx").on(table.userId)],
+  (table) => [index("nutrition_log_preset_userId_idx").on(table.userId)],
 );
 
 export const workoutLogPreset = pgTable(
@@ -211,7 +212,7 @@ export const workoutLogPreset = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
-    duration: integer("duration").notNull(),
+    minutes: integer("minutes").notNull(),
     icon: jsonb("icon")
       .$type<WorkoutLogIcon>()
       .default({
@@ -233,11 +234,11 @@ export const workoutLogPreset = pgTable(
   (table) => [index("workout_log_preset_userId_idx").on(table.userId)],
 );
 
-export const calorieLogPresetRelations = relations(
-  calorieLogPreset,
+export const nutritionLogPresetRelations = relations(
+  nutritionLogPreset,
   ({ one }) => ({
     user: one(user, {
-      fields: [calorieLogPreset.userId],
+      fields: [nutritionLogPreset.userId],
       references: [user.id],
     }),
   }),
@@ -278,6 +279,30 @@ export const goal = pgTable(
 export const goalRelations = relations(goal, ({ one }) => ({
   user: one(user, {
     fields: [goal.userId],
+    references: [user.id],
+  }),
+}));
+
+export const dailyTarget = pgTable("daily_target", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  calorieTarget: integer("calorie_target").default(2000).notNull(),
+  workoutMinutesTarget: integer("workout_minutes_target").default(30).notNull(),
+  userId: text("user_id")
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+export const dailyTargetRelations = relations(dailyTarget, ({ one }) => ({
+  user: one(user, {
+    fields: [dailyTarget.userId],
     references: [user.id],
   }),
 }));

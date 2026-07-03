@@ -1,11 +1,5 @@
+import { WorkoutLogIcon } from "@/lib/types/workout-log-icon";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-
-export type WorkoutLogIcon =
-  | { library: "MaterialIcons"; name: keyof typeof MaterialIcons.glyphMap }
-  | {
-      library: "MaterialCommunityIcons";
-      name: keyof typeof MaterialCommunityIcons.glyphMap;
-    };
 
 type Props = {
   workoutLogIcon: WorkoutLogIcon;
