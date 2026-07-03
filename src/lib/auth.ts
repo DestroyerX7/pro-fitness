@@ -10,6 +10,23 @@ export const auth = betterAuth({
     provider: "pg",
     schema,
   }),
+  user: {
+    additionalFields: {
+      dailyCalorieGoal: {
+        type: "number",
+        required: true,
+        defaultValue: 2000,
+      },
+      dailyWorkoutGoal: {
+        type: "number",
+        required: true,
+        defaultValue: 60,
+      },
+    },
+    deleteUser: {
+      enabled: true,
+    },
+  },
   emailAndPassword: {
     enabled: true,
   },

@@ -10,7 +10,7 @@ export const calorieLogSchema = z.object({
     .regex(/^\d+$/, "Calories must be a whole number")
     .refine((val) => Number(val) > 0, "Calories must be greater than 0"),
   consumedAt: z.date(),
-  imageUri: z.string().nullable(),
+  imageUri: z.url().nullable(),
 });
 
 export type CalorieLogFormValues = z.infer<typeof calorieLogSchema>;
@@ -57,7 +57,7 @@ export const scanSchema = z.object({
       "Number of servings must be greater than 0",
     ),
   consumedAt: z.date(),
-  imageUri: z.string().nullable(),
+  imageUri: z.url().nullable(),
 });
 
 export type ScanFormValues = z.infer<typeof scanSchema>;
@@ -70,7 +70,7 @@ export const calorieLogPresetSchema = z.object({
     .min(1, "Please enter a calorie amount")
     .regex(/^\d+$/, "Calories must be a whole number")
     .refine((val) => Number(val) > 0, "Calories must be greater than 0"),
-  imageUri: z.string().nullable(),
+  imageUri: z.url().nullable(),
 });
 
 export type CalorieLogPresetFormValues = z.infer<typeof calorieLogPresetSchema>;
@@ -87,3 +87,22 @@ export const workoutLogPresetSchema = z.object({
 });
 
 export type WorkoutLogPresetFormValues = z.infer<typeof workoutLogPresetSchema>;
+
+export const userSchema = z.object({
+  name: z.string().trim().min(1, "Please enter a name"),
+  dailyCalorieGoal: z
+    .string()
+    .trim()
+    .min(1, "Please enter a calorie amount")
+    .regex(/^\d+$/, "Calories must be a whole number")
+    .refine((val) => Number(val) > 0, "Calories must be greater than 0"),
+  dailyWorkoutGoal: z
+    .string()
+    .trim()
+    .min(1, "Please enter a duration")
+    .regex(/^\d+$/, "Duration must be a whole number")
+    .refine((val) => Number(val) > 0, "Duration must be greater than 0"),
+  imageUri: z.url().nullable(),
+});
+
+export type UserFormValues = z.infer<typeof userSchema>;

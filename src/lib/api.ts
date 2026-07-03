@@ -1,16 +1,16 @@
+import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import { WorkoutLogIcon } from "@/components/WorkoutLogIconDisplay";
 import {
   calorieLog,
   calorieLogPreset,
   goal,
-  user,
   workoutLog,
   workoutLogPreset,
 } from "@/db/schema";
 import axios from "axios";
 import { authClient } from "./auth-client";
 
-export type User = typeof user.$inferSelect;
+export type User = ReturnType<typeof useAuthenticatedAuth>["user"];
 export type CalorieLog = typeof calorieLog.$inferSelect;
 export type WorkoutLog = typeof workoutLog.$inferSelect;
 export type Goal = typeof goal.$inferSelect;
@@ -39,36 +39,6 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
-
-export const getUser = async (userId: string): Promise<User> => {
-  const response = await api.get<User>(`/api/user/${userId}`);
-  return response.data;
-};
-
-export const updateUser = async ({
-  dailyCalorieGoal,
-  dailyWorkoutGoal,
-  image,
-  userId,
-}: {
-  dailyCalorieGoal?: number;
-  dailyWorkoutGoal?: number;
-  image?: string | null | undefined;
-  userId: string;
-}): Promise<User> => {
-  const response = await api.patch<User>(`/api/user/${userId}`, {
-    dailyCalorieGoal,
-    dailyWorkoutGoal,
-    image,
-  });
-
-  return response.data;
-};
-
-export const deleteUser = async (userId: string): Promise<User> => {
-  const response = await api.delete<User>(`/api/user/${userId}`);
-  return response.data;
-};
 
 export const createCalorieLog = async ({
   userId,

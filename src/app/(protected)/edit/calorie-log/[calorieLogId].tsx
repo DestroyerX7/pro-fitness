@@ -211,7 +211,7 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
     const imageUrl =
       data.imageUri === null
         ? null
-        : z.url({ protocol: /^https?$/ }).safeParse(data.imageUri).success
+        : z.httpUrl().safeParse(data.imageUri).success
           ? data.imageUri
           : await uploadToCloudinary(data.imageUri);
 
@@ -341,12 +341,16 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
                   onBlur={field.onBlur}
                   placeholder="Name"
                   placeholderTextColor={theme.mutedForeground}
-                  className={formState.errors.name ? "border-destructive" : ""}
+                  className={
+                    formState.errors.name !== undefined
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
               )}
             />
 
-            {formState.errors.name && (
+            {formState.errors.name !== undefined && (
               <ThemedText className="text-xs text-destructive">
                 {formState.errors.name.message}
               </ThemedText>
@@ -394,13 +398,15 @@ function CalorieLogForm({ calorieLog }: { calorieLog: CalorieLog }) {
                   placeholderTextColor={theme.mutedForeground}
                   keyboardType="number-pad"
                   className={
-                    formState.errors.calories ? "border-destructive" : ""
+                    formState.errors.calories !== undefined
+                      ? "border-destructive"
+                      : ""
                   }
                 />
               )}
             />
 
-            {formState.errors.calories && (
+            {formState.errors.calories !== undefined && (
               <ThemedText className="text-xs text-destructive">
                 {formState.errors.calories.message}
               </ThemedText>

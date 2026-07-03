@@ -85,7 +85,7 @@ export default function ThemeProvider({ children }: PropsWithChildren) {
       })
       .catch((e) => console.warn("Failed to load theme preference", e))
       .finally(() => setIsLoaded(true));
-  }, []);
+  }, [setColorScheme]);
 
   const setPreference = useCallback(
     (next: ThemePreference) => {
