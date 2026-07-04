@@ -2,6 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import WorkoutIconGrid from "@/components/WorkoutIconGrid";
+import { queryKeys } from "@/constants/query-keys";
 import useTheme from "@/hooks/useTheme";
 import {
   createWorkoutLogPreset,
@@ -51,7 +52,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
     mutationFn: updateWorkoutLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", user.id],
+        queryKey: queryKeys.workoutLogs.all(user.id),
       });
     },
   });
@@ -60,7 +61,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
     mutationFn: deleteWorkoutLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", user.id],
+        queryKey: queryKeys.workoutLogs.all(user.id),
       });
     },
   });
@@ -69,7 +70,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
     mutationFn: createWorkoutLogPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogPresets", workoutLog.userId],
+        queryKey: queryKeys.workoutLogPresets.all(user.id),
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -377,13 +378,14 @@ export default function EditWorkoutLog() {
   const { user } = useAuthenticatedAuth();
 
   const { data: workoutLog, isPending } = useQuery({
-    queryKey: ["workoutLogs", user.id, workoutLogId],
+    queryKey: queryKeys.workoutLogs.one(user.id, workoutLogId),
     queryFn: () => getWorkoutLog(workoutLogId),
     initialData: queryClient
-      .getQueryData<WorkoutLog[]>(["workoutLogs", user.id])
+      .getQueryData<WorkoutLog[]>(queryKeys.workoutLogs.all(user.id))
       ?.find((w) => w.id === workoutLogId),
-    initialDataUpdatedAt: queryClient.getQueryState(["workoutLogs", user.id])
-      ?.dataUpdatedAt,
+    initialDataUpdatedAt: queryClient.getQueryState(
+      queryKeys.workoutLogs.all(user.id),
+    )?.dataUpdatedAt,
   });
 
   useEffect(() => {

@@ -6,6 +6,7 @@ import NutritionLogItem from "@/components/NutritionLogItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
+import { queryKeys } from "@/constants/query-keys";
 import useDailyTarget from "@/hooks/useDailyTarget";
 import useGoals from "@/hooks/useGoals";
 import useNutritionLogs from "@/hooks/useNutritionLogs";
@@ -66,7 +67,9 @@ export default function Index() {
   const updateDailyTargetMutation = useMutation({
     mutationFn: updateDailyTarget,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dailyTarget", user.id] });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.dailyTarget.byUser(user.id),
+      });
     },
   });
 
@@ -74,16 +77,17 @@ export default function Index() {
     mutationFn: updateGoal,
     onMutate: async (variables) => {
       // Stop any in-flight refetches so they don't clobber our optimistic update
-      await queryClient.cancelQueries({ queryKey: ["goals", user.id] });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.goals.all(user.id),
+      });
 
       // Snapshot the current cache so we can roll back on error
-      const previousGoals = queryClient.getQueryData<Goal[]>([
-        "goals",
-        user.id,
-      ]);
+      const previousGoals = queryClient.getQueryData<Goal[]>(
+        queryKeys.goals.all(user.id),
+      );
 
       // Optimistically write the new value into the cache
-      queryClient.setQueryData<Goal[]>(["goals", user.id], (old) =>
+      queryClient.setQueryData<Goal[]>(queryKeys.goals.all(user.id), (old) =>
         old?.map((goal) =>
           goal.id === variables.goalId ? { ...goal, ...variables } : goal,
         ),
@@ -95,12 +99,15 @@ export default function Index() {
     onError: (_error, _variables, context) => {
       // Roll back to the pre-mutation state
       if (context !== undefined && context.previousGoals !== undefined) {
-        queryClient.setQueryData(["goals", user.id], context.previousGoals);
+        queryClient.setQueryData(
+          queryKeys.goals.all(user.id),
+          context.previousGoals,
+        );
       }
     },
     onSettled: () => {
       // Always resync with the server afterward, success or failure
-      queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.all(user.id) });
     },
   });
 
@@ -339,7 +346,10 @@ export default function Index() {
     (w) => toSqlDate(w.performedAt) === todayString,
   );
 
-  const loggedCalories = todaysNutritionLogs.reduce((a, b) => a + b.calories, 0);
+  const loggedCalories = todaysNutritionLogs.reduce(
+    (a, b) => a + b.calories,
+    0,
+  );
   const loggedWorkoutTime = todaysWorkoutLogs.reduce(
     (a, b) => a + b.durationMinutes,
     0,
@@ -440,7 +450,7 @@ export default function Index() {
 
             <Pressable
               className="bg-secondary p-4 rounded-xl active:opacity-80"
-              onPress={() => router.push("/(protected)/(tabs)/log/calories")}
+              onPress={() => router.push("/(protected)/(tabs)/log/nutrition")}
             >
               <ThemedText className="text-secondary-foreground">
                 Log calories

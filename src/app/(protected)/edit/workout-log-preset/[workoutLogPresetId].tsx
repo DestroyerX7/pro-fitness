@@ -2,6 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import WorkoutIconGrid from "@/components/WorkoutIconGrid";
+import { queryKeys } from "@/constants/query-keys";
 import useTheme from "@/hooks/useTheme";
 import {
   deleteWorkoutLogPreset,
@@ -54,7 +55,7 @@ function WorkoutLogPresetForm({
     mutationFn: updateWorkoutLogPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogPresets", user.id],
+        queryKey: queryKeys.workoutLogPresets.all(user.id),
       });
     },
   });
@@ -63,7 +64,7 @@ function WorkoutLogPresetForm({
     mutationFn: deleteWorkoutLogPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogPresets", user.id],
+        queryKey: queryKeys.workoutLogPresets.all(user.id),
       });
     },
   });
@@ -306,15 +307,16 @@ export default function EditWorkoutLogPreset() {
   const { user } = useAuthenticatedAuth();
 
   const { data: workoutLogPreset, isPending } = useQuery({
-    queryKey: ["workoutLogPresets", user.id, workoutLogPresetId],
+    queryKey: queryKeys.workoutLogPresets.one(user.id, workoutLogPresetId),
     queryFn: () => getWorkoutLogPreset(workoutLogPresetId),
     initialData: queryClient
-      .getQueryData<WorkoutLogPreset[]>(["workoutLogPresets", user.id])
+      .getQueryData<WorkoutLogPreset[]>(
+        queryKeys.workoutLogPresets.all(user.id),
+      )
       ?.find((w) => w.id === workoutLogPresetId),
-    initialDataUpdatedAt: queryClient.getQueryState([
-      "workoutLogPresets",
-      user.id,
-    ])?.dataUpdatedAt,
+    initialDataUpdatedAt: queryClient.getQueryState(
+      queryKeys.workoutLogPresets.all(user.id),
+    )?.dataUpdatedAt,
   });
 
   useEffect(() => {

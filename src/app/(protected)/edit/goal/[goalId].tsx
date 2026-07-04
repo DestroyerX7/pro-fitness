@@ -1,6 +1,7 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import { queryKeys } from "@/constants/query-keys";
 import useTheme from "@/hooks/useTheme";
 import { deleteGoal, getGoal, Goal, updateGoal } from "@/lib/api";
 import { cn } from "@/lib/nativewind";
@@ -41,7 +42,7 @@ function GoalForm({ goal }: { goal: Goal }) {
     mutationFn: updateGoal,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["goals", user.id],
+        queryKey: queryKeys.goals.all(user.id),
       });
     },
   });
@@ -50,7 +51,7 @@ function GoalForm({ goal }: { goal: Goal }) {
     mutationFn: deleteGoal,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["goals", user.id],
+        queryKey: queryKeys.goals.all(user.id),
       });
     },
   });
@@ -306,13 +307,14 @@ export default function EditGoal() {
   const { user } = useAuthenticatedAuth();
 
   const { data: goal, isPending } = useQuery({
-    queryKey: ["goals", user.id, goalId],
+    queryKey: queryKeys.goals.one(user.id, goalId),
     queryFn: () => getGoal(goalId),
     initialData: queryClient
-      .getQueryData<Goal[]>(["goals", user.id])
+      .getQueryData<Goal[]>(queryKeys.goals.all(user.id))
       ?.find((g) => g.id === goalId),
-    initialDataUpdatedAt: queryClient.getQueryState(["goals", user.id])
-      ?.dataUpdatedAt,
+    initialDataUpdatedAt: queryClient.getQueryState(
+      queryKeys.goals.all(user.id),
+    )?.dataUpdatedAt,
   });
 
   useEffect(() => {

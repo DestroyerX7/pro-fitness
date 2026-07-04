@@ -2,6 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import GoalItem from "@/components/GoalItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
+import { queryKeys } from "@/constants/query-keys";
 import useGoals from "@/hooks/useGoals";
 import { Goal, updateGoal } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,16 +24,17 @@ export default function Goals() {
     mutationFn: updateGoal,
     onMutate: async (variables) => {
       // Stop any in-flight refetches so they don't clobber our optimistic update
-      await queryClient.cancelQueries({ queryKey: ["goals", user.id] });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.goals.all(user.id),
+      });
 
       // Snapshot the current cache so we can roll back on error
-      const previousGoals = queryClient.getQueryData<Goal[]>([
-        "goals",
-        user.id,
-      ]);
+      const previousGoals = queryClient.getQueryData<Goal[]>(
+        queryKeys.goals.all(user.id),
+      );
 
       // Optimistically write the new value into the cache
-      queryClient.setQueryData<Goal[]>(["goals", user.id], (old) =>
+      queryClient.setQueryData<Goal[]>(queryKeys.goals.all(user.id), (old) =>
         old?.map((goal) =>
           goal.id === variables.goalId ? { ...goal, ...variables } : goal,
         ),
@@ -44,12 +46,15 @@ export default function Goals() {
     onError: (_error, _variables, context) => {
       // Roll back to the pre-mutation state
       if (context !== undefined && context.previousGoals !== undefined) {
-        queryClient.setQueryData(["goals", user.id], context.previousGoals);
+        queryClient.setQueryData(
+          queryKeys.goals.all(user.id),
+          context.previousGoals,
+        );
       }
     },
     onSettled: () => {
       // Always resync with the server afterward, success or failure
-      queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.all(user.id) });
     },
   });
 

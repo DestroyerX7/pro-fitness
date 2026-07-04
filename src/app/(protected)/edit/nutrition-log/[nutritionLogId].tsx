@@ -1,6 +1,7 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import { queryKeys } from "@/constants/query-keys";
 import useTheme from "@/hooks/useTheme";
 import {
   createNutritionLogPreset,
@@ -54,7 +55,7 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
     mutationFn: updateNutritionLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["nutritionLogs", user.id],
+        queryKey: queryKeys.nutritionLogs.all(user.id),
       });
     },
   });
@@ -63,7 +64,7 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
     mutationFn: deleteNutritionLog,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["nutritionLogs", user.id],
+        queryKey: queryKeys.nutritionLogs.all(user.id),
       });
     },
   });
@@ -72,7 +73,7 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
     mutationFn: createNutritionLogPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["nutritionLogPresets", nutritionLog.userId],
+        queryKey: queryKeys.nutritionLogPresets.all(user.id),
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -90,7 +91,7 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
     }
 
     createNutritionLogPresetMutation.mutate({
-      userId: nutritionLog.userId,
+      userId: user.id,
       name: nutritionLog.name,
       calories: nutritionLog.calories,
       imageUrl: nutritionLog.imageUrl,
@@ -475,14 +476,15 @@ export default function EditNutritionLog() {
   const { user } = useAuthenticatedAuth();
 
   const { isPending, data: nutritionLog } = useQuery({
-    queryKey: ["nutritionLogs", user.id, nutritionLogId],
+    queryKey: queryKeys.nutritionLogs.one(user.id, nutritionLogId),
     queryFn: () => getNutritionLog(nutritionLogId),
     initialData: () =>
       queryClient
-        .getQueryData<NutritionLog[]>(["nutritionLogs", user.id])
+        .getQueryData<NutritionLog[]>(queryKeys.nutritionLogs.all(user.id))
         ?.find((c) => c.id === nutritionLogId),
     initialDataUpdatedAt: () =>
-      queryClient.getQueryState(["nutritionLogs", user.id])?.dataUpdatedAt,
+      queryClient.getQueryState(queryKeys.nutritionLogs.all(user.id))
+        ?.dataUpdatedAt,
   });
 
   useEffect(() => {

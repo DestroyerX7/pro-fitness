@@ -1,6 +1,7 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import { queryKeys } from "@/constants/query-keys";
 import useTheme from "@/hooks/useTheme";
 import { createNutritionLog, uploadToCloudinary } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
@@ -42,7 +43,7 @@ export default function Calories() {
     mutationFn: createNutritionLog,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["nutritionLogs", user.id],
+        queryKey: queryKeys.nutritionLogs.all(user.id),
       });
 
       Toast.show({

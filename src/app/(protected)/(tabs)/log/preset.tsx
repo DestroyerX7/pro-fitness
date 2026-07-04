@@ -3,6 +3,7 @@ import NutritionLogItem from "@/components/NutritionLogItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
+import { queryKeys } from "@/constants/query-keys";
 import useTheme from "@/hooks/useTheme";
 import {
   createNutritionLog,
@@ -34,12 +35,12 @@ export default function Favorites() {
   const insets = useSafeAreaInsets();
 
   const { data: nutritionLogPresets } = useQuery({
-    queryKey: ["nutritionLogPresets", user.id],
+    queryKey: queryKeys.nutritionLogPresets.all(user.id),
     queryFn: getNutritionLogPresets,
   });
 
   const { data: workoutLogPresets } = useQuery({
-    queryKey: ["workoutLogPresets", user.id],
+    queryKey: queryKeys.workoutLogPresets.all(user.id),
     queryFn: getWorkoutLogPresets,
   });
 
@@ -47,7 +48,7 @@ export default function Favorites() {
     mutationFn: createNutritionLog,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["nutritionLogs", user.id],
+        queryKey: queryKeys.nutritionLogs.all(user.id),
       });
 
       Toast.show({
@@ -75,7 +76,7 @@ export default function Favorites() {
     mutationFn: createWorkoutLog,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", user.id],
+        queryKey: queryKeys.workoutLogs.all(user.id),
       });
 
       Toast.show({
@@ -125,7 +126,7 @@ export default function Favorites() {
 
   const handleEditNutritionLogPreset = async (nutritionLogPresetId: string) => {
     router.push({
-      pathname: "/(protected)/edit/nutrition-log-preset/nutritionLogPresetId]",
+      pathname: "/(protected)/edit/nutrition-log-preset/[nutritionLogPresetId]",
       params: { nutritionLogPresetId },
     });
 

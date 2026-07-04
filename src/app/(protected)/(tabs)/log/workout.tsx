@@ -2,6 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import WorkoutIconGrid from "@/components/WorkoutIconGrid";
+import { queryKeys } from "@/constants/query-keys";
 import { createWorkoutLog } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
 import { WorkoutLogFormValues, workoutLogSchema } from "@/lib/zodSchema";
@@ -38,7 +39,7 @@ export default function Workout() {
     mutationFn: createWorkoutLog,
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["workoutLogs", user.id],
+        queryKey: queryKeys.workoutLogs.all(user.id),
       });
 
       Toast.show({

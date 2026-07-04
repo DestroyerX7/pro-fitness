@@ -17,7 +17,7 @@ export const colors = {
     destructive: "#ef4444",
     destructiveForeground: "#ffffff",
     destructiveAccent: "#ffdddd",
-  },
+  } as const,
   dark: {
     foreground: "#eeeeee",
     background: "#111111",
@@ -36,5 +36,5 @@ export const colors = {
     destructive: "#ef4444",
     destructiveForeground: "#ffffff",
     destructiveAccent: "#442222",
-  },
+  } as const,
 } as const;

@@ -47,7 +47,7 @@ export default function Index() {
       ),
       title: "Log Calories",
       description: "Add food or drinks you have consumed to log their calories",
-      href: "/(protected)/(tabs)/log/calories",
+      href: "/(protected)/(tabs)/log/nutrition",
     },
     {
       id: "workout",
@@ -83,7 +83,7 @@ export default function Index() {
       title: "Presets",
       description:
         "Quickly log calories or workouts by using one of your saved presets",
-      href: "/(protected)/(tabs)/log/presets",
+      href: "/(protected)/(tabs)/log/preset",
     },
     {
       id: "goal",

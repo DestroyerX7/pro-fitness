@@ -11,20 +11,28 @@ import { authClient } from "./auth-client";
 import { fromSqlTimestampToLocalDate } from "./dates";
 import type { WorkoutLogIcon } from "./types/workout-log-icon";
 
-type Serialized<T> = T extends Date ? string : T;
+type Serialized<T> = {
+  [K in keyof T]: T[K] extends Date ? string : T[K];
+};
+
+type WithDates<T, K extends keyof T> = Omit<T, K> & {
+  [P in K]: Date;
+};
 
 export type DailyTarget = typeof dailyTarget.$inferSelect;
 type DailyTargetResponse = Serialized<DailyTarget>;
 
 type NutritionLogResponse = Serialized<typeof nutritionLog.$inferSelect>;
-export type NutritionLog = Omit<NutritionLogResponse, "consumedAt"> & {
-  consumedAt: Date;
-};
+export type NutritionLog = WithDates<
+  NutritionLogResponse,
+  "consumedAt" | "createdAt" | "updatedAt"
+>;
 
 type WorkoutLogResponse = Serialized<typeof workoutLog.$inferSelect>;
-export type WorkoutLog = Omit<WorkoutLogResponse, "performedAt"> & {
-  performedAt: Date;
-};
+export type WorkoutLog = WithDates<
+  WorkoutLogResponse,
+  "performedAt" | "createdAt" | "updatedAt"
+>;
 
 export type Goal = typeof goal.$inferSelect;
 type GoalResponse = Serialized<Goal>;
@@ -112,10 +120,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-/* ---------------------------------------------------------------------- */
-/*  Nutrition logs                                                        */
-/* ---------------------------------------------------------------------- */
-
+//  Nutrition logs
 export const createNutritionLog = async ({
   userId,
   name,
@@ -186,10 +191,7 @@ export const deleteNutritionLog = async (
   return reviveNutritionLog(response.data);
 };
 
-/* ---------------------------------------------------------------------- */
-/*  Workout logs                                                          */
-/* ---------------------------------------------------------------------- */
-
+// Workout logs
 export const createWorkoutLog = async ({
   userId,
   name,
@@ -260,10 +262,7 @@ export const deleteWorkoutLog = async (
   return reviveWorkoutLog(response.data);
 };
 
-/* ---------------------------------------------------------------------- */
-/*  Goals                                                                  */
-/* ---------------------------------------------------------------------- */
-
+// Goals
 export const createGoal = async ({
   userId,
   name,
@@ -320,10 +319,7 @@ export const deleteGoal = async (goalId: string): Promise<Goal> => {
   return reviveGoal(response.data);
 };
 
-/* ---------------------------------------------------------------------- */
-/*  Daily target — singleton, one per user, no id-based routes            */
-/* ---------------------------------------------------------------------- */
-
+// Daily Target
 export const getDailyTarget = async (): Promise<DailyTarget> => {
   const response = await api.get<DailyTargetResponse>("/api/daily-target");
   return reviveDailyTarget(response.data);
@@ -344,10 +340,7 @@ export const updateDailyTarget = async ({
   return reviveDailyTarget(response.data);
 };
 
-/* ---------------------------------------------------------------------- */
-/*  Nutrition log presets                                                  */
-/* ---------------------------------------------------------------------- */
-
+// Nutrition log presets
 export const createNutritionLogPreset = async ({
   userId,
   name,
@@ -416,10 +409,7 @@ export const deleteNutritionLogPreset = async (
   return reviveNutritionLogPreset(response.data);
 };
 
-/* ---------------------------------------------------------------------- */
-/*  Workout log presets                                                    */
-/* ---------------------------------------------------------------------- */
-
+// Workout log presets
 export const createWorkoutLogPreset = async ({
   userId,
   name,
@@ -486,10 +476,7 @@ export const deleteWorkoutLogPreset = async (
   return reviveWorkoutLogPreset(response.data);
 };
 
-/* ---------------------------------------------------------------------- */
-/*  Cloudinary upload                                                      */
-/* ---------------------------------------------------------------------- */
-
+// Cloudinary upload
 export const uploadToCloudinary = async (imageUri: string): Promise<string> => {
   const signResponse = await api.post<CloudinarySignatureResponse>(
     "/api/sign-cloudinary-upload",

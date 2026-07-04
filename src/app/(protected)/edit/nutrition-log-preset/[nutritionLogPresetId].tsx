@@ -1,6 +1,7 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import { queryKeys } from "@/constants/query-keys";
 import useTheme from "@/hooks/useTheme";
 import {
   NutritionLogPreset,
@@ -57,7 +58,7 @@ function NutritionLogPresetForm({
     mutationFn: updateNutritionLogPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["nutritionLogPresets", user.id],
+        queryKey: queryKeys.nutritionLogPresets.all(user.id),
       });
     },
   });
@@ -66,7 +67,7 @@ function NutritionLogPresetForm({
     mutationFn: deleteNutritionLogPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["nutritionLogPresets", user.id],
+        queryKey: queryKeys.nutritionLogPresets.all(user.id),
       });
     },
   });
@@ -407,16 +408,17 @@ export default function EditCaloireLogPreset() {
   const { user } = useAuthenticatedAuth();
 
   const { data: nutritionLogPreset, isPending } = useQuery({
-    queryKey: ["nutritionLogPresets", user.id, nutritionLogPresetId],
+    queryKey: queryKeys.nutritionLogPresets.one(user.id, nutritionLogPresetId),
     queryFn: () => getNutritionLogPreset(nutritionLogPresetId),
     initialData: () =>
       queryClient
-        .getQueryData<NutritionLogPreset[]>(["nutritionLogPresets", user.id])
+        .getQueryData<NutritionLogPreset[]>(
+          queryKeys.nutritionLogPresets.all(user.id),
+        )
         ?.find((c) => c.id === nutritionLogPresetId),
-    initialDataUpdatedAt: queryClient.getQueryState([
-      "nutritionLogPresets",
-      user.id,
-    ])?.dataUpdatedAt,
+    initialDataUpdatedAt: queryClient.getQueryState(
+      queryKeys.nutritionLogPresets.all(user.id),
+    )?.dataUpdatedAt,
   });
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import { queryKeys } from "@/constants/query-keys";
 import useDailyTarget from "@/hooks/useDailyTarget";
 import useTheme from "@/hooks/useTheme";
 import { DailyTarget, updateDailyTarget, uploadToCloudinary } from "@/lib/api";
@@ -36,10 +37,11 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
   const theme = useTheme();
 
   const updateDailyTargetMutation = useMutation({
-    mutationKey: ["dailyTarget", user.id],
     mutationFn: updateDailyTarget,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dailyTarget", user.id] });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.dailyTarget.byUser(user.id),
+      });
     },
   });
 

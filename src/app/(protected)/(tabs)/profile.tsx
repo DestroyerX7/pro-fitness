@@ -15,7 +15,7 @@ import { Alert, Pressable, ScrollView, View } from "react-native";
 
 export default function Profile() {
   const { user } = useAuthenticatedAuth();
-  const { data: dailyTarget, isPending, error } = useDailyTarget(user.id);
+  const { data: dailyTarget } = useDailyTarget(user.id);
 
   const { preference, setPreference } = useThemePreference();
   const theme = useTheme();

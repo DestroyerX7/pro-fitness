@@ -1,6 +1,7 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
+import { queryKeys } from "@/constants/query-keys";
 import { createGoal } from "@/lib/api";
 import { cn } from "@/lib/nativewind";
 import { GoalFormValues, goalSchema } from "@/lib/zodSchema";
@@ -29,7 +30,7 @@ export default function Goal() {
   const createGoalMutation = useMutation({
     mutationFn: createGoal,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["goals", user.id] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.all(user.id) });
 
       Toast.show({
         type: "createdGoal",
