@@ -73,39 +73,4 @@ export default function NutritionLogItem({
       )}
     </Card>
   );
-
-  // return (
-  //   <Card className="flex-row gap-4">
-  //     {imageUrl !== null ? (
-  //       <Image
-  //         className="w-16 h-16 rounded-md"
-  //         source={{ uri: imageUrl.replace("http://", "https://") }}
-  //       />
-  //     ) : (
-  //       <View className="w-16 h-16 border rounded-md border-border items-center justify-center">
-  //         <MaterialCommunityIcons
-  //           name="food"
-  //           size={32}
-  //           color={theme.foreground}
-  //         />
-  //       </View>
-  //     )}
-
-  //     <View className="flex-1 gap-1">
-  //       <ThemedText className="text-lg font-bold">{name}</ThemedText>
-
-  //       <ThemedText className="text-muted-foreground">{calories}</ThemedText>
-  //     </View>
-
-  //     {onEdit !== undefined && (
-  //       <Pressable hitSlop={8} onPress={() => onEdit(id)}>
-  //         <Ionicons
-  //           name="ellipsis-horizontal"
-  //           size={24}
-  //           color={theme.foreground}
-  //         />
-  //       </Pressable>
-  //     )}
-  //   </Card>
-  // );
 }

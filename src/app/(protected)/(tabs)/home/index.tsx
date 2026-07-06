@@ -18,7 +18,7 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -199,24 +199,6 @@ export default function Index() {
     }
   };
 
-  const todayString = toSqlDate(new Date());
-
-  const todaysNutritionLogs = useMemo(() => {
-    if (nutritionLogs === undefined) {
-      return [];
-    }
-
-    return nutritionLogs.filter((c) => toSqlDate(c.consumedAt) === todayString);
-  }, [nutritionLogs, todayString]);
-
-  const todaysWorkoutLogs = useMemo(() => {
-    if (workoutLogs === undefined) {
-      return [];
-    }
-
-    return workoutLogs.filter((w) => toSqlDate(w.performedAt) === todayString);
-  }, [workoutLogs, todayString]);
-
   if (
     dailyTargetError !== null ||
     nutritionLogsError !== null ||
@@ -345,6 +327,16 @@ export default function Index() {
       </ScrollView>
     );
   }
+
+  const todayString = toSqlDate(new Date());
+
+  const todaysNutritionLogs = nutritionLogs.filter(
+    (c) => toSqlDate(c.consumedAt) === todayString,
+  );
+
+  const todaysWorkoutLogs = workoutLogs.filter(
+    (w) => toSqlDate(w.performedAt) === todayString,
+  );
 
   const loggedCalories = todaysNutritionLogs.reduce(
     (a, b) => a + b.calories,

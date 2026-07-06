@@ -25,7 +25,7 @@ const workoutLogIcons: WorkoutLogIcon[] = [
   { library: "MaterialCommunityIcons", name: "bow-arrow" },
 ];
 
-function chunk<T>(arr: Array<T>, size: number): T[][] {
+function chunk<T>(arr: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
     arr.slice(i * size, i * size + size),
   );

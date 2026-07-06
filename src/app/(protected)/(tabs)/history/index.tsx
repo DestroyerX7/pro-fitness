@@ -13,10 +13,10 @@ import { Goal, NutritionLog, WorkoutLog } from "@/lib/api";
 import { toSqlDate } from "@/lib/dates";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Pressable, ScrollView, SectionList, View } from "react-native";
 
-function chunk<T>(arr: Array<T>, size: number): T[][] {
+function chunk<T>(arr: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
     arr.slice(i * size, i * size + size),
   );
@@ -155,163 +155,129 @@ export default function History() {
   const trailingCalendarPadding =
     (7 - ((leadingCalendarPadding + numDaysInMonth) % 7)) % 7;
 
-  const nutritionLogsGroupedByConsumedAt = useMemo(() => {
-    if (nutritionLogs === undefined) {
-      return {};
-    }
+  const nutritionLogsGroupedByConsumedAt =
+    nutritionLogs === undefined
+      ? {}
+      : nutritionLogs.reduce<
+          Record<
+            string,
+            {
+              nutritionLogs: NutritionLog[];
+              totalCalories: number;
+              date: Date;
+            }
+          >
+        >((a, b) => {
+          const key = toSqlDate(b.consumedAt);
 
-    return nutritionLogs.reduce<
-      Record<
-        string,
-        {
-          nutritionLogs: NutritionLog[];
-          totalCalories: number;
-          date: Date;
-        }
-      >
-    >((a, b) => {
-      const key = toSqlDate(b.consumedAt);
+          if (a[key] !== undefined) {
+            a[key].nutritionLogs.push(b);
+            a[key].totalCalories += b.calories;
+          } else {
+            a[key] = {
+              nutritionLogs: [b],
+              totalCalories: b.calories,
+              date: new Date(
+                b.consumedAt.getFullYear(),
+                b.consumedAt.getMonth(),
+                b.consumedAt.getDate(),
+              ),
+            };
+          }
 
-      if (a[key] !== undefined) {
-        a[key].nutritionLogs.push(b);
-        a[key].totalCalories += b.calories;
-      } else {
-        a[key] = {
-          nutritionLogs: [b],
-          totalCalories: b.calories,
-          date: new Date(
-            b.consumedAt.getFullYear(),
-            b.consumedAt.getMonth(),
-            b.consumedAt.getDate(),
-          ),
-        };
-      }
+          return a;
+        }, {});
 
-      return a;
-    }, {});
-  }, [nutritionLogs]);
+  const workoutLogsGroupedByPerformedAt =
+    workoutLogs === undefined
+      ? {}
+      : workoutLogs.reduce<
+          Record<
+            string,
+            {
+              workoutLogs: WorkoutLog[];
+              totalDurationMinutes: number;
+              date: Date;
+            }
+          >
+        >((a, b) => {
+          const key = toSqlDate(b.performedAt);
 
-  const workoutLogsGroupedByPerformedAt = useMemo(() => {
-    if (workoutLogs === undefined) {
-      return {};
-    }
+          if (a[key] !== undefined) {
+            a[key].workoutLogs.push(b);
+            a[key].totalDurationMinutes += b.durationMinutes;
+          } else {
+            a[key] = {
+              workoutLogs: [b],
+              totalDurationMinutes: b.durationMinutes,
+              date: new Date(
+                b.performedAt.getFullYear(),
+                b.performedAt.getMonth(),
+                b.performedAt.getDate(),
+              ),
+            };
+          }
 
-    return workoutLogs.reduce<
-      Record<
-        string,
-        {
-          workoutLogs: WorkoutLog[];
-          totalDurationMinutes: number;
-          date: Date;
-        }
-      >
-    >((a, b) => {
-      const key = toSqlDate(b.performedAt);
+          return a;
+        }, {});
 
-      if (a[key] !== undefined) {
-        a[key].workoutLogs.push(b);
-        a[key].totalDurationMinutes += b.durationMinutes;
-      } else {
-        a[key] = {
-          workoutLogs: [b],
-          totalDurationMinutes: b.durationMinutes,
-          date: new Date(
-            b.performedAt.getFullYear(),
-            b.performedAt.getMonth(),
-            b.performedAt.getDate(),
-          ),
-        };
-      }
+  const goalsGroupedByCreatedAt =
+    goals === undefined
+      ? {}
+      : goals.reduce<
+          Record<
+            string,
+            {
+              goals: Goal[];
+              date: Date;
+            }
+          >
+        >((a, b) => {
+          const key = toSqlDate(b.createdAt);
 
-      return a;
-    }, {});
-  }, [workoutLogs]);
+          if (a[key] !== undefined) {
+            a[key].goals.push(b);
+          } else {
+            a[key] = {
+              goals: [b],
+              date: new Date(
+                b.createdAt.getFullYear(),
+                b.createdAt.getMonth(),
+                b.createdAt.getDate(),
+              ),
+            };
+          }
 
-  const goalsGroupedByCreatedAt = useMemo(() => {
-    if (goals === undefined) {
-      return {};
-    }
+          return a;
+        }, {});
 
-    return goals.reduce<
-      Record<
-        string,
-        {
-          goals: Goal[];
-          date: Date;
-        }
-      >
-    >((a, b) => {
-      const key = toSqlDate(b.createdAt);
-
-      if (a[key] !== undefined) {
-        a[key].goals.push(b);
-      } else {
-        a[key] = {
-          goals: [b],
-          date: new Date(
-            b.createdAt.getFullYear(),
-            b.createdAt.getMonth(),
-            b.createdAt.getDate(),
-          ),
-        };
-      }
-
-      return a;
-    }, {});
-  }, [goals]);
-
-  const nutritionLogCalendarItemRows: CalendarItem[][] = useMemo(
-    () =>
-      buildCalendarItemRows(
-        year,
-        month,
-        numDaysInMonth,
-        leadingCalendarPadding,
-        trailingCalendarPadding,
-        (dateString) =>
-          dailyTarget !== undefined
-            ? ((nutritionLogsGroupedByConsumedAt[dateString]?.totalCalories ??
-                0) /
-                dailyTarget.calorieTarget) *
-              100
-            : 0,
-      ),
-    [
-      leadingCalendarPadding,
-      numDaysInMonth,
-      year,
-      month,
-      nutritionLogsGroupedByConsumedAt,
-      dailyTarget,
-      trailingCalendarPadding,
-    ],
+  const nutritionLogCalendarItemRows = buildCalendarItemRows(
+    year,
+    month,
+    numDaysInMonth,
+    leadingCalendarPadding,
+    trailingCalendarPadding,
+    (dateString) =>
+      dailyTarget !== undefined
+        ? ((nutritionLogsGroupedByConsumedAt[dateString]?.totalCalories ?? 0) /
+            dailyTarget.calorieTarget) *
+          100
+        : 0,
   );
 
-  const workoutLogCalendarItemRows: CalendarItem[][] = useMemo(
-    () =>
-      buildCalendarItemRows(
-        year,
-        month,
-        numDaysInMonth,
-        leadingCalendarPadding,
-        trailingCalendarPadding,
-        (dateString) =>
-          dailyTarget !== undefined
-            ? ((workoutLogsGroupedByPerformedAt[dateString]
-                ?.totalDurationMinutes ?? 0) /
-                dailyTarget.workoutMinutesTarget) *
-              100
-            : 0,
-      ),
-    [
-      leadingCalendarPadding,
-      numDaysInMonth,
-      year,
-      month,
-      workoutLogsGroupedByPerformedAt,
-      dailyTarget,
-      trailingCalendarPadding,
-    ],
+  const workoutLogCalendarItemRows = buildCalendarItemRows(
+    year,
+    month,
+    numDaysInMonth,
+    leadingCalendarPadding,
+    trailingCalendarPadding,
+    (dateString) =>
+      dailyTarget !== undefined
+        ? ((workoutLogsGroupedByPerformedAt[dateString]?.totalDurationMinutes ??
+            0) /
+            dailyTarget.workoutMinutesTarget) *
+          100
+        : 0,
   );
 
   if (activeTab === "nutrition") {
