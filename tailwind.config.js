@@ -35,6 +35,10 @@ module.exports = {
           foreground: "var(--color-destructive-foreground)",
           accent: "var(--color-destructive-accent)",
         },
+        nutrition: {
+          DEFAULT: "var(--color-nutrition)",
+          accent: "var(--color-nutrition-accent)",
+        },
       },
     },
   },
