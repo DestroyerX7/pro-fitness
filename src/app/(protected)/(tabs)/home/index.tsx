@@ -303,11 +303,11 @@ export default function Index() {
           showsHorizontalScrollIndicator={false}
           contentContainerClassName="gap-2 flex-1"
         >
-          <TabButton text="Calories" active={activeTab === "nutrition"} />
+          <TabButton disabled text="Calories" active={true} />
 
-          <TabButton text="Workouts" active={activeTab === "workout"} />
+          <TabButton disabled text="Workouts" active={false} />
 
-          <TabButton text="Goals" active={activeTab === "goal"} />
+          <TabButton disabled text="Goals" active={false} />
         </ScrollView>
 
         <View className="gap-4 items-center p-4">

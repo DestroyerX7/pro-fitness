@@ -16,7 +16,7 @@ type LogMenuItemData = {
 
 function LogMenuItem({ icon, title, description, href }: LogMenuItemData) {
   return (
-    <Pressable onPress={() => router.push(href)}>
+    <Pressable onPress={() => router.push(href)} className="active:opacity-80">
       <Card className="flex-row gap-4">
         {icon}
 

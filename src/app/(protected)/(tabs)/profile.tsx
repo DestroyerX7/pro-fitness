@@ -109,10 +109,6 @@ export default function Profile() {
     }
   };
 
-  if (dailyTarget === undefined) {
-    return;
-  }
-
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -176,9 +172,13 @@ export default function Profile() {
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Daily Calorie Goal</ThemedText>
 
-          <ThemedText className="text-muted-foreground text-xl">
-            {dailyTarget.calorieTarget} calories
-          </ThemedText>
+          {dailyTarget !== undefined ? (
+            <ThemedText className="text-muted-foreground text-xl">
+              {dailyTarget.calorieTarget} calories
+            </ThemedText>
+          ) : (
+            <View className="h-8 w-32 bg-muted rounded-lg" />
+          )}
         </View>
 
         <View className="h-px bg-border" />
@@ -186,9 +186,13 @@ export default function Profile() {
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Daily Workout Goal</ThemedText>
 
-          <ThemedText className="text-muted-foreground text-xl">
-            {dailyTarget.workoutMinutesTarget} minutes
-          </ThemedText>
+          {dailyTarget !== undefined ? (
+            <ThemedText className="text-muted-foreground text-xl">
+              {dailyTarget.workoutMinutesTarget} minutes
+            </ThemedText>
+          ) : (
+            <View className="h-8 w-32 bg-muted rounded-lg" />
+          )}
         </View>
 
         <View className="h-px bg-border" />

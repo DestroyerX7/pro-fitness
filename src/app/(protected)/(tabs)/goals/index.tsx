@@ -1,5 +1,5 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
-import GoalItem from "@/components/GoalItem";
+import GoalItem, { GoalItemSkeleton } from "@/components/GoalItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import { queryKeys } from "@/constants/query-keys";
@@ -122,7 +122,34 @@ export default function Goals() {
   }
 
   if (isPending) {
-    return <ThemedText>Loading...</ThemedText>;
+    return (
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="p-4 gap-4"
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={false}
+      >
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="gap-2 flex-1"
+        >
+          <TabButton text="All" active={true} />
+
+          <TabButton disabled text="Visible" active={false} />
+
+          <TabButton disabled text="Hidden" active={false} />
+
+          <TabButton disabled text="Completed" active={false} />
+
+          <TabButton disabled text="Not Completed" active={false} />
+        </ScrollView>
+
+        {Array.from({ length: 10 }).map((_, i) => (
+          <GoalItemSkeleton key={i} />
+        ))}
+      </ScrollView>
+    );
   }
 
   const filteredGoals =
