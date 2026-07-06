@@ -11,18 +11,20 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 
 export default function Goals() {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
-  const { data: goals, isPending, error } = useGoals(user.id);
+  const { data: goals, isPending, error, refetch } = useGoals(user.id);
 
   const [activeTab, setActiveTab] = useState<
     "all" | "visible" | "hidden" | "completed" | "notCompleted"
   >("all");
 
   const theme = useTheme();
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const updateGoalMutation = useMutation({
     mutationFn: updateGoal,
@@ -71,8 +73,52 @@ export default function Goals() {
     await Haptics.selectionAsync();
   };
 
+  const handleRefresh = async () => {
+    if (isRefreshing) {
+      return;
+    }
+    setIsRefreshing(true);
+
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (error !== null) {
-    return <ThemedText>{error.message}</ThemedText>;
+    return (
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="gap-4 p-4"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+        }
+      >
+        <View className="gap-4 items-center p-4">
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={64}
+            color={theme.foreground}
+          />
+
+          <ThemedText className="text-center text-xl w-3/4">
+            Something went wrong loading your data.
+          </ThemedText>
+
+          <Pressable
+            className="bg-secondary p-4 rounded-xl"
+            onPress={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <ThemedText className="text-secondary-foreground">
+              {isRefreshing ? "Retrying..." : "Try again"}
+            </ThemedText>
+          </Pressable>
+        </View>
+      </ScrollView>
+    );
   }
 
   if (isPending) {
@@ -96,6 +142,9 @@ export default function Goals() {
       className="flex-1"
       contentContainerClassName="gap-4 p-4"
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+      }
     >
       <ScrollView
         horizontal

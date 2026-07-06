@@ -18,7 +18,7 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Pressable,
@@ -60,7 +60,6 @@ export default function Index() {
   );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const isRefreshingRef = useRef(false);
 
   const theme = useTheme();
 
@@ -179,11 +178,10 @@ export default function Index() {
   };
 
   const handleRefresh = async () => {
-    if (isRefreshingRef.current) {
+    if (isRefreshing) {
       return;
     }
 
-    isRefreshingRef.current = true;
     setIsRefreshing(true);
 
     try {
@@ -194,7 +192,6 @@ export default function Index() {
         refetchGoals(),
       ]);
     } finally {
-      isRefreshingRef.current = false;
       setIsRefreshing(false);
     }
   };
@@ -214,9 +211,9 @@ export default function Index() {
           <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
         }
       >
-        <View className="gap-4 items-center justify-center flex-1 p-4">
-          <MaterialIcons
-            name="error-outline"
+        <View className="gap-4 items-center p-4">
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
             size={64}
             color={theme.foreground}
           />

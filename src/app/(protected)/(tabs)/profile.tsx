@@ -11,14 +11,25 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { useState } from "react";
+import {
+  Alert,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  View,
+} from "react-native";
 
 export default function Profile() {
   const { user } = useAuthenticatedAuth();
-  const { data: dailyTarget } = useDailyTarget(user.id);
+  const { data: dailyTarget, refetch: refetchDailyTarget } = useDailyTarget(
+    user.id,
+  );
 
   const { preference, setPreference } = useThemePreference();
   const theme = useTheme();
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const pickImage = async () => {
     Alert.alert("Select Image", "Choose an option", [
@@ -85,6 +96,19 @@ export default function Profile() {
     authClient.updateUser({ image: imageUrl });
   };
 
+  const handleRefresh = async () => {
+    if (isRefreshing) {
+      return;
+    }
+    setIsRefreshing(true);
+
+    try {
+      await refetchDailyTarget();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (dailyTarget === undefined) {
     return;
   }
@@ -94,6 +118,9 @@ export default function Profile() {
       contentInsetAdjustmentBehavior="automatic"
       contentContainerClassName="gap-4 p-4"
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+      }
     >
       <Pressable
         onPress={() => router.push("/(protected)/edit/profile")}

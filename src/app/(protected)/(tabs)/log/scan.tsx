@@ -8,7 +8,7 @@ import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/nativewind";
 import { ScanFormValues, scanSchema } from "@/lib/zodSchema";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -209,7 +209,7 @@ export default function Scan() {
     const imageUrl =
       data.imageUri === null
         ? null
-        : z.url({ protocol: /^https?$/ }).safeParse(data.imageUri).success
+        : z.httpUrl().safeParse(data.imageUri).success
           ? data.imageUri
           : await uploadToCloudinary(data.imageUri);
 
@@ -275,7 +275,11 @@ export default function Scan() {
         </Pressable>
 
         <View className="p-4 gap-4 items-center">
-          <MaterialIcons name="error" size={64} color={theme.foreground} />
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={64}
+            color={theme.foreground}
+          />
 
           <ThemedText className="text-2xl text-center w-3/4">
             {error}
