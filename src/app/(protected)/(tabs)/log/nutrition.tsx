@@ -19,7 +19,7 @@ import { Alert, Image, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
-export default function Calories() {
+export default function Nutrition() {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
 

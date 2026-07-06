@@ -25,6 +25,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -292,7 +293,6 @@ function NutritionLogPresetForm({
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 placeholder="Name"
-                placeholderTextColor={theme.mutedForeground}
                 className={
                   formState.errors.name !== undefined
                     ? "border-destructive"
@@ -347,7 +347,6 @@ function NutritionLogPresetForm({
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 placeholder="Calories"
-                placeholderTextColor={theme.mutedForeground}
                 keyboardType="number-pad"
                 className={
                   formState.errors.calories !== undefined
@@ -428,7 +427,13 @@ export default function EditCaloireLogPreset() {
   }, [isPending, nutritionLogPreset]);
 
   if (nutritionLogPreset === undefined) {
-    return;
+    return (
+      <View className="flex-1 items-center justify-center gap-4">
+        <ActivityIndicator size="large" />
+
+        <ThemedText>Loading...</ThemedText>
+      </View>
+    );
   }
 
   return <NutritionLogPresetForm nutritionLogPreset={nutritionLogPreset} />;

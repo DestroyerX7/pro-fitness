@@ -1,35 +1,26 @@
-import useTheme from "@/hooks/useTheme";
 import { cn } from "@/lib/nativewind";
-import { Pressable, PressableProps, StyleProp } from "react-native";
+import { Pressable, PressableProps } from "react-native";
 import ThemedText from "./ThemedText";
 
 type Props = {
   text: string;
   active: boolean;
-  onPress?: () => void;
-  className?: string;
-  style?: StyleProp<PressableProps>;
-};
+} & PressableProps;
 
 export default function TabButton({
   text,
   active,
-  onPress,
   className,
-  style,
+  ...props
 }: Props) {
-  const theme = useTheme();
-
   return (
     <Pressable
-      className={cn("p-4 rounded-xl active:opacity-80", className)}
-      style={[
-        {
-          backgroundColor: active ? theme.foreground : theme.secondary,
-        },
-        style,
-      ]}
-      onPress={onPress}
+      className={cn(
+        "p-4 rounded-xl active:opacity-80",
+        active ? "bg-foreground" : "bg-secondary",
+        className,
+      )}
+      {...props}
     >
       <ThemedText
         className={active ? "text-background" : "text-secondary-foreground"}

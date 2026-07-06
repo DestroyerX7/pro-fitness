@@ -7,7 +7,7 @@ export default function ThemedText({
   ...props
 }: TextProps) {
   return (
-    <Text className={cn("text-foreground", className)} {...props}>
+    <Text className={cn("text-foreground text-base", className)} {...props}>
       {children}
     </Text>
   );

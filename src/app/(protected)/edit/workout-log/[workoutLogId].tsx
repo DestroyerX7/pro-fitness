@@ -23,6 +23,7 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -325,13 +326,11 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
               control={control}
               name="icon"
               render={({ field }) => (
-                <View className="flex-row gap-4 flex-wrap p-4 bg-muted border rounded-xl border-border">
-                  <WorkoutIconGrid
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    numColumns={6}
-                  />
-                </View>
+                <WorkoutIconGrid
+                  className="p-4 bg-muted border rounded-xl border-border"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               )}
             />
           </View>
@@ -395,7 +394,13 @@ export default function EditWorkoutLog() {
   }, [isPending, workoutLog]);
 
   if (workoutLog === undefined) {
-    return null;
+    return (
+      <View className="flex-1 items-center justify-center gap-4">
+        <ActivityIndicator size="large" />
+
+        <ThemedText>Loading...</ThemedText>
+      </View>
+    );
   }
 
   return <WorkoutLogForm workoutLog={workoutLog} />;

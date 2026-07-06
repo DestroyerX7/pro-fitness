@@ -1,7 +1,7 @@
 import useTheme from "@/hooks/useTheme";
+import { cn } from "@/lib/nativewind";
 import { WorkoutLogIcon } from "@/lib/types/workout-log-icon";
-import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, View, ViewProps } from "react-native";
 import WorkoutLogIconDisplay from "./WorkoutLogIconDisplay";
 
 const workoutLogIcons: WorkoutLogIcon[] = [
@@ -25,49 +25,74 @@ const workoutLogIcons: WorkoutLogIcon[] = [
   { library: "MaterialCommunityIcons", name: "bow-arrow" },
 ];
 
+function chunk<T>(arr: Array<T>, size: number): T[][] {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, i * size + size),
+  );
+}
+
+type Props = {
+  value: WorkoutLogIcon;
+  numColumns?: number;
+  onValueChange?: (workoutLogIcon: WorkoutLogIcon) => void;
+} & ViewProps;
+
 export default function WorkoutIconGrid({
   value,
   numColumns = 6,
-  gap = 8,
   onValueChange,
-}: {
-  value: WorkoutLogIcon;
-  numColumns?: number;
-  gap?: number;
-  onValueChange?: (workoutLogIcon: WorkoutLogIcon) => void;
-}) {
-  const [containerWidth, setContainerWidth] = useState(0);
+  className,
+  ...props
+}: Props) {
   const theme = useTheme();
 
-  const itemWidth = containerWidth
-    ? (containerWidth - gap * (numColumns - 1)) / numColumns
-    : 0;
+  const trailingPadding =
+    Math.ceil(workoutLogIcons.length / numColumns) * numColumns -
+    workoutLogIcons.length;
+
+  const items: (WorkoutLogIcon | null)[] = [
+    ...workoutLogIcons,
+    ...Array(trailingPadding).fill(null),
+  ];
+
+  const rows = chunk(items, numColumns);
+  const iconSize = Math.floor(256 / numColumns);
 
   return (
-    <View onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
-      <View className="flex-row flex-wrap" style={{ gap }}>
-        {workoutLogIcons.map((workoutLogIcon, i) => (
-          <Pressable
-            key={i}
-            className="items-center justify-center rounded-xl"
-            style={[
-              { width: itemWidth, height: itemWidth },
-              value.library === workoutLogIcon.library &&
-                value.name === workoutLogIcon.name && {
-                  borderWidth: 2,
-                  borderColor: theme.foreground,
-                },
-            ]}
-            onPress={() => onValueChange?.(workoutLogIcon)}
-          >
-            <WorkoutLogIconDisplay
-              workoutLogIcon={workoutLogIcon}
-              size={itemWidth * 0.75}
-              color={theme.foreground}
-            />
-          </Pressable>
-        ))}
-      </View>
+    <View className={cn("gap-2", className)} {...props}>
+      {rows.map((row, i) => (
+        <View key={i} className="flex-row gap-2">
+          {row.map((item, j) => {
+            if (item === null) {
+              return (
+                <View
+                  key={i * numColumns + j}
+                  className="flex-1 aspect-square"
+                />
+              );
+            }
+
+            return (
+              <Pressable
+                key={i * numColumns + j}
+                className={cn(
+                  "flex-1 aspect-square items-center justify-center rounded-xl border-2",
+                  value.library === item.library && value.name === item.name
+                    ? "border-foreground"
+                    : "border-transparent",
+                )}
+                onPress={() => onValueChange?.(item)}
+              >
+                <WorkoutLogIconDisplay
+                  workoutLogIcon={item}
+                  size={iconSize}
+                  color={theme.foreground}
+                />
+              </Pressable>
+            );
+          })}
+        </View>
+      ))}
     </View>
   );
 }

@@ -25,6 +25,7 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -342,7 +343,6 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
                   placeholder="Name"
-                  placeholderTextColor={theme.mutedForeground}
                   className={
                     formState.errors.name !== undefined
                       ? "border-destructive"
@@ -397,7 +397,6 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
                   placeholder="Calories"
-                  placeholderTextColor={theme.mutedForeground}
                   keyboardType="number-pad"
                   className={
                     formState.errors.calories !== undefined
@@ -494,7 +493,13 @@ export default function EditNutritionLog() {
   }, [isPending, nutritionLog]);
 
   if (nutritionLog === undefined) {
-    return;
+    return (
+      <View className="flex-1 items-center justify-center gap-4">
+        <ActivityIndicator size="large" />
+
+        <ThemedText>Loading...</ThemedText>
+      </View>
+    );
   }
 
   return <NutritionLogForm nutritionLog={nutritionLog} />;

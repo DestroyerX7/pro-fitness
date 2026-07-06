@@ -16,7 +16,13 @@ import * as ImagePicker from "expo-image-picker";
 import { router, Stack } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import { z } from "zod";
 
 function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
@@ -265,7 +271,6 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 placeholder="Name"
-                placeholderTextColor={theme.mutedForeground}
                 className={
                   formState.errors.name !== undefined
                     ? "border-destructive"
@@ -296,7 +301,6 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 placeholder="Daily calorie target"
-                placeholderTextColor={theme.mutedForeground}
                 className={
                   formState.errors.dailyCalorieTarget !== undefined
                     ? "border-destructive"
@@ -327,7 +331,6 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 placeholder="Daily workout target"
-                placeholderTextColor={theme.mutedForeground}
                 className={
                   formState.errors.dailyWorkoutMinutesTarget !== undefined
                     ? "border-destructive"
@@ -401,7 +404,13 @@ export default function EditUser() {
   }, [isPending, dailyTarget]);
 
   if (dailyTarget === undefined) {
-    return;
+    return (
+      <View className="flex-1 items-center justify-center gap-4">
+        <ActivityIndicator size="large" />
+
+        <ThemedText>Loading...</ThemedText>
+      </View>
+    );
   }
 
   return <ProfileForm dailyTarget={dailyTarget} />;

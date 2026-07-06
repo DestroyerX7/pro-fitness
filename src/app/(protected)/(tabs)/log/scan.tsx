@@ -8,11 +8,7 @@ import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/nativewind";
 import { ScanFormValues, scanSchema } from "@/lib/zodSchema";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
-import {
-  AntDesign,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -23,9 +19,11 @@ import {
 } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -132,7 +130,7 @@ export default function Scan() {
       );
       setValue("imageUri", image_url ?? null, { shouldValidate: true });
     } catch {
-      setError("Product not found, try again.");
+      setError("Product not found, try again or log munually.");
     } finally {
       isLoadingRef.current = false;
       setIsLoading(false);
@@ -258,7 +256,7 @@ export default function Scan() {
     return (
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-6"
+        contentContainerClassName="p-4 gap-4"
         showsVerticalScrollIndicator={false}
       >
         <Pressable
@@ -276,10 +274,21 @@ export default function Scan() {
           </ThemedText>
         </Pressable>
 
-        <View className="flex-row gap-2 items-center justify-center">
-          <MaterialIcons name="error" size={32} color={theme.foreground} />
+        <View className="p-4 gap-4 items-center">
+          <MaterialIcons name="error" size={64} color={theme.foreground} />
 
-          <ThemedText className="text-2xl">{error}</ThemedText>
+          <ThemedText className="text-2xl text-center w-3/4">
+            {error}
+          </ThemedText>
+
+          <Pressable
+            className="bg-secondary p-4 rounded-xl active:opacity-80"
+            onPress={() => router.replace("/(protected)/(tabs)/log/nutrition")}
+          >
+            <ThemedText className="text-secondary-foreground">
+              Log calories
+            </ThemedText>
+          </Pressable>
         </View>
       </ScrollView>
     );
@@ -288,12 +297,7 @@ export default function Scan() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center gap-4">
-        <AntDesign
-          // className="animate-spin"
-          name="loading-3-quarters"
-          size={64}
-          color={theme.foreground}
-        />
+        <ActivityIndicator size="large" />
 
         <ThemedText>Loading...</ThemedText>
       </View>

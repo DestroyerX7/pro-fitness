@@ -18,7 +18,7 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -55,8 +55,8 @@ export default function Index() {
     error: goalsError,
   } = useGoals(user.id);
 
-  const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
-    "calories",
+  const [activeTab, setActiveTab] = useState<"nutrition" | "workout" | "goal">(
+    "nutrition",
   );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -153,7 +153,7 @@ export default function Index() {
 
   const handleEditNutritionLog = async (nutritionLogId: string) => {
     router.push({
-      pathname: "/(protected)/edit/nutrition-log/nutritionLogId]",
+      pathname: "/(protected)/edit/nutrition-log/[nutritionLogId]",
       params: { nutritionLogId },
     });
 
@@ -178,14 +178,6 @@ export default function Index() {
     await Haptics.selectionAsync();
   };
 
-  const handleUpdateGoalCompleted = (completed: boolean, goalId: string) => {
-    updateGoalMutation.mutate({ completed, goalId });
-  };
-
-  const handleUpdateGoalHidden = (hidden: boolean, goalId: string) => {
-    updateGoalMutation.mutate({ hidden, goalId });
-  };
-
   const handleRefresh = async () => {
     if (isRefreshingRef.current) {
       return;
@@ -206,6 +198,24 @@ export default function Index() {
       setIsRefreshing(false);
     }
   };
+
+  const todayString = toSqlDate(new Date());
+
+  const todaysNutritionLogs = useMemo(() => {
+    if (nutritionLogs === undefined) {
+      return [];
+    }
+
+    return nutritionLogs.filter((c) => toSqlDate(c.consumedAt) === todayString);
+  }, [nutritionLogs, todayString]);
+
+  const todaysWorkoutLogs = useMemo(() => {
+    if (workoutLogs === undefined) {
+      return [];
+    }
+
+    return workoutLogs.filter((w) => toSqlDate(w.performedAt) === todayString);
+  }, [workoutLogs, todayString]);
 
   if (
     dailyTargetError !== null ||
@@ -314,11 +324,11 @@ export default function Index() {
           showsHorizontalScrollIndicator={false}
           contentContainerClassName="gap-2 flex-1"
         >
-          <TabButton text="Calories" active={activeTab === "calories"} />
+          <TabButton text="Calories" active={activeTab === "nutrition"} />
 
-          <TabButton text="Workouts" active={activeTab === "workouts"} />
+          <TabButton text="Workouts" active={activeTab === "workout"} />
 
-          <TabButton text="Goals" active={activeTab === "goals"} />
+          <TabButton text="Goals" active={activeTab === "goal"} />
         </ScrollView>
 
         <View className="gap-4 items-center p-4">
@@ -335,16 +345,6 @@ export default function Index() {
       </ScrollView>
     );
   }
-
-  const todayString = toSqlDate(new Date());
-
-  const todaysNutritionLogs = nutritionLogs.filter(
-    (c) => toSqlDate(c.consumedAt) === todayString,
-  );
-
-  const todaysWorkoutLogs = workoutLogs.filter(
-    (w) => toSqlDate(w.performedAt) === todayString,
-  );
 
   const loggedCalories = todaysNutritionLogs.reduce(
     (a, b) => a + b.calories,
@@ -406,34 +406,38 @@ export default function Index() {
       >
         <TabButton
           text="Calories"
-          active={activeTab === "calories"}
-          onPress={() => setActiveTab("calories")}
+          active={activeTab === "nutrition"}
+          onPress={() => setActiveTab("nutrition")}
         />
 
         <TabButton
           text="Workouts"
-          active={activeTab === "workouts"}
-          onPress={() => setActiveTab("workouts")}
+          active={activeTab === "workout"}
+          onPress={() => setActiveTab("workout")}
         />
 
         <TabButton
           text="Goals"
-          active={activeTab === "goals"}
-          onPress={() => setActiveTab("goals")}
+          active={activeTab === "goal"}
+          onPress={() => setActiveTab("goal")}
         />
       </ScrollView>
 
-      {activeTab === "calories" &&
+      {activeTab === "nutrition" &&
         (todaysNutritionLogs.length > 0 ? (
           todaysNutritionLogs.map((nutritionLog) => (
-            <NutritionLogItem
+            <Pressable
+              className="active:opacity-80"
               key={nutritionLog.id}
-              id={nutritionLog.id}
-              name={nutritionLog.name}
-              calories={nutritionLog.calories}
-              imageUrl={nutritionLog.imageUrl}
-              onEdit={handleEditNutritionLog}
-            />
+              onPress={() => handleEditNutritionLog(nutritionLog.id)}
+            >
+              <NutritionLogItem
+                name={nutritionLog.name}
+                calories={nutritionLog.calories}
+                imageUrl={nutritionLog.imageUrl}
+                consumedAt={nutritionLog.consumedAt}
+              />
+            </Pressable>
           ))
         ) : (
           <View className="gap-4 items-center p-4">
@@ -459,17 +463,21 @@ export default function Index() {
           </View>
         ))}
 
-      {activeTab === "workouts" &&
+      {activeTab === "workout" &&
         (todaysWorkoutLogs.length > 0 ? (
           todaysWorkoutLogs.map((workoutLog) => (
-            <WorkoutLogItem
+            <Pressable
+              className="active:opacity-80"
               key={workoutLog.id}
-              id={workoutLog.id}
-              name={workoutLog.name}
-              durationMinutes={workoutLog.durationMinutes}
-              workoutLogIcon={workoutLog.icon}
-              onEdit={handleEditWorkoutLog}
-            />
+              onPress={() => handleEditWorkoutLog(workoutLog.id)}
+            >
+              <WorkoutLogItem
+                name={workoutLog.name}
+                durationMinutes={workoutLog.durationMinutes}
+                workoutLogIcon={workoutLog.icon}
+                performedAt={workoutLog.performedAt}
+              />
+            </Pressable>
           ))
         ) : (
           <View className="gap-4 items-center p-4">
@@ -495,7 +503,7 @@ export default function Index() {
           </View>
         ))}
 
-      {activeTab === "goals" &&
+      {activeTab === "goal" &&
         (goalsVisable.length > 0 ? (
           <>
             <ThemedText className="text-2xl font-bold">
@@ -505,19 +513,19 @@ export default function Index() {
             {goalsVisable.map((goal) => (
               <Pressable
                 key={goal.id}
+                className="active:opacity-80"
                 onPress={() =>
-                  handleUpdateGoalCompleted(!goal.completed, goal.id)
+                  updateGoalMutation.mutate({
+                    completed: !goal.completed,
+                    goalId: goal.id,
+                  })
                 }
-                onLongPress={() =>
-                  handleUpdateGoalHidden(!goal.hidden, goal.id)
-                }
+                onLongPress={() => handleEditGoal(goal.id)}
               >
                 <GoalItem
-                  id={goal.id}
                   name={goal.name}
                   description={goal.description}
                   completed={goal.completed}
-                  onEdit={handleEditGoal}
                 />
               </Pressable>
             ))}

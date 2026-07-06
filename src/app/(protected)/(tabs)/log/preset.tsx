@@ -23,12 +23,12 @@ import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
-export default function Favorites() {
+export default function Preset() {
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
 
-  const [activeTab, setActiveTab] = useState<"calories" | "workouts">(
-    "calories",
+  const [activeTab, setActiveTab] = useState<"nutrition" | "workout">(
+    "nutrition",
   );
 
   const theme = useTheme();
@@ -159,30 +159,32 @@ export default function Favorites() {
       >
         <TabButton
           text="Calories"
-          active={activeTab === "calories"}
-          onPress={() => setActiveTab("calories")}
+          active={activeTab === "nutrition"}
+          onPress={() => setActiveTab("nutrition")}
         />
 
         <TabButton
           text="Workouts"
-          active={activeTab === "workouts"}
-          onPress={() => setActiveTab("workouts")}
+          active={activeTab === "workout"}
+          onPress={() => setActiveTab("workout")}
         />
       </ScrollView>
 
-      {activeTab === "calories" ? (
+      {activeTab === "nutrition" ? (
         nutritionLogPresets.length > 0 ? (
           nutritionLogPresets.map((nutritionLogPreset) => (
             <Pressable
-              onPress={() => logCalories(nutritionLogPreset)}
+              className="active:opacity-80"
               key={nutritionLogPreset.id}
+              onPress={() => logCalories(nutritionLogPreset)}
+              onLongPress={() =>
+                handleEditNutritionLogPreset(nutritionLogPreset.id)
+              }
             >
               <NutritionLogItem
-                id={nutritionLogPreset.id}
                 name={nutritionLogPreset.name}
                 imageUrl={nutritionLogPreset.imageUrl}
                 calories={nutritionLogPreset.calories}
-                onEdit={handleEditNutritionLogPreset}
               />
             </Pressable>
           ))
@@ -207,15 +209,15 @@ export default function Favorites() {
       ) : workoutLogPresets.length > 0 ? (
         workoutLogPresets.map((workoutLogPreset) => (
           <Pressable
+            className="active:opacity-80"
             onPress={() => logWorkout(workoutLogPreset)}
+            onLongPress={() => handleEditWorkoutLogPreset(workoutLogPreset.id)}
             key={workoutLogPreset.id}
           >
             <WorkoutLogItem
-              id={workoutLogPreset.id}
               name={workoutLogPreset.name}
               durationMinutes={workoutLogPreset.durationMinutes}
               workoutLogIcon={workoutLogPreset.icon}
-              onEdit={handleEditWorkoutLogPreset}
             />
           </Pressable>
         ))

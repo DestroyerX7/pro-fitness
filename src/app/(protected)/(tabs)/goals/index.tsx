@@ -4,12 +4,14 @@ import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import { queryKeys } from "@/constants/query-keys";
 import useGoals from "@/hooks/useGoals";
+import useTheme from "@/hooks/useTheme";
 import { Goal, updateGoal } from "@/lib/api";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 
 export default function Goals() {
   const queryClient = useQueryClient();
@@ -19,6 +21,8 @@ export default function Goals() {
   const [activeTab, setActiveTab] = useState<
     "all" | "visible" | "hidden" | "completed" | "notCompleted"
   >("all");
+
+  const theme = useTheme();
 
   const updateGoalMutation = useMutation({
     mutationFn: updateGoal,
@@ -57,10 +61,6 @@ export default function Goals() {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.all(user.id) });
     },
   });
-
-  const handleUpdateGoalCompleted = (completed: boolean, goalId: string) => {
-    updateGoalMutation.mutate({ completed, goalId });
-  };
 
   const handleEditGoal = async (goalId: string) => {
     router.push({
@@ -133,20 +133,47 @@ export default function Goals() {
         />
       </ScrollView>
 
-      {filteredGoals.map((goal) => (
-        <Pressable
-          key={goal.id}
-          onPress={() => handleUpdateGoalCompleted(!goal.completed, goal.id)}
-        >
-          <GoalItem
-            id={goal.id}
-            name={goal.name}
-            description={goal.description}
-            completed={goal.completed}
-            onEdit={handleEditGoal}
+      {goals.length > 0 ? (
+        filteredGoals.map((goal) => (
+          <Pressable
+            key={goal.id}
+            onPress={() =>
+              updateGoalMutation.mutate({
+                completed: !goal.completed,
+                goalId: goal.id,
+              })
+            }
+            onLongPress={() => handleEditGoal(goal.id)}
+          >
+            <GoalItem
+              name={goal.name}
+              description={goal.description}
+              completed={goal.completed}
+            />
+          </Pressable>
+        ))
+      ) : (
+        <View className="gap-4 items-center p-4">
+          <MaterialCommunityIcons
+            name="bullseye-arrow"
+            size={64}
+            color={theme.foreground}
           />
-        </Pressable>
-      ))}
+
+          <ThemedText className="text-center text-xl w-3/4">
+            Your goals will appear here, showing everything you have created.
+          </ThemedText>
+
+          <Pressable
+            className="bg-secondary p-4 rounded-xl active:opacity-80"
+            onPress={() => router.push("/(protected)/(tabs)/log/goal")}
+          >
+            <ThemedText className="text-secondary-foreground">
+              Create Goal
+            </ThemedText>
+          </Pressable>
+        </View>
+      )}
     </ScrollView>
   );
 }

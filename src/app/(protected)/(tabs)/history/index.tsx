@@ -11,251 +11,574 @@ import useTheme from "@/hooks/useTheme";
 import useWorkoutLogs from "@/hooks/useWorkoutLogs";
 import { Goal, NutritionLog, WorkoutLog } from "@/lib/api";
 import { toSqlDate } from "@/lib/dates";
-import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useMemo, useState } from "react";
+import { Pressable, ScrollView, SectionList, View } from "react-native";
 
-const startedColor = "#004000";
-const halfwayColor = "#108010";
-const completedColor = "#20b020";
+function chunk<T>(arr: Array<T>, size: number): T[][] {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, i * size + size),
+  );
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return toSqlDate(a) === toSqlDate(b);
+}
+
+function formatSectionTitle(date: Date): string {
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (isSameDay(date, today)) {
+    return "Today";
+  } else if (isSameDay(date, yesterday)) {
+    return "Yesterday";
+  }
+
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+type CalendarItem = CalendarDateItem | null;
+
+type CalendarDateItem = {
+  date: Date;
+  percentComplete: number;
+};
+
+function CalendarDateItemDisplay({
+  calendarDateItem,
+  backgroundColor,
+  borderColor,
+  textColor,
+}: {
+  calendarDateItem: CalendarDateItem;
+  backgroundColor: string;
+  borderColor: string;
+  textColor: string;
+}) {
+  return (
+    <View
+      className={
+        "flex-1 aspect-square rounded-xl items-center justify-center border"
+      }
+      style={{ backgroundColor, borderColor }}
+    >
+      <ThemedText style={{ color: textColor }}>
+        {calendarDateItem.date.getDate()}
+      </ThemedText>
+
+      {calendarDateItem.percentComplete !== 0 && (
+        <ThemedText className="text-xs" style={{ color: textColor }}>
+          {calendarDateItem.percentComplete.toFixed(0)}%
+        </ThemedText>
+      )}
+    </View>
+  );
+}
+
+function Tabs({
+  activeTab,
+  setActiveTab,
+}: {
+  activeTab: "nutrition" | "workout" | "goal";
+  setActiveTab: (tab: "nutrition" | "workout" | "goal") => void;
+}) {
+  return (
+    <ScrollView horizontal contentContainerClassName="gap-2">
+      <TabButton
+        text="Calories"
+        active={activeTab === "nutrition"}
+        onPress={() => setActiveTab("nutrition")}
+      />
+
+      <TabButton
+        text="Workouts"
+        active={activeTab === "workout"}
+        onPress={() => setActiveTab("workout")}
+      />
+
+      <TabButton
+        text="Goals"
+        active={activeTab === "goal"}
+        onPress={() => setActiveTab("goal")}
+      />
+    </ScrollView>
+  );
+}
+
+function buildCalendarItemRows(
+  year: number,
+  month: number,
+  numDaysInMonth: number,
+  leadingPadding: number,
+  trailingPadding: number,
+  getPercentComplete: (dateString: string) => number,
+): CalendarItem[][] {
+  const items = [
+    ...Array(leadingPadding).fill(null),
+    ...Array.from({ length: numDaysInMonth }, (_, i) => {
+      const date = new Date(year, month, i + 1);
+      const dateString = toSqlDate(date);
+      return { date, percentComplete: getPercentComplete(dateString) };
+    }),
+    ...Array(trailingPadding).fill(null),
+  ];
+
+  return chunk(items, 7);
+}
 
 export default function History() {
   const { user } = useAuthenticatedAuth();
-  const { data: dailyTarget } = useDailyTarget(user.id);
   const { data: nutritionLogs } = useNutritionLogs(user.id);
   const { data: workoutLogs } = useWorkoutLogs(user.id);
   const { data: goals } = useGoals(user.id);
+  const { data: dailyTarget } = useDailyTarget(user.id);
 
-  const [activeTab, setActiveTab] = useState<"calories" | "workouts" | "goals">(
-    "calories",
+  const [activeTab, setActiveTab] = useState<"nutrition" | "workout" | "goal">(
+    "nutrition",
   );
 
   const theme = useTheme();
 
-  if (
-    dailyTarget === undefined ||
-    nutritionLogs === undefined ||
-    workoutLogs === undefined ||
-    goals === undefined
-  ) {
-    return;
-  }
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
 
-  const dateStrings = Array.from({ length: 31 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    return toSqlDate(date);
-  });
+  const numDaysInMonth = new Date(year, month + 1, 0).getDate();
+  const leadingCalendarPadding = new Date(year, month, 1).getDay();
+  const trailingCalendarPadding =
+    (7 - ((leadingCalendarPadding + numDaysInMonth) % 7)) % 7;
 
-  const nutritionLogsGroupedByDate = nutritionLogs.reduce<
-    Record<string, { nutritionLogs: NutritionLog[]; totalCalories: number }>
-  >((dict, nutritionLog) => {
-    const dateString = toSqlDate(nutritionLog.consumedAt);
-
-    if (dict[dateString] === undefined) {
-      dict[dateString] = {
-        nutritionLogs: [],
-        totalCalories: 0,
-      };
+  const nutritionLogsGroupedByConsumedAt = useMemo(() => {
+    if (nutritionLogs === undefined) {
+      return {};
     }
 
-    dict[dateString].nutritionLogs.push(nutritionLog);
-    dict[dateString].totalCalories += nutritionLog.calories;
+    return nutritionLogs.reduce<
+      Record<
+        string,
+        {
+          nutritionLogs: NutritionLog[];
+          totalCalories: number;
+          date: Date;
+        }
+      >
+    >((a, b) => {
+      const key = toSqlDate(b.consumedAt);
 
-    return dict;
-  }, {});
-
-  const workoutLogsGroupedByDate = workoutLogs.reduce<
-    Record<string, { workoutLogs: WorkoutLog[]; totalDurationMinutes: number }>
-  >((dict, workoutLog) => {
-    const dateString = toSqlDate(workoutLog.performedAt);
-
-    if (dict[dateString] === undefined) {
-      dict[dateString] = {
-        workoutLogs: [],
-        totalDurationMinutes: 0,
-      };
-    }
-
-    dict[dateString].workoutLogs.push(workoutLog);
-    dict[dateString].totalDurationMinutes += workoutLog.durationMinutes;
-
-    return dict;
-  }, {});
-
-  const goalsGroupedByCreatedAt = goals.reduce<Record<string, Goal[]>>(
-    (dict, goal) => {
-      const dateString = goal.createdAt.toString().split("T")[0];
-
-      if (dict[dateString] === undefined) {
-        dict[dateString] = [];
+      if (a[key] !== undefined) {
+        a[key].nutritionLogs.push(b);
+        a[key].totalCalories += b.calories;
+      } else {
+        a[key] = {
+          nutritionLogs: [b],
+          totalCalories: b.calories,
+          date: new Date(
+            b.consumedAt.getFullYear(),
+            b.consumedAt.getMonth(),
+            b.consumedAt.getDate(),
+          ),
+        };
       }
 
-      dict[dateString].push(goal);
+      return a;
+    }, {});
+  }, [nutritionLogs]);
 
-      return dict;
-    },
-    {},
+  const workoutLogsGroupedByPerformedAt = useMemo(() => {
+    if (workoutLogs === undefined) {
+      return {};
+    }
+
+    return workoutLogs.reduce<
+      Record<
+        string,
+        {
+          workoutLogs: WorkoutLog[];
+          totalDurationMinutes: number;
+          date: Date;
+        }
+      >
+    >((a, b) => {
+      const key = toSqlDate(b.performedAt);
+
+      if (a[key] !== undefined) {
+        a[key].workoutLogs.push(b);
+        a[key].totalDurationMinutes += b.durationMinutes;
+      } else {
+        a[key] = {
+          workoutLogs: [b],
+          totalDurationMinutes: b.durationMinutes,
+          date: new Date(
+            b.performedAt.getFullYear(),
+            b.performedAt.getMonth(),
+            b.performedAt.getDate(),
+          ),
+        };
+      }
+
+      return a;
+    }, {});
+  }, [workoutLogs]);
+
+  const goalsGroupedByCreatedAt = useMemo(() => {
+    if (goals === undefined) {
+      return {};
+    }
+
+    return goals.reduce<
+      Record<
+        string,
+        {
+          goals: Goal[];
+          date: Date;
+        }
+      >
+    >((a, b) => {
+      const key = toSqlDate(b.createdAt);
+
+      if (a[key] !== undefined) {
+        a[key].goals.push(b);
+      } else {
+        a[key] = {
+          goals: [b],
+          date: new Date(
+            b.createdAt.getFullYear(),
+            b.createdAt.getMonth(),
+            b.createdAt.getDate(),
+          ),
+        };
+      }
+
+      return a;
+    }, {});
+  }, [goals]);
+
+  const nutritionLogCalendarItemRows: CalendarItem[][] = useMemo(
+    () =>
+      buildCalendarItemRows(
+        year,
+        month,
+        numDaysInMonth,
+        leadingCalendarPadding,
+        trailingCalendarPadding,
+        (dateString) =>
+          dailyTarget !== undefined
+            ? ((nutritionLogsGroupedByConsumedAt[dateString]?.totalCalories ??
+                0) /
+                dailyTarget.calorieTarget) *
+              100
+            : 0,
+      ),
+    [
+      leadingCalendarPadding,
+      numDaysInMonth,
+      year,
+      month,
+      nutritionLogsGroupedByConsumedAt,
+      dailyTarget,
+      trailingCalendarPadding,
+    ],
   );
 
-  return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerClassName="p-4 gap-4"
-      showsVerticalScrollIndicator={false}
-    >
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerClassName="gap-2 flex-1"
-      >
-        <TabButton
-          text="Calories"
-          active={activeTab === "calories"}
-          onPress={() => setActiveTab("calories")}
-        />
+  const workoutLogCalendarItemRows: CalendarItem[][] = useMemo(
+    () =>
+      buildCalendarItemRows(
+        year,
+        month,
+        numDaysInMonth,
+        leadingCalendarPadding,
+        trailingCalendarPadding,
+        (dateString) =>
+          dailyTarget !== undefined
+            ? ((workoutLogsGroupedByPerformedAt[dateString]
+                ?.totalDurationMinutes ?? 0) /
+                dailyTarget.workoutMinutesTarget) *
+              100
+            : 0,
+      ),
+    [
+      leadingCalendarPadding,
+      numDaysInMonth,
+      year,
+      month,
+      workoutLogsGroupedByPerformedAt,
+      dailyTarget,
+      trailingCalendarPadding,
+    ],
+  );
 
-        <TabButton
-          text="Workouts"
-          active={activeTab === "workouts"}
-          onPress={() => setActiveTab("workouts")}
-        />
+  if (activeTab === "nutrition") {
+    return (
+      <SectionList
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="p-4"
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <View className="gap-4 mb-4">
+            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <TabButton
-          text="Goals"
-          active={activeTab === "goals"}
-          onPress={() => setActiveTab("goals")}
-        />
-      </ScrollView>
-
-      <View className="flex-row flex-wrap">
-        {dateStrings.map((dateString) => {
-          const totalCalories =
-            nutritionLogsGroupedByDate[dateString]?.totalCalories ?? 0;
-          const backgroundColor =
-            totalCalories >= dailyTarget.calorieTarget
-              ? completedColor
-              : totalCalories >= dailyTarget.calorieTarget * 0.5
-                ? halfwayColor
-                : totalCalories > 0
-                  ? startedColor
-                  : theme.secondary;
-
-          const percentComplete = (
-            (totalCalories / dailyTarget.calorieTarget) *
-            100
-          ).toFixed(0);
-
-          return (
-            <View key={dateString} className="w-[16.66%] aspect-square p-1">
-              <View
-                className="flex-1 rounded items-center justify-center"
-                style={{
-                  backgroundColor,
-                }}
-              >
-                <ThemedText>{percentComplete}%</ThemedText>
-              </View>
-            </View>
-          );
-        })}
-      </View>
-
-      {activeTab === "calories" &&
-        Object.entries(nutritionLogsGroupedByDate).map(
-          ([dateString, { nutritionLogs, totalCalories }]) => {
-            const [year, month, day] = dateString.split("-").map(Number);
-            const localeDateString = new Date(
-              year,
-              month - 1,
-              day,
-            ).toLocaleDateString();
-
-            return (
-              <View key={dateString} className="gap-4">
-                <View className="flex-row justify-between">
-                  <ThemedText>{localeDateString}</ThemedText>
-
-                  <ThemedText>{totalCalories} calories</ThemedText>
-                </View>
-
-                {nutritionLogs.map((nutritionLog) => (
-                  <NutritionLogItem
-                    key={nutritionLog.id}
-                    id={nutritionLog.id}
-                    name={nutritionLog.name}
-                    calories={nutritionLog.calories}
-                    imageUrl={nutritionLog.imageUrl}
-                  />
+            <View className="gap-1">
+              <View className="flex-row gap-1">
+                {["S", "M", "T", "W", "T", "F", "S"].map((dayString, i) => (
+                  <View key={i} className="flex-1">
+                    <ThemedText className="text-center">{dayString}</ThemedText>
+                  </View>
                 ))}
               </View>
-            );
-          },
-        )}
 
-      {activeTab === "workouts" &&
-        Object.entries(workoutLogsGroupedByDate).map(
-          ([
-            dateString,
-            { workoutLogs, totalDurationMinutes: totalDuration },
-          ]) => {
-            const [year, month, day] = dateString.split("-").map(Number);
-            const localeDateString = new Date(
-              year,
-              month - 1,
-              day,
-            ).toLocaleDateString();
+              {nutritionLogCalendarItemRows.map((week, i) => (
+                <View key={i} className="flex-row gap-1">
+                  {week.map((calendarItem, j) => {
+                    if (calendarItem === null) {
+                      return (
+                        <View
+                          key={j}
+                          className="flex-1 aspect-square bg-muted rounded-xl"
+                        />
+                      );
+                    }
 
-            return (
-              <View key={dateString} className="gap-4">
-                <View className="flex-row justify-between">
-                  <ThemedText>{localeDateString}</ThemedText>
+                    const borderColor = isSameDay(today, calendarItem.date)
+                      ? theme.secondaryForeground
+                      : "transparent";
 
-                  <ThemedText>{totalDuration} minutes</ThemedText>
+                    const backgroundColor =
+                      calendarItem.percentComplete >= 100
+                        ? theme.nutritionOne
+                        : calendarItem.percentComplete >= 50
+                          ? theme.nutritionTwo
+                          : calendarItem.percentComplete > 0
+                            ? theme.nutritionFour
+                            : theme.secondary;
+
+                    return (
+                      <CalendarDateItemDisplay
+                        key={j}
+                        calendarDateItem={calendarItem}
+                        borderColor={borderColor}
+                        backgroundColor={backgroundColor}
+                        textColor={theme.foreground}
+                      />
+                    );
+                  })}
                 </View>
-
-                {workoutLogs.map((workoutLog) => (
-                  <WorkoutLogItem
-                    key={workoutLog.id}
-                    id={workoutLog.id}
-                    name={workoutLog.name}
-                    durationMinutes={workoutLog.durationMinutes}
-                    workoutLogIcon={workoutLog.icon}
-                  />
-                ))}
-              </View>
-            );
-          },
-        )}
-
-      {activeTab === "goals" &&
-        Object.entries(goalsGroupedByCreatedAt).map(([dateString, goals]) => {
-          const [year, month, day] = dateString.split("-").map(Number);
-          const localeDateString = new Date(
-            year,
-            month - 1,
-            day,
-          ).toLocaleDateString();
-
-          return (
-            <View key={dateString} className="gap-4">
-              <View className="flex-row justify-between">
-                <ThemedText>{localeDateString}</ThemedText>
-
-                <ThemedText>{goals.length} created</ThemedText>
-              </View>
-
-              {goals.map((goal) => (
-                <GoalItem
-                  key={goal.id}
-                  id={goal.id}
-                  name={goal.name}
-                  description={goal.description}
-                  completed={goal.completed}
-                />
               ))}
             </View>
-          );
-        })}
-    </ScrollView>
+          </View>
+        }
+        sections={Object.values(nutritionLogsGroupedByConsumedAt).map(
+          (data) => ({
+            title: formatSectionTitle(data.date),
+            data: data.nutritionLogs,
+            totalCalories: data.totalCalories,
+          }),
+        )}
+        renderSectionHeader={({ section }) => (
+          <View className="flex-row justify-between">
+            <ThemedText>{section.title}</ThemedText>
+
+            <ThemedText>{section.totalCalories} calories</ThemedText>
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <NutritionLogItem
+            name={item.name}
+            calories={item.calories}
+            consumedAt={item.consumedAt}
+          />
+        )}
+        ListEmptyComponent={
+          <View className="gap-4 items-center p-4">
+            <MaterialCommunityIcons
+              name="food"
+              size={64}
+              color={theme.foreground}
+            />
+
+            <ThemedText className="text-center text-xl w-3/4">
+              Your calorie logs will appear here, showing the things you have
+              logged.
+            </ThemedText>
+
+            <Pressable
+              className="bg-secondary p-4 rounded-xl active:opacity-80"
+              onPress={() => router.push("/(protected)/(tabs)/log/nutrition")}
+            >
+              <ThemedText className="text-secondary-foreground">
+                Log calories
+              </ThemedText>
+            </Pressable>
+          </View>
+        }
+        ItemSeparatorComponent={() => <View className="h-4" />}
+        SectionSeparatorComponent={() => <View className="h-4" />}
+      />
+    );
+  } else if (activeTab === "workout") {
+    return (
+      <SectionList
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="p-4"
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <View className="gap-4 mb-4">
+            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            <View className="gap-1">
+              <View className="flex-row gap-1">
+                {["S", "M", "T", "W", "T", "F", "S"].map((dayString, i) => (
+                  <View key={i} className="flex-1">
+                    <ThemedText className="text-center">{dayString}</ThemedText>
+                  </View>
+                ))}
+              </View>
+
+              {workoutLogCalendarItemRows.map((week, i) => (
+                <View key={i} className="flex-row gap-1">
+                  {week.map((calendarItem, j) => {
+                    if (calendarItem === null) {
+                      return (
+                        <View
+                          key={j}
+                          className="flex-1 aspect-square bg-muted rounded-xl"
+                        />
+                      );
+                    }
+
+                    const borderColor = isSameDay(today, calendarItem.date)
+                      ? theme.secondaryForeground
+                      : "transparent";
+
+                    const backgroundColor =
+                      calendarItem.percentComplete >= 100
+                        ? theme.chartOne
+                        : calendarItem.percentComplete >= 50
+                          ? theme.chartTwo
+                          : calendarItem.percentComplete > 0
+                            ? theme.chartFour
+                            : theme.secondary;
+
+                    return (
+                      <CalendarDateItemDisplay
+                        key={j}
+                        calendarDateItem={calendarItem}
+                        borderColor={borderColor}
+                        backgroundColor={backgroundColor}
+                        textColor={theme.foreground}
+                      />
+                    );
+                  })}
+                </View>
+              ))}
+            </View>
+          </View>
+        }
+        sections={Object.values(workoutLogsGroupedByPerformedAt).map(
+          (data) => ({
+            title: formatSectionTitle(data.date),
+            data: data.workoutLogs,
+            totalDurationMinutes: data.totalDurationMinutes,
+          }),
+        )}
+        renderSectionHeader={({ section }) => (
+          <View className="flex-row justify-between">
+            <ThemedText>{section.title}</ThemedText>
+
+            <ThemedText>{section.totalDurationMinutes} minutes</ThemedText>
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <WorkoutLogItem {...item} workoutLogIcon={item.icon} />
+        )}
+        ListEmptyComponent={
+          <View className="gap-4 items-center p-4">
+            <MaterialCommunityIcons
+              name="run"
+              size={64}
+              color={theme.foreground}
+            />
+
+            <ThemedText className="text-center text-xl w-3/4">
+              Your workout logs will appear here, showing the things you have
+              logged.
+            </ThemedText>
+
+            <Pressable
+              className="bg-secondary p-4 rounded-xl active:opacity-80"
+              onPress={() => router.push("/(protected)/(tabs)/log/workout")}
+            >
+              <ThemedText className="text-secondary-foreground">
+                Log workout
+              </ThemedText>
+            </Pressable>
+          </View>
+        }
+        ItemSeparatorComponent={() => <View className="h-4" />}
+        SectionSeparatorComponent={() => <View className="h-4" />}
+      />
+    );
+  }
+
+  return (
+    <SectionList
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="p-4"
+      showsVerticalScrollIndicator={false}
+      ListHeaderComponent={
+        <View className="mb-4">
+          <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        </View>
+      }
+      sections={Object.values(goalsGroupedByCreatedAt).map((data) => ({
+        title: formatSectionTitle(data.date),
+        data: data.goals,
+        totalCreated: data.goals.length,
+      }))}
+      renderSectionHeader={({ section }) => (
+        <View className="flex-row justify-between">
+          <ThemedText>{section.title}</ThemedText>
+
+          <ThemedText>{section.totalCreated} created</ThemedText>
+        </View>
+      )}
+      renderItem={({ item }) => (
+        <GoalItem
+          name={item.name}
+          completed={item.completed}
+          description={item.description}
+        />
+      )}
+      ListEmptyComponent={
+        <View className="gap-4 items-center p-4">
+          <MaterialCommunityIcons
+            name="bullseye-arrow"
+            size={64}
+            color={theme.foreground}
+          />
+
+          <ThemedText className="text-center text-xl w-3/4">
+            Your goals will appear here, showing everything you have created.
+          </ThemedText>
+
+          <Pressable
+            className="bg-secondary p-4 rounded-xl active:opacity-80"
+            onPress={() => router.push("/(protected)/(tabs)/log/goal")}
+          >
+            <ThemedText className="text-secondary-foreground">
+              Create Goal
+            </ThemedText>
+          </Pressable>
+        </View>
+      }
+      ItemSeparatorComponent={() => <View className="h-4" />}
+      SectionSeparatorComponent={() => <View className="h-4" />}
+    />
   );
 }

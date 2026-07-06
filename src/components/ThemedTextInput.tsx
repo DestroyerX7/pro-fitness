@@ -11,7 +11,7 @@ export default function ThemedTextInput({
   return (
     <TextInput
       className={cn(
-        "text-foreground p-4 border border-border rounded-xl bg-muted",
+        "text-foreground //text-base p-4 border border-border rounded-xl bg-muted",
         className,
       )}
       placeholderTextColor={theme.mutedForeground}
