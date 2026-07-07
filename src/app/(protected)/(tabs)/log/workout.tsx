@@ -3,15 +3,25 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import WorkoutIconGrid from "@/components/WorkoutIconGrid";
 import { queryKeys } from "@/constants/query-keys";
+import useTheme from "@/hooks/useTheme";
 import { createWorkoutLog } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
+import { cn } from "@/lib/nativewind";
 import { WorkoutLogFormValues, workoutLogSchema } from "@/lib/zodSchema";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
@@ -34,6 +44,9 @@ export default function Workout() {
     });
 
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+
+  const [logging, setLogging] = useState(false);
 
   const createWorkoutLogMutation = useMutation({
     mutationFn: createWorkoutLog,
@@ -61,9 +74,12 @@ export default function Workout() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
+    onSettled: () => setLogging(false),
   });
 
   const onSubmit = async (data: WorkoutLogFormValues) => {
+    setLogging(true);
+
     const durationMinutesNum = Number(data.durationMinutes);
     const performedAtSqlTimestamp = toSqlTimestamp(data.performedAt);
 
@@ -77,146 +93,164 @@ export default function Workout() {
   };
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerClassName="p-4 gap-6"
-      showsVerticalScrollIndicator={false}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      className="flex-1"
     >
-      <View className="gap-2">
-        <ThemedText className="text-sm font-medium">Name</ThemedText>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="p-4 gap-6"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Name</ThemedText>
 
-        <Controller
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <ThemedTextInput
-              placeholder="Name"
-              value={field.value}
-              onChangeText={field.onChange}
-              onBlur={field.onBlur}
-              className={
-                formState.errors.name !== undefined ? "border-destructive" : ""
-              }
-            />
-          )}
-        />
-
-        {formState.errors.name !== undefined && (
-          <ThemedText className="text-destructive text-xs">
-            {formState.errors.name.message}
-          </ThemedText>
-        )}
-
-        <View className="flex-row flex-wrap gap-2">
-          {[
-            "Push",
-            "Pull",
-            "Legs",
-            "Upper",
-            "Lower",
-            "Chest",
-            "Shoulders",
-            "Arms",
-            "Cardio",
-          ].map((label) => (
-            <Pressable
-              key={label}
-              onPress={() => setValue("name", label, { shouldValidate: true })}
-              className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
-            >
-              <ThemedText className="text-sm">{label}</ThemedText>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-
-      <View className="gap-2">
-        <ThemedText className="text-sm font-medium">Duration</ThemedText>
-
-        <Controller
-          control={control}
-          name="durationMinutes"
-          render={({ field }) => (
-            <ThemedTextInput
-              placeholder="Duration"
-              keyboardType="number-pad"
-              value={field.value}
-              onChangeText={field.onChange}
-              onBlur={field.onBlur}
-              className={
-                formState.errors.durationMinutes !== undefined
-                  ? "border-destructive"
-                  : ""
-              }
-            />
-          )}
-        />
-
-        {formState.errors.durationMinutes !== undefined && (
-          <ThemedText className="text-destructive text-xs">
-            {formState.errors.durationMinutes.message}
-          </ThemedText>
-        )}
-
-        <View className="flex-row flex-wrap gap-2">
-          {["15", "30", "45", "60", "75", "90", "105", "120"].map((label) => (
-            <Pressable
-              key={label}
-              onPress={() =>
-                setValue("durationMinutes", label, { shouldValidate: true })
-              }
-              className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
-            >
-              <ThemedText className="text-sm">{label}</ThemedText>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-
-      <View className="gap-2">
-        <ThemedText className="text-sm font-medium">Performed At</ThemedText>
-
-        <Controller
-          control={control}
-          name="performedAt"
-          render={({ field }) => (
-            <View className="rounded-xl border border-border bg-muted px-2 py-1">
-              <DateTimePicker
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <ThemedTextInput
+                placeholder="Name"
                 value={field.value}
-                mode="datetime"
-                onValueChange={(_, selectedDate) =>
-                  field.onChange(selectedDate)
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                className={
+                  formState.errors.name !== undefined
+                    ? "border-destructive"
+                    : ""
                 }
               />
-            </View>
+            )}
+          />
+
+          {formState.errors.name !== undefined && (
+            <ThemedText className="text-destructive text-xs">
+              {formState.errors.name.message}
+            </ThemedText>
           )}
-        />
-      </View>
 
-      <View className="gap-2">
-        <ThemedText className="text-sm font-medium">Icon</ThemedText>
+          <View className="flex-row flex-wrap gap-2">
+            {[
+              "Push",
+              "Pull",
+              "Legs",
+              "Upper",
+              "Lower",
+              "Chest",
+              "Shoulders",
+              "Arms",
+              "Cardio",
+            ].map((label) => (
+              <Pressable
+                key={label}
+                onPress={() =>
+                  setValue("name", label, { shouldValidate: true })
+                }
+                className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
+              >
+                <ThemedText className="text-sm">{label}</ThemedText>
+              </Pressable>
+            ))}
+          </View>
+        </View>
 
-        <Controller
-          control={control}
-          name="icon"
-          render={({ field }) => (
-            <WorkoutIconGrid
-              className="p-4 bg-muted border rounded-xl border-border"
-              value={field.value}
-              onValueChange={field.onChange}
-            />
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Duration</ThemedText>
+
+          <Controller
+            control={control}
+            name="durationMinutes"
+            render={({ field }) => (
+              <ThemedTextInput
+                placeholder="Duration"
+                keyboardType="number-pad"
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                className={
+                  formState.errors.durationMinutes !== undefined
+                    ? "border-destructive"
+                    : ""
+                }
+              />
+            )}
+          />
+
+          {formState.errors.durationMinutes !== undefined && (
+            <ThemedText className="text-destructive text-xs">
+              {formState.errors.durationMinutes.message}
+            </ThemedText>
           )}
-        />
-      </View>
 
-      <Pressable
-        onPress={handleSubmit(onSubmit)}
-        className="bg-primary p-4 rounded-xl active:opacity-80"
-      >
-        <ThemedText className="text-primary-foreground text-center font-semibold">
-          Log Workout
-        </ThemedText>
-      </Pressable>
-    </ScrollView>
+          <View className="flex-row flex-wrap gap-2">
+            {["15", "30", "45", "60", "75", "90", "105", "120"].map((label) => (
+              <Pressable
+                key={label}
+                onPress={() =>
+                  setValue("durationMinutes", label, { shouldValidate: true })
+                }
+                className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
+              >
+                <ThemedText className="text-sm">{label}</ThemedText>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Performed At</ThemedText>
+
+          <Controller
+            control={control}
+            name="performedAt"
+            render={({ field }) => (
+              <View className="rounded-xl border border-border bg-muted px-2 py-1">
+                <DateTimePicker
+                  value={field.value}
+                  mode="datetime"
+                  onValueChange={(_, selectedDate) =>
+                    field.onChange(selectedDate)
+                  }
+                />
+              </View>
+            )}
+          />
+        </View>
+
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Icon</ThemedText>
+
+          <Controller
+            control={control}
+            name="icon"
+            render={({ field }) => (
+              <WorkoutIconGrid
+                className="p-4 bg-muted border rounded-xl border-border"
+                value={field.value}
+                onValueChange={field.onChange}
+              />
+            )}
+          />
+        </View>
+
+        <Pressable
+          onPress={handleSubmit(onSubmit)}
+          className={cn(
+            "bg-primary p-4 rounded-xl active:opacity-80",
+            logging && "opacity-50",
+          )}
+          disabled={logging}
+        >
+          {logging ? (
+            <ActivityIndicator color={theme.primaryForeground} />
+          ) : (
+            <ThemedText className="text-primary-foreground text-center font-semibold">
+              Log Workout
+            </ThemedText>
+          )}
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

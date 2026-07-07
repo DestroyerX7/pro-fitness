@@ -14,6 +14,7 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -128,7 +129,8 @@ function GoalForm({ goal }: { goal: Goal }) {
                 <Pressable
                   onPress={() => field.onChange(!field.value)}
                   onBlur={field.onBlur}
-                  className="p-2 justify-center items-center flex-row gap-2"
+                  className="p-2 items-center flex-row gap-2"
+                  disabled={isSaving || isDeleting}
                 >
                   <MaterialCommunityIcons
                     name={field.value ? "eye" : "eye-off"}
@@ -152,6 +154,7 @@ function GoalForm({ goal }: { goal: Goal }) {
           contentInsetAdjustmentBehavior="automatic"
           contentContainerClassName="p-4 gap-6"
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           <View className="gap-2">
             <ThemedText className="text-sm font-medium">Name</ThemedText>
@@ -191,9 +194,8 @@ function GoalForm({ goal }: { goal: Goal }) {
                 <ThemedTextInput
                   className={cn(
                     "h-32",
-                    formState.errors.description !== undefined
-                      ? "border-destructive"
-                      : "",
+                    formState.errors.description !== undefined &&
+                      "border-destructive",
                   )}
                   placeholder="Description..."
                   value={field.value ?? ""}
@@ -270,30 +272,43 @@ function GoalForm({ goal }: { goal: Goal }) {
             onPress={handleSubmit(onSubmit)}
             className={cn(
               "items-center rounded-xl bg-primary p-4 active:opacity-80",
-              isSaving || !hasUnsavedChanges ? "opacity-50" : "",
+              (isSaving || !hasUnsavedChanges || isDeleting) && "opacity-50",
             )}
-            disabled={isSaving || !hasUnsavedChanges}
+            disabled={isSaving || !hasUnsavedChanges || isDeleting}
           >
             <ThemedText className="font-semibold text-primary-foreground">
-              {isSaving ? "Saving..." : "Save"}
+              {isSaving ? (
+                <ActivityIndicator color={theme.primaryForeground} />
+              ) : (
+                "Save"
+              )}
             </ThemedText>
           </Pressable>
 
           {/* Delete */}
           <Pressable
-            className="p-4 rounded-xl bg-muted flex-row items-center justify-center gap-2 active:opacity-80"
-            disabled={isDeleting}
+            className={cn(
+              "p-4 rounded-xl bg-muted items-center active:opacity-80",
+              (isDeleting || isSaving) && "opacity-50",
+            )}
+            disabled={isDeleting || isSaving}
             onPress={handleDelete}
           >
-            <MaterialCommunityIcons
-              name="trash-can"
-              size={16}
-              color={theme.destructive}
-            />
+            {isDeleting ? (
+              <ActivityIndicator color={theme.destructive} />
+            ) : (
+              <View className="flex-row gap-1 items-center">
+                <MaterialCommunityIcons
+                  name="trash-can"
+                  size={16}
+                  color={theme.destructive}
+                />
 
-            <ThemedText className="text-destructive font-semibold">
-              {isDeleting ? "Deleting..." : "Delete"}
-            </ThemedText>
+                <ThemedText className="text-destructive font-semibold">
+                  Delete
+                </ThemedText>
+              </View>
+            )}
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -305,6 +320,8 @@ export default function EditGoal() {
   const { goalId } = useLocalSearchParams<{ goalId: string }>();
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
+
+  const theme = useTheme();
 
   const { data: goal, isPending } = useQuery({
     queryKey: queryKeys.goals.one(user.id, goalId),
@@ -324,7 +341,13 @@ export default function EditGoal() {
   }, [isPending, goal]);
 
   if (goal === undefined) {
-    return;
+    return (
+      <View className="flex-1 items-center justify-center gap-4">
+        <ActivityIndicator size="large" color={theme.foreground} />
+
+        <ThemedText>Loading...</ThemedText>
+      </View>
+    );
   }
 
   return <GoalForm goal={goal} />;

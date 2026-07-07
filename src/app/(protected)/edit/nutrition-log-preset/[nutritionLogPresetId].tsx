@@ -221,6 +221,7 @@ function NutritionLogPresetForm({
         contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName="p-4 gap-6"
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Image picker */}
         <View className="items-center gap-2">
@@ -369,30 +370,43 @@ function NutritionLogPresetForm({
           onPress={handleSubmit(onSubmit)}
           className={cn(
             "items-center rounded-xl bg-primary p-4 active:opacity-80",
-            isSaving || !hasUnsavedChanges ? "opacity-50" : "",
+            (isSaving || !hasUnsavedChanges || isDeleting) && "opacity-50",
           )}
-          disabled={isSaving || !hasUnsavedChanges}
+          disabled={isSaving || !hasUnsavedChanges || isDeleting}
         >
-          <ThemedText className="font-semibold text-primary-foreground">
-            {isSaving ? "Saving..." : "Save"}
-          </ThemedText>
+          {isSaving ? (
+            <ActivityIndicator color={theme.primaryForeground} />
+          ) : (
+            <ThemedText className="font-semibold text-primary-foreground">
+              Save
+            </ThemedText>
+          )}
         </Pressable>
 
         {/* Delete */}
         <Pressable
-          className="p-4 rounded-xl bg-muted flex-row items-center justify-center gap-2 active:opacity-80"
-          disabled={isDeleting}
+          className={cn(
+            "p-4 rounded-xl bg-muted items-center active:opacity-80",
+            (isDeleting || isSaving) && "opacity-50",
+          )}
+          disabled={isDeleting || isSaving}
           onPress={handleDelete}
         >
-          <MaterialCommunityIcons
-            name="trash-can"
-            size={16}
-            color={theme.destructive}
-          />
+          {isDeleting ? (
+            <ActivityIndicator color={theme.destructive} />
+          ) : (
+            <View className="flex-row gap-1 items-center">
+              <MaterialCommunityIcons
+                name="trash-can"
+                size={16}
+                color={theme.destructive}
+              />
 
-          <ThemedText className="text-destructive font-semibold">
-            {isDeleting ? "Deleting..." : "Delete"}
-          </ThemedText>
+              <ThemedText className="text-destructive font-semibold">
+                Delete
+              </ThemedText>
+            </View>
+          )}
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -405,6 +419,8 @@ export default function EditCaloireLogPreset() {
   }>();
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
+
+  const theme = useTheme();
 
   const { data: nutritionLogPreset, isPending } = useQuery({
     queryKey: queryKeys.nutritionLogPresets.one(user.id, nutritionLogPresetId),
@@ -429,7 +445,7 @@ export default function EditCaloireLogPreset() {
   if (nutritionLogPreset === undefined) {
     return (
       <View className="flex-1 items-center justify-center gap-4">
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={theme.foreground} />
 
         <ThemedText>Loading...</ThemedText>
       </View>

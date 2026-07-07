@@ -155,6 +155,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
     });
   };
 
+  // TODO: Only go back when both the authClient and mutation have both finished
   const onSubmit = async (data: ProfileFormValues) => {
     const dailyCalorieTargetNum = Number(data.dailyCalorieTarget);
     const dailyWorkoutMinutesTargetNum = Number(data.dailyWorkoutMinutesTarget);
@@ -353,7 +354,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
             onPress={handleSubmit(onSubmit)}
             className={cn(
               "h-12 items-center justify-center rounded-xl bg-primary active:opacity-80",
-              isSaving || !hasUnsavedChanges ? "opacity-50" : "",
+              (isSaving || !hasUnsavedChanges) && "opacity-50",
             )}
             disabled={isSaving || !hasUnsavedChanges}
           >
@@ -397,6 +398,8 @@ export default function EditUser() {
   const { user } = useAuthenticatedAuth();
   const { data: dailyTarget, isPending } = useDailyTarget(user.id);
 
+  const theme = useTheme();
+
   useEffect(() => {
     if (!isPending && dailyTarget === undefined) {
       router.back();
@@ -406,7 +409,7 @@ export default function EditUser() {
   if (dailyTarget === undefined) {
     return (
       <View className="flex-1 items-center justify-center gap-4">
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={theme.foreground} />
 
         <ThemedText>Loading...</ThemedText>
       </View>

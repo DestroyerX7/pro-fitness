@@ -27,6 +27,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   View,
@@ -54,6 +55,8 @@ export default function Scan() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const isLoadingRef = useRef(false);
+
+  const [logging, setLogging] = useState(false);
 
   const { control, handleSubmit, setValue, formState, reset } =
     useForm<ScanFormValues>({
@@ -96,6 +99,7 @@ export default function Scan() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
+    onSettled: () => setLogging(false),
   });
 
   const handleBarcodeScanned = (scanningResult: BarcodeScanningResult) => {
@@ -201,6 +205,8 @@ export default function Scan() {
   };
 
   const onSubmit = async (data: ScanFormValues) => {
+    setLogging(true);
+
     const caloriesPerServingNum = Number(data.caloriesPerServing);
     const numberOfServingsNum = Number(data.numberOfServings);
     const calories = Math.ceil(caloriesPerServingNum * numberOfServingsNum);
@@ -231,11 +237,7 @@ export default function Scan() {
     reset();
   };
 
-  if (status === null) {
-    return;
-  }
-
-  if (!status.granted) {
+  if (status === null || !status.granted) {
     return (
       <View className="flex-1 justify-center items-center gap-4">
         <ThemedText className="text-xl font-semibold">
@@ -301,7 +303,7 @@ export default function Scan() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center gap-4">
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={theme.foreground} />
 
         <ThemedText>Loading...</ThemedText>
       </View>
@@ -327,11 +329,15 @@ export default function Scan() {
   }
 
   return (
-    <KeyboardAvoidingView behavior="padding" className="flex-1">
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      className="flex-1"
+    >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName="p-4 gap-6"
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <Pressable
           className="bg-secondary p-4 rounded-xl flex-row items-center justify-center gap-1 active:opacity-80"
@@ -522,12 +528,20 @@ export default function Scan() {
         </View>
 
         <Pressable
-          className="bg-primary p-4 rounded-xl active:opacity-80"
+          className={cn(
+            "bg-primary p-4 rounded-xl active:opacity-80",
+            logging && "opacity-50",
+          )}
           onPress={handleSubmit(onSubmit)}
+          disabled={logging}
         >
-          <ThemedText className="text-primary-foreground text-center font-semibold">
-            Log Calories
-          </ThemedText>
+          {logging ? (
+            <ActivityIndicator color={theme.primaryForeground} />
+          ) : (
+            <ThemedText className="text-primary-foreground text-center font-semibold">
+              Log Calories
+            </ThemedText>
+          )}
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>

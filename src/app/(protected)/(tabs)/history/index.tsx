@@ -1,6 +1,8 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import GoalItem from "@/components/GoalItem";
-import NutritionLogItem from "@/components/NutritionLogItem";
+import NutritionLogItem, {
+  NutritionLogItemSkeleton,
+} from "@/components/NutritionLogItem";
 import TabButton from "@/components/TabButton";
 import ThemedText from "@/components/ThemedText";
 import WorkoutLogItem from "@/components/WorkoutLogItem";
@@ -88,31 +90,31 @@ function CalendarDateItemDisplay({
   );
 }
 
-function Tabs({
+function TabBar({
   activeTab,
   setActiveTab,
 }: {
   activeTab: "nutrition" | "workout" | "goal";
-  setActiveTab: (tab: "nutrition" | "workout" | "goal") => void;
+  setActiveTab?: (tab: "nutrition" | "workout" | "goal") => void;
 }) {
   return (
     <ScrollView horizontal contentContainerClassName="gap-2">
       <TabButton
         text="Calories"
         active={activeTab === "nutrition"}
-        onPress={() => setActiveTab("nutrition")}
+        onPress={() => setActiveTab?.("nutrition")}
       />
 
       <TabButton
         text="Workouts"
         active={activeTab === "workout"}
-        onPress={() => setActiveTab("workout")}
+        onPress={() => setActiveTab?.("workout")}
       />
 
       <TabButton
         text="Goals"
         active={activeTab === "goal"}
-        onPress={() => setActiveTab("goal")}
+        onPress={() => setActiveTab?.("goal")}
       />
     </ScrollView>
   );
@@ -243,15 +245,6 @@ export default function History() {
     );
   }
 
-  if (
-    isPendingDailyTarget ||
-    isPendingNutritionLogs ||
-    isPendingWorkoutLogs ||
-    isPendingGoals
-  ) {
-    return <ThemedText>Loding...</ThemedText>;
-  }
-
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth();
@@ -260,6 +253,81 @@ export default function History() {
   const leadingCalendarPadding = new Date(year, month, 1).getDay();
   const trailingCalendarPadding =
     (7 - ((leadingCalendarPadding + numDaysInMonth) % 7)) % 7;
+
+  if (
+    isPendingDailyTarget ||
+    isPendingNutritionLogs ||
+    isPendingWorkoutLogs ||
+    isPendingGoals
+  ) {
+    const pendingCalendarItemRows = buildCalendarItemRows(
+      year,
+      month,
+      numDaysInMonth,
+      leadingCalendarPadding,
+      trailingCalendarPadding,
+      () => 0,
+    );
+
+    return (
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="p-4 gap-4"
+        scrollEnabled={false}
+      >
+        <TabBar activeTab={activeTab} />
+
+        <View className="gap-1">
+          <View className="flex-row gap-1">
+            {["S", "M", "T", "W", "T", "F", "S"].map((dayString, i) => (
+              <View key={i} className="flex-1">
+                <ThemedText className="text-center">{dayString}</ThemedText>
+              </View>
+            ))}
+          </View>
+
+          {pendingCalendarItemRows.map((week, i) => (
+            <View key={i} className="flex-row gap-1">
+              {week.map((calendarItem, j) => {
+                if (calendarItem === null) {
+                  return (
+                    <View
+                      key={j}
+                      className="flex-1 aspect-square bg-muted rounded-xl"
+                    />
+                  );
+                }
+
+                const borderColor = isSameDay(today, calendarItem.date)
+                  ? theme.secondaryForeground
+                  : "transparent";
+
+                return (
+                  <CalendarDateItemDisplay
+                    key={j}
+                    calendarDateItem={calendarItem}
+                    borderColor={borderColor}
+                    backgroundColor={theme.secondary}
+                    textColor={theme.foreground}
+                  />
+                );
+              })}
+            </View>
+          ))}
+        </View>
+
+        <View className="flex-row justify-between">
+          <View className="h-8 w-32 rounded-lg bg-muted" />
+
+          <View className="h-8 w-32 rounded-lg bg-muted" />
+        </View>
+
+        {Array.from({ length: 5 }).map((_, i) => (
+          <NutritionLogItemSkeleton key={i} />
+        ))}
+      </ScrollView>
+    );
+  }
 
   const nutritionLogsGroupedByConsumedAt = nutritionLogs.reduce<
     Record<
@@ -385,7 +453,7 @@ export default function History() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View className="gap-4 mb-4">
-            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
 
             <View className="gap-1">
               <View className="flex-row gap-1">
@@ -494,7 +562,7 @@ export default function History() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View className="gap-4 mb-4">
-            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
 
             <View className="gap-1">
               <View className="flex-row gap-1">
@@ -600,7 +668,7 @@ export default function History() {
       showsVerticalScrollIndicator={false}
       ListHeaderComponent={
         <View className="mb-4">
-          <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
         </View>
       }
       sections={Object.values(goalsGroupedByCreatedAt).map((data) => ({

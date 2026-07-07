@@ -167,7 +167,7 @@ export default function Profile() {
           </ThemedText>
         </View>
 
-        <View className="h-px bg-border" />
+        {/* <View className="h-px bg-border" />
 
         <View className="flex-row justify-between">
           <ThemedText className="text-xl">Daily Calorie Goal</ThemedText>
@@ -193,7 +193,7 @@ export default function Profile() {
           ) : (
             <View className="h-8 w-32 bg-muted rounded-lg" />
           )}
-        </View>
+        </View> */}
 
         <View className="h-px bg-border" />
 
@@ -203,6 +203,36 @@ export default function Profile() {
           <ThemedText className="text-muted-foreground text-xl">
             {new Date(user.createdAt).toLocaleDateString()}
           </ThemedText>
+        </View>
+      </Card>
+
+      <Card className="gap-4">
+        <ThemedText className="text-2xl font-bold">Daily Targets</ThemedText>
+
+        <View className="flex-row justify-between">
+          <ThemedText className="text-xl">Calories</ThemedText>
+
+          {dailyTarget !== undefined ? (
+            <ThemedText className="text-muted-foreground text-xl">
+              {dailyTarget.calorieTarget} calories
+            </ThemedText>
+          ) : (
+            <View className="h-8 w-32 bg-muted rounded-lg" />
+          )}
+        </View>
+
+        <View className="h-px bg-border" />
+
+        <View className="flex-row justify-between">
+          <ThemedText className="text-xl">Workout Time</ThemedText>
+
+          {dailyTarget !== undefined ? (
+            <ThemedText className="text-muted-foreground text-xl">
+              {dailyTarget.workoutMinutesTarget} minutes
+            </ThemedText>
+          ) : (
+            <View className="h-8 w-32 bg-muted rounded-lg" />
+          )}
         </View>
       </Card>
 

@@ -50,9 +50,11 @@ export default function GoalItem({
       <View className="gap-1 flex-1">
         <ThemedText className={"text-lg font-bold"}>{name}</ThemedText>
 
-        <ThemedText className="text-muted-foreground flex-wrap">
-          {description}
-        </ThemedText>
+        {description !== null && (
+          <ThemedText className="text-muted-foreground flex-wrap">
+            {description}
+          </ThemedText>
+        )}
       </View>
     </Card>
   );
@@ -67,7 +69,7 @@ export function GoalItemSkeleton() {
       -1,
       true,
     );
-  }, []);
+  }, [opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

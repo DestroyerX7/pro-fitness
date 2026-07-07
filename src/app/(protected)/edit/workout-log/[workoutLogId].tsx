@@ -167,7 +167,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
         options={{
           headerRight: () => (
             <Pressable
-              className="p-2 justify-center items-center flex-row gap-2"
+              className="p-2 items-center flex-row gap-2"
               disabled={createWorkoutLogPresetMutation.isPending}
               onPress={handleCreateWorkoutLogPreset}
             >
@@ -191,6 +191,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
           contentInsetAdjustmentBehavior="automatic"
           contentContainerClassName="p-4 gap-6"
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           <View className="gap-2">
             <ThemedText className="text-sm font-medium">Name</ThemedText>
@@ -340,30 +341,43 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
             onPress={handleSubmit(onSubmit)}
             className={cn(
               "items-center rounded-xl bg-primary p-4 active:opacity-80",
-              isSaving || !hasUnsavedChanges ? "opacity-50" : "",
+              (isSaving || !hasUnsavedChanges || isDeleting) && "opacity-50",
             )}
-            disabled={isSaving || !hasUnsavedChanges}
+            disabled={isSaving || !hasUnsavedChanges || isDeleting}
           >
-            <ThemedText className="font-semibold text-primary-foreground">
-              {isSaving ? "Saving..." : "Save"}
-            </ThemedText>
+            {isSaving ? (
+              <ActivityIndicator color={theme.primaryForeground} />
+            ) : (
+              <ThemedText className="font-semibold text-primary-foreground">
+                Save
+              </ThemedText>
+            )}
           </Pressable>
 
           {/* Delete */}
           <Pressable
-            className="p-4 rounded-xl bg-muted flex-row items-center justify-center gap-2 active:opacity-80"
-            disabled={isDeleting}
+            className={cn(
+              "p-4 rounded-xl bg-muted items-center active:opacity-80",
+              (isDeleting || isSaving) && "opacity-50",
+            )}
+            disabled={isDeleting || isSaving}
             onPress={handleDelete}
           >
-            <MaterialCommunityIcons
-              name="trash-can"
-              size={16}
-              color={theme.destructive}
-            />
+            {isDeleting ? (
+              <ActivityIndicator color={theme.destructive} />
+            ) : (
+              <View className="flex-row gap-1 items-center">
+                <MaterialCommunityIcons
+                  name="trash-can"
+                  size={16}
+                  color={theme.destructive}
+                />
 
-            <ThemedText className="text-destructive font-semibold">
-              {isDeleting ? "Deleting..." : "Delete"}
-            </ThemedText>
+                <ThemedText className="text-destructive font-semibold">
+                  Delete
+                </ThemedText>
+              </View>
+            )}
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -375,6 +389,8 @@ export default function EditWorkoutLog() {
   const { workoutLogId } = useLocalSearchParams<{ workoutLogId: string }>();
   const queryClient = useQueryClient();
   const { user } = useAuthenticatedAuth();
+
+  const theme = useTheme();
 
   const { data: workoutLog, isPending } = useQuery({
     queryKey: queryKeys.workoutLogs.one(user.id, workoutLogId),
@@ -396,7 +412,7 @@ export default function EditWorkoutLog() {
   if (workoutLog === undefined) {
     return (
       <View className="flex-1 items-center justify-center gap-4">
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={theme.foreground} />
 
         <ThemedText>Loading...</ThemedText>
       </View>

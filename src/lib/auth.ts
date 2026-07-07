@@ -3,6 +3,8 @@ import * as schema from "@/db/schema";
 import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { emailOTP } from "better-auth/plugins";
+import { sendEmailVerificationOtp } from "./resend";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL!,
@@ -26,6 +28,10 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    autoSignInAfterVerification: true,
   },
   socialProviders: {
     google: {
@@ -43,5 +49,14 @@ export const auth = betterAuth({
     "https://appleid.apple.com",
     process.env.EXPO_PUBLIC_BACKEND_URL!,
   ],
-  plugins: [expo()],
+  plugins: [
+    expo(),
+    emailOTP({
+      async sendVerificationOTP({ email, otp, type }) {
+        if (type === "email-verification") {
+          await sendEmailVerificationOtp(email, otp);
+        }
+      },
+    }),
+  ],
 });

@@ -2,165 +2,376 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/nativewind";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Controller, useForm } from "react-hook-form";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { z } from "zod";
+
+const signUpSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    email: z.email("Enter a valid email"),
+    password: z.string().min(8, "At least 8 characters"),
+    confirmPassword: z.string().min(1, "Confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+type SignUpForm = z.infer<typeof signUpSchema>;
 
 export default function SignUp() {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<"email" | "google" | "apple" | null>(
+    null,
+  );
 
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
-  const signUpWithEmail = async () => {
-    if (password !== confirmPassword) {
-      Alert.alert("Passwords do not match.");
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpForm>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+  });
+
+  const signUpWithEmail = async ({ name, email, password }: SignUpForm) => {
+    setFormError(null);
+    setLoading("email");
+
+    const { error: signUpError } = await authClient.signUp.email({
+      name,
+      email,
+      password,
+    });
+
+    if (signUpError !== null) {
+      setFormError(signUpError.message ?? "Something went wrong. Try again.");
+      setLoading(null);
       return;
     }
 
-    await authClient.signUp.email(
-      {
-        email,
-        password,
-        name,
-      },
-      {
-        onSuccess: () => {
-          router.replace("/(protected)/(tabs)/home");
-        },
-        onError: (ctx) => {
-          console.log(ctx.error);
-        },
-      },
-    );
+    const { error: otpError } = await authClient.emailOtp.sendVerificationOtp({
+      email,
+      type: "email-verification",
+    });
+
+    if (otpError !== null) {
+      setFormError(otpError.message ?? "Something went wrong. Try again.");
+      setLoading(null);
+      return;
+    }
+
+    router.push({
+      pathname: "/(auth)/email-verification/[email]",
+      params: { email },
+    });
   };
 
   const signUpWithGoogle = async () => {
+    setFormError(null);
+    setLoading("google");
+
     const { error } = await authClient.signIn.social({
       provider: "google",
       callbackURL: "/(protected)/(tabs)/home", // Callback url is required or it breaks
     });
 
-    if (error) {
-      console.log(error);
-      return;
-    }
+    setLoading(null);
 
-    router.replace("/(protected)/(tabs)/home");
+    if (error !== null) {
+      setFormError(error.message ?? "Couldn't sign in with Google.");
+    }
   };
 
   const signUpWithApple = async () => {
-    const credential = await AppleAuthentication.signInAsync({
-      requestedScopes: [
-        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-        AppleAuthentication.AppleAuthenticationScope.EMAIL,
-      ],
-    });
+    try {
+      setFormError(null);
+      setLoading("apple");
 
-    if (credential.identityToken == null) {
-      return;
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (credential.identityToken === null) {
+        setFormError("No identity token.");
+        return;
+      }
+
+      const { error } = await authClient.signIn.social({
+        provider: "apple",
+        idToken: {
+          token: credential.identityToken,
+        },
+      });
+
+      if (error !== null) {
+        setFormError(error.message ?? "Couldn't sign in with Apple.");
+      }
+    } catch {
+    } finally {
+      setLoading(null);
     }
-
-    const { error } = await authClient.signIn.social({
-      provider: "apple",
-      idToken: {
-        token: credential.identityToken,
-      },
-    });
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    router.replace("/(protected)/(tabs)/home");
   };
 
   return (
-    <SafeAreaView className="p-4 gap-4">
-      <ThemedText className="text-4xl font-bold">Sign Up</ThemedText>
-
-      <ThemedTextInput
-        placeholder="Name"
-        textContentType="name"
-        value={name}
-        onChangeText={setName}
-      />
-
-      <ThemedTextInput
-        textContentType="emailAddress"
-        placeholder="Email"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
-
-      <ThemedTextInput
-        placeholder="Password"
-        textContentType="newPassword"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-
-      <ThemedTextInput
-        placeholder="Confirm Password"
-        textContentType="password"
-        secureTextEntry
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-      />
-
-      <Pressable
-        className="p-4 bg-primary rounded-xl"
-        onPress={signUpWithEmail}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      className="flex-1"
+    >
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 16,
+          paddingBottom: insets.bottom + 16,
+          paddingHorizontal: 16,
+        }}
+        keyboardShouldPersistTaps="handled"
       >
-        <ThemedText className="text-primary-foreground">Sign Up</ThemedText>
-      </Pressable>
+        <View className="gap-1 mb-8">
+          <ThemedText className="text-4xl font-bold">
+            Create an account
+          </ThemedText>
 
-      <View className="h-px bg-border" />
+          <ThemedText className="text-base opacity-60">
+            Takes less than a minute to get started.
+          </ThemedText>
+        </View>
 
-      <Pressable
-        className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"
-        onPress={signUpWithGoogle}
-      >
-        {/* <Image
-          className="w-8 h-8"
-          source={{
-            uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/500px-Google_%22G%22_logo.svg.png",
-          }}
-        /> */}
-        <MaterialCommunityIcons
-          name="google"
-          size={32}
-          color={theme.foreground}
-        />
-        <ThemedText>Sign up with Google</ThemedText>
-      </Pressable>
+        <View className="gap-3">
+          <View>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <ThemedTextInput
+                  placeholder="Name"
+                  textContentType="name"
+                  autoComplete="name"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                />
+              )}
+            />
+            {errors.name && (
+              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+                {errors.name.message}
+              </ThemedText>
+            )}
+          </View>
 
-      <Pressable
-        className="p-4 bg-background rounded-xl border border-border flex-row items-center gap-4"
-        onPress={signUpWithApple}
-      >
-        <MaterialCommunityIcons
-          name="apple"
-          size={32}
-          color={theme.foreground}
-        />
-        <ThemedText>Sign up with Apple</ThemedText>
-      </Pressable>
+          <View>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <ThemedTextInput
+                  placeholder="Email"
+                  textContentType="emailAddress"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                />
+              )}
+            />
+            {errors.email && (
+              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+                {errors.email.message}
+              </ThemedText>
+            )}
+          </View>
 
-      <ThemedText className="text-center text-xl">
-        Already have an account?{" "}
-        <Link href="/(auth)">
-          <ThemedText className="text-primary underline">Login</ThemedText>
-        </Link>
-      </ThemedText>
-    </SafeAreaView>
+          <View>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <ThemedTextInput
+                  placeholder="Password"
+                  textContentType="newPassword"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                />
+              )}
+            />
+
+            <Pressable
+              onPress={() => setShowPassword((v) => !v)}
+              className="absolute right-4 top-0 h-14 justify-center"
+              hitSlop={8}
+            >
+              <MaterialCommunityIcons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                size={20}
+                color={theme.foreground}
+                style={{ opacity: 0.5 }}
+              />
+            </Pressable>
+
+            {errors.password && (
+              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+                {errors.password.message}
+              </ThemedText>
+            )}
+          </View>
+
+          <View>
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <ThemedTextInput
+                  placeholder="Confirm password"
+                  textContentType="password"
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                />
+              )}
+            />
+            <Pressable
+              onPress={() => setShowConfirmPassword((v) => !v)}
+              className="absolute right-4 top-0 h-14 justify-center"
+              hitSlop={8}
+            >
+              <MaterialCommunityIcons
+                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                size={20}
+                color={theme.foreground}
+                style={{ opacity: 0.5 }}
+              />
+            </Pressable>
+
+            {errors.confirmPassword && (
+              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+                {errors.confirmPassword.message}
+              </ThemedText>
+            )}
+          </View>
+        </View>
+
+        {formError && (
+          <View className="mt-3 px-4 py-3 rounded-xl bg-destructive/10">
+            <ThemedText className="text-destructive text-sm">
+              {formError}
+            </ThemedText>
+          </View>
+        )}
+
+        <Pressable
+          className={cn(
+            "mt-6 p-4 bg-primary rounded-xl items-center justify-center",
+            loading !== null && "opacity-50",
+          )}
+          onPress={handleSubmit(signUpWithEmail)}
+          disabled={loading !== null}
+        >
+          {loading === "email" ? (
+            <ActivityIndicator color={theme.primaryForeground} />
+          ) : (
+            <ThemedText className="text-primary-foreground font-semibold">
+              Sign up
+            </ThemedText>
+          )}
+        </Pressable>
+
+        <View className="flex-row items-center gap-3 my-6">
+          <View className="flex-1 h-px bg-border" />
+
+          <ThemedText className="text-xs opacity-50">
+            OR CONTINUE WITH
+          </ThemedText>
+          <View className="flex-1 h-px bg-border" />
+        </View>
+
+        <View className="gap-3">
+          <Pressable
+            className={cn(
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-3",
+              loading !== null && loading !== "google" && "opacity-50",
+            )}
+            onPress={signUpWithGoogle}
+            disabled={loading !== null}
+          >
+            {loading === "google" ? (
+              <ActivityIndicator color={theme.foreground} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="google"
+                  size={20}
+                  color={theme.foreground}
+                />
+                <ThemedText className="font-medium">
+                  Continue with Google
+                </ThemedText>
+              </>
+            )}
+          </Pressable>
+
+          <Pressable
+            className={cn(
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-3",
+              loading !== null && loading !== "apple" && "opacity-50",
+            )}
+            onPress={signUpWithApple}
+            disabled={loading !== null}
+          >
+            {loading === "apple" ? (
+              <ActivityIndicator color={theme.foreground} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="apple"
+                  size={20}
+                  color={theme.foreground}
+                />
+                <ThemedText className="font-medium">
+                  Continue with Apple
+                </ThemedText>
+              </>
+            )}
+          </Pressable>
+        </View>
+
+        <ThemedText className="text-center mt-8">
+          Already have an account?{" "}
+          <Link href="/(auth)">
+            <ThemedText className="text-primary font-medium">Log in</ThemedText>
+          </Link>
+        </ThemedText>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
