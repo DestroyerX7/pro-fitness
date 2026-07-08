@@ -1,80 +1,92 @@
-import { Text, View } from "react-native";
-import { BaseToast, ErrorToast, ToastConfig } from "react-native-toast-message";
+import ThemedText from "@/components/ThemedText";
+import { Pressable, View } from "react-native";
+import { ToastConfig } from "react-native-toast-message";
 
 export const toastConfig: ToastConfig = {
-  success: (props) => (
-    <BaseToast
-      {...props}
-      style={{ borderLeftColor: "green" }}
-      contentContainerStyle={{ paddingHorizontal: 15 }}
-      text1Style={{ fontSize: 15, fontWeight: "600" }}
-      text2Style={{ fontSize: 13 }}
-    />
-  ),
-  error: (props) => (
-    <ErrorToast
-      {...props}
-      text1Style={{ fontSize: 15 }}
-      text2Style={{ fontSize: 13 }}
-    />
-  ),
-  loggedCalories: ({ text1, text2 }) => (
-    <View
-      style={{
-        height: 60,
-        width: "90%",
-        backgroundColor: "#1e1e1e",
-        borderRadius: 12,
-        padding: 12,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
-      }}
+  success: ({ text1, text2, onPress }) => (
+    <Pressable
+      onPress={onPress}
+      className="bg-card flex-row items-center gap-2 p-4 rounded-xl w-11/12"
     >
-      <Text style={{ fontSize: 20 }}>🍽️</Text>
+      <ThemedText className="text-card-foreground text-2xl">✅</ThemedText>
+
       <View>
-        <Text style={{ color: "white", fontWeight: "600" }}>{text1}</Text>
-        <Text style={{ color: "#aaa", fontSize: 12 }}>{text2}</Text>
+        <ThemedText className="text-card-foreground font-semibold">
+          {text1}
+        </ThemedText>
+
+        <ThemedText className="text-xs text-muted-foreground">
+          {text2}
+        </ThemedText>
       </View>
-    </View>
+    </Pressable>
   ),
-  loggedWorkout: ({ text1, text2 }) => (
-    <View
-      style={{
-        height: 60,
-        width: "90%",
-        backgroundColor: "#1e1e1e",
-        borderRadius: 12,
-        padding: 12,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
-      }}
+  error: ({ text1, text2, onPress }) => (
+    <Pressable
+      onPress={onPress}
+      className="bg-card flex-row items-center gap-2 p-4 rounded-xl w-11/12"
     >
-      <Text style={{ fontSize: 20 }}>💪</Text>
+      <ThemedText className="text-card-foreground text-2xl">❗</ThemedText>
+
       <View>
-        <Text style={{ color: "white", fontWeight: "600" }}>{text1}</Text>
-        <Text style={{ color: "#aaa", fontSize: 12 }}>{text2}</Text>
+        <ThemedText className="text-card-foreground font-semibold">
+          {text1}
+        </ThemedText>
+
+        <ThemedText className="text-xs text-muted-foreground">
+          {text2}
+        </ThemedText>
       </View>
-    </View>
+    </Pressable>
+  ),
+  loggedCalories: ({ text1, text2, onPress }) => (
+    <Pressable
+      onPress={onPress}
+      className="bg-card flex-row items-center gap-2 p-4 rounded-xl w-11/12"
+    >
+      <ThemedText className="text-card-foreground text-2xl">🍽️</ThemedText>
+
+      <View>
+        <ThemedText className="text-card-foreground font-semibold">
+          {text1}
+        </ThemedText>
+
+        <ThemedText className="text-xs text-muted-foreground">
+          {text2}
+        </ThemedText>
+      </View>
+    </Pressable>
+  ),
+  loggedWorkout: ({ text1, text2, onPress }) => (
+    <Pressable
+      onPress={onPress}
+      className="bg-card flex-row items-center gap-2 p-4 rounded-xl w-11/12"
+    >
+      <ThemedText className="text-card-foreground text-2xl">💪</ThemedText>
+
+      <View>
+        <ThemedText className="text-card-foreground font-semibold">
+          {text1}
+        </ThemedText>
+
+        <ThemedText className="text-xs text-muted-foreground">
+          {text2}
+        </ThemedText>
+      </View>
+    </Pressable>
   ),
   createdGoal: ({ text1, text2 }) => (
-    <View
-      style={{
-        height: 60,
-        width: "90%",
-        backgroundColor: "#1e1e1e",
-        borderRadius: 12,
-        padding: 12,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
-      }}
-    >
-      <Text style={{ fontSize: 20 }}>🎯</Text>
+    <View className="bg-card flex-row items-center gap-2 p-4 rounded-xl w-11/12">
+      <ThemedText className="text-card-foreground text-2xl">🎯</ThemedText>
+
       <View>
-        <Text style={{ color: "white", fontWeight: "600" }}>{text1}</Text>
-        <Text style={{ color: "#aaa", fontSize: 12 }}>{text2}</Text>
+        <ThemedText className="text-card-foreground font-semibold">
+          {text1}
+        </ThemedText>
+
+        <ThemedText className="text-xs text-muted-foreground">
+          {text2}
+        </ThemedText>
       </View>
     </View>
   ),

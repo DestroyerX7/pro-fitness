@@ -189,7 +189,7 @@ export default function Login() {
             )}
           </View>
 
-          <Link href="/(auth)/sign-up" asChild>
+          <Link href="/(auth)/forgot-password" asChild>
             <Pressable className="self-end">
               <ThemedText className="text-sm opacity-60">
                 Forgot password?
@@ -293,12 +293,6 @@ export default function Login() {
             </ThemedText>
           </Link>
         </ThemedText>
-
-        {/* <Link href="/(auth)/email-verification/test@test.com">
-          <ThemedText className="text-primary font-medium">
-            Verify email
-          </ThemedText>
-        </Link> */}
       </ScrollView>
     </KeyboardAvoidingView>
   );

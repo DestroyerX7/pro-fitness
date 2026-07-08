@@ -4,7 +4,7 @@ import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP } from "better-auth/plugins";
-import { sendEmailVerificationOtp } from "./resend";
+import { sendEmailVerificationOtp, sendForgotPasswordOtp } from "./resend";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL!,
@@ -55,6 +55,8 @@ export const auth = betterAuth({
       async sendVerificationOTP({ email, otp, type }) {
         if (type === "email-verification") {
           await sendEmailVerificationOtp(email, otp);
+        } else if (type === "forget-password") {
+          await sendForgotPasswordOtp(email, otp);
         }
       },
     }),

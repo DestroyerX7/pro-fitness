@@ -1,0 +1,474 @@
+import OtpInput from "@/components/OtpInput";
+import ThemedText from "@/components/ThemedText";
+import ThemedTextInput from "@/components/ThemedTextInput";
+import useTheme from "@/hooks/useTheme";
+import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/nativewind";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { router } from "expo-router";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { z } from "zod";
+
+const optLength = 6;
+
+const forgotPasswordSchema = z.object({
+  email: z.email("Enter a valid email"),
+});
+
+type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
+
+const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, "At least 8 characters"),
+    confirmPassword: z.string().min(1, "Confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
+
+function EnterEmail({ onNext }: { onNext?: (email: string) => void }) {
+  const [formError, setFormError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+
+  const { control, handleSubmit, formState } = useForm<ForgotPasswordForm>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: "" },
+  });
+
+  const loginWithEmail = async ({ email }: ForgotPasswordForm) => {
+    setFormError(null);
+    setLoading(true);
+
+    const { error } = await authClient.emailOtp.requestPasswordReset({ email });
+
+    if (error !== null) {
+      setFormError(error.message ?? "Something went wrong. Try again.");
+      setLoading(false);
+      return;
+    }
+
+    onNext?.(email);
+  };
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      className="flex-1"
+    >
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 16,
+          paddingBottom: insets.bottom + 16,
+          paddingHorizontal: 16,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="gap-1 mb-8">
+          <ThemedText className="text-4xl font-bold">
+            Forgot Password?
+          </ThemedText>
+
+          <ThemedText className="text-base opacity-60">
+            Enter you email and we&apos;ll send you a 6-digit verification code
+            instantly.
+          </ThemedText>
+        </View>
+
+        <View className="gap-3">
+          <View>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <ThemedTextInput
+                  placeholder="Email"
+                  textContentType="emailAddress"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+            {formState.errors.email !== undefined && (
+              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+                {formState.errors.email.message}
+              </ThemedText>
+            )}
+          </View>
+        </View>
+
+        {formError !== null && (
+          <View className="mt-3 px-4 py-3 rounded-xl bg-destructive-accent">
+            <ThemedText className="text-destructive text-sm">
+              {formError}
+            </ThemedText>
+          </View>
+        )}
+
+        <Pressable
+          className={cn(
+            "mt-6 p-4 bg-primary rounded-xl items-center justify-center",
+            (!formState.isValid || loading) && "opacity-50",
+          )}
+          onPress={handleSubmit(loginWithEmail)}
+          disabled={!formState.isValid || loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={theme.primaryForeground} />
+          ) : (
+            <ThemedText className="text-primary-foreground font-semibold">
+              Send Code
+            </ThemedText>
+          )}
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+function EnterOtp({
+  email,
+  onVerified,
+}: {
+  email: string;
+  onVerified?: (code: string) => void;
+}) {
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const theme = useTheme();
+
+  const verify = async () => {
+    setLoading(true);
+
+    const { error } = await authClient.emailOtp.checkVerificationOtp({
+      email,
+      otp,
+      type: "forget-password",
+    });
+
+    if (error !== null) {
+      setError(error.message ?? "Couldn't verify code.");
+      setLoading(false);
+      return;
+    }
+
+    onVerified?.(otp);
+  };
+
+  const resendOtp = async () => {
+    await authClient.emailOtp.requestPasswordReset({ email });
+  };
+
+  return (
+    <ScrollView
+      contentContainerClassName="flex-1 p-4 justify-center gap-4"
+      // contentInsetAdjustmentBehavior="automatic"
+      keyboardShouldPersistTaps="handled"
+    >
+      <View className="gap-1 mb-8">
+        <ThemedText className="text-4xl font-bold">Verify Code</ThemedText>
+
+        <ThemedText className="text-muted-foreground">
+          Enter the code sent to {email}
+        </ThemedText>
+      </View>
+
+      <OtpInput value={otp} onChange={setOtp} length={optLength} />
+
+      <Pressable
+        onPress={verify}
+        className={cn(
+          "p-4 bg-primary rounded-xl active:opacity-80",
+          (otp.length !== optLength || loading) && "opacity-50",
+        )}
+        disabled={otp.length !== optLength || loading}
+      >
+        {loading ? (
+          <ActivityIndicator color={theme.primaryForeground} />
+        ) : (
+          <ThemedText className="text-primary-foreground text-center font-semibold">
+            Verify
+          </ThemedText>
+        )}
+      </Pressable>
+
+      <View className="flex-row justify-center items-center gap-1">
+        <ThemedText>Didn&apos;t recieve a OTP?</ThemedText>
+
+        <Pressable onPress={resendOtp}>
+          <ThemedText className="text-primary font-medium">Resend</ThemedText>
+        </Pressable>
+      </View>
+
+      {error !== null && (
+        <View className="mt-3 px-4 py-3 rounded-xl bg-destructive-accent">
+          <ThemedText className="text-destructive text-sm">{error}</ThemedText>
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
+function ResetPassword({
+  email,
+  otp,
+  onReset,
+}: {
+  email: string;
+  otp: string;
+  onReset?: () => void;
+}) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+
+  const { control, handleSubmit, formState } = useForm<ResetPasswordForm>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { password: "", confirmPassword: "" },
+  });
+
+  const signUpWithEmail = async ({ password }: ResetPasswordForm) => {
+    setFormError(null);
+    setLoading(true);
+
+    const { error } = await authClient.emailOtp.resetPassword({
+      email,
+      password,
+      otp,
+    });
+
+    if (error !== null) {
+      setFormError(error.message ?? "Something went wrong. Try again.");
+      setLoading(false);
+      return;
+    }
+
+    onReset?.();
+  };
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      className="flex-1"
+    >
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 16,
+          paddingBottom: insets.bottom + 16,
+          paddingHorizontal: 16,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="gap-1 mb-8">
+          <ThemedText className="text-4xl font-bold">Reset Password</ThemedText>
+
+          <ThemedText className="text-base opacity-60">
+            Enter your new password
+          </ThemedText>
+        </View>
+
+        <View className="gap-3">
+          <View>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <ThemedTextInput
+                  placeholder="Password"
+                  textContentType="newPassword"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+
+            <Pressable
+              onPress={() => setShowPassword((v) => !v)}
+              className="absolute right-4 top-0 h-14 justify-center"
+              hitSlop={8}
+            >
+              <MaterialCommunityIcons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                size={20}
+                color={theme.foreground}
+                style={{ opacity: 0.5 }}
+              />
+            </Pressable>
+
+            {formState.errors.password !== undefined && (
+              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+                {formState.errors.password.message}
+              </ThemedText>
+            )}
+          </View>
+
+          <View>
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <ThemedTextInput
+                  placeholder="Confirm password"
+                  textContentType="password"
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+            <Pressable
+              onPress={() => setShowConfirmPassword((v) => !v)}
+              className="absolute right-4 top-0 h-14 justify-center"
+              hitSlop={8}
+            >
+              <MaterialCommunityIcons
+                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                size={20}
+                color={theme.foreground}
+                style={{ opacity: 0.5 }}
+              />
+            </Pressable>
+
+            {formState.errors.confirmPassword !== undefined && (
+              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+                {formState.errors.confirmPassword.message}
+              </ThemedText>
+            )}
+          </View>
+        </View>
+
+        {formError !== null && (
+          <View className="mt-3 px-4 py-3 rounded-xl bg-destructive/10">
+            <ThemedText className="text-destructive text-sm">
+              {formError}
+            </ThemedText>
+          </View>
+        )}
+
+        <Pressable
+          className={cn(
+            "mt-6 p-4 bg-primary rounded-xl items-center justify-center",
+            (!formState.isValid || loading) && "opacity-50",
+          )}
+          onPress={handleSubmit(signUpWithEmail)}
+          disabled={!formState.isValid || loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={theme.primaryForeground} />
+          ) : (
+            <ThemedText className="text-primary-foreground font-semibold">
+              Reset Password
+            </ThemedText>
+          )}
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+export default function ForgotPasswordFlow() {
+  const [step, setStep] = useState<"email" | "otp" | "password" | "success">(
+    "email",
+  );
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+
+  const insets = useSafeAreaInsets();
+
+  if (step === "email") {
+    return (
+      <EnterEmail
+        onNext={(e) => {
+          setEmail(e);
+          setStep("otp");
+        }}
+      />
+    );
+  } else if (step === "otp") {
+    return (
+      <EnterOtp
+        email={email}
+        onVerified={(code) => {
+          setOtp(code);
+          setStep("password");
+        }}
+      />
+    );
+  } else if (step === "password") {
+    return (
+      <ResetPassword
+        email={email}
+        otp={otp}
+        onReset={() => setStep("success")}
+      />
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      className="flex-1"
+    >
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: insets.top + 16,
+          paddingBottom: insets.bottom + 16,
+          paddingHorizontal: 16,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="gap-1 mb-8">
+          <ThemedText className="text-4xl font-bold">Success!</ThemedText>
+
+          <ThemedText className="text-base opacity-60">
+            Your password has been reset successsfully. You can now login with
+            your new password.
+          </ThemedText>
+        </View>
+
+        <Pressable
+          onPress={() => router.push("/(auth)")}
+          className="mt-6 p-4 bg-primary rounded-xl items-center justify-center"
+        >
+          <ThemedText className="text-primary-foreground font-semibold">
+            Login
+          </ThemedText>
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}

@@ -63,20 +63,15 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
         {
           text: "Delete",
           onPress: async () => {
-            const result = await authClient.deleteUser({
-              callbackURL: "/(auth)",
-            });
+            const { error } = await authClient.deleteUser();
 
-            if (result.error !== null) {
+            if (error !== null) {
               Alert.alert(
-                result.error.message ??
-                  "Something went wrong, please try again",
+                error.message ?? "Something went wrong, please try again",
               );
 
               return;
             }
-
-            await authClient.signOut();
           },
           style: "destructive",
         },

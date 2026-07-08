@@ -82,7 +82,7 @@ export default function SignUp() {
     }
 
     router.push({
-      pathname: "/(auth)/email-verification/[email]",
+      pathname: "/(auth)/verify-email/[email]",
       params: { email },
     });
   };
