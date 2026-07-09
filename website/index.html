@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pro Fitness</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <a class="logo" href="/">Pro Fitness</a>
+        <nav>
+          <a href="/privacy-policy">Privacy</a>
+          <a href="/support">Support</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <h1>Pro Fitness</h1>
+      <p class="updated">
+        Track calories, log workouts, and hit your health goals.
+      </p>
+
+      <p>
+        Pro Fitness is a cross-platform fitness app that helps you track your
+        daily calorie intake, log workouts, and set personal health goals.
+      </p>
+
+      <div class="hero-links">
+        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/support">Support</a>
+      </div>
+    </main>
+
+    <footer>
+      &copy; <span id="year"></span> Pro Fitness. All rights reserved.
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>

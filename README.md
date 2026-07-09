@@ -5,7 +5,7 @@ A cross-platform fitness app built with Expo that helps you track your calories,
 ## Features
 
 - **Calorie Logging** — Track your daily food intake and monitor calorie goals
-- **Workout Tracking** — Log workout sessions and durations
+- **Workout Tracking** — Log workouts and durations
 - **Goal Setting** — Set and track personal fitness goals
 - **Authentication** — Email/password, Google, and Sign in with Apple
 
@@ -59,6 +59,14 @@ APPLE_KEY_ID=ABC123DEF4
 
 # Private key from downloaded .p8 file (only used to generate client secret)
 APPLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-cloudinary-api-key
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
+
+# Resend
+RESEND_API_KEY=re_your-resend-api-key
 ```
 
 ## Apple Client Secret
@@ -115,3 +123,5 @@ eas build --platform ios --profile production
 - [Better Auth](https://better-auth.com/) — Authentication
 - [Drizzle ORM](https://orm.drizzle.team/) — Database ORM
 - [Neon PostgreSQL](https://neon.com/) — Database
+- [Cloudinary](https://cloudinary.com/) — Image storage and optimization
+- [Resend](https://resend.com/home) — Transactional email delivery
