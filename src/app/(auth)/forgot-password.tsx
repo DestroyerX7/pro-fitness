@@ -4,9 +4,15 @@ import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/nativewind";
+import {
+  ForgotPasswordFormValues,
+  forgotPasswordSchema,
+  ResetPasswordFormValues,
+  resetPasswordSchema,
+} from "@/lib/zodSchema";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -18,27 +24,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { z } from "zod";
 
 const optLength = 6;
-
-const forgotPasswordSchema = z.object({
-  email: z.email("Enter a valid email"),
-});
-
-type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
-
-const resetPasswordSchema = z
-  .object({
-    password: z.string().min(8, "At least 8 characters"),
-    confirmPassword: z.string().min(1, "Confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
 function EnterEmail({ onNext }: { onNext?: (email: string) => void }) {
   const [formError, setFormError] = useState<string | null>(null);
@@ -47,12 +34,13 @@ function EnterEmail({ onNext }: { onNext?: (email: string) => void }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const { control, handleSubmit, formState } = useForm<ForgotPasswordForm>({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: { email: "" },
-  });
+  const { control, handleSubmit, formState } =
+    useForm<ForgotPasswordFormValues>({
+      resolver: zodResolver(forgotPasswordSchema),
+      defaultValues: { email: "" },
+    });
 
-  const loginWithEmail = async ({ email }: ForgotPasswordForm) => {
+  const sendCode = async ({ email }: ForgotPasswordFormValues) => {
     setFormError(null);
     setLoading(true);
 
@@ -86,14 +74,14 @@ function EnterEmail({ onNext }: { onNext?: (email: string) => void }) {
             Forgot Password?
           </ThemedText>
 
-          <ThemedText className="text-base opacity-60">
+          <ThemedText className="text-muted-foreground">
             Enter you email and we&apos;ll send you a 6-digit verification code
             instantly.
           </ThemedText>
         </View>
 
-        <View className="gap-3">
-          <View>
+        <View className="gap-4">
+          <View className="gap-2">
             <Controller
               control={control}
               name="email"
@@ -110,38 +98,45 @@ function EnterEmail({ onNext }: { onNext?: (email: string) => void }) {
                 />
               )}
             />
+
             {formState.errors.email !== undefined && (
               <ThemedText className="text-destructive text-xs mt-1 ml-1">
                 {formState.errors.email.message}
               </ThemedText>
             )}
           </View>
+
+          {formError !== null && (
+            <View className="p-4 rounded-xl bg-destructive-accent">
+              <ThemedText className="text-destructive text-sm">
+                {formError}
+              </ThemedText>
+            </View>
+          )}
+
+          <Pressable
+            className={cn(
+              "p-4 bg-primary rounded-xl items-center justify-center active:opacity-80",
+              loading && "opacity-50",
+            )}
+            onPress={handleSubmit(sendCode)}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={theme.primaryForeground} />
+            ) : (
+              <ThemedText className="text-primary-foreground font-semibold">
+                Send Code
+              </ThemedText>
+            )}
+          </Pressable>
+
+          <Link href="/(auth)">
+            <ThemedText className="text-muted-foreground">
+              ← Back to login
+            </ThemedText>
+          </Link>
         </View>
-
-        {formError !== null && (
-          <View className="mt-3 px-4 py-3 rounded-xl bg-destructive-accent">
-            <ThemedText className="text-destructive text-sm">
-              {formError}
-            </ThemedText>
-          </View>
-        )}
-
-        <Pressable
-          className={cn(
-            "mt-6 p-4 bg-primary rounded-xl items-center justify-center",
-            (!formState.isValid || loading) && "opacity-50",
-          )}
-          onPress={handleSubmit(loginWithEmail)}
-          disabled={!formState.isValid || loading}
-        >
-          {loading ? (
-            <ActivityIndicator color={theme.primaryForeground} />
-          ) : (
-            <ThemedText className="text-primary-foreground font-semibold">
-              Send Code
-            </ThemedText>
-          )}
-        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -184,8 +179,7 @@ function EnterOtp({
 
   return (
     <ScrollView
-      contentContainerClassName="flex-1 p-4 justify-center gap-4"
-      // contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="flex-1 p-4 justify-center"
       keyboardShouldPersistTaps="handled"
     >
       <View className="gap-1 mb-8">
@@ -196,38 +190,42 @@ function EnterOtp({
         </ThemedText>
       </View>
 
-      <OtpInput value={otp} onChange={setOtp} length={optLength} />
+      <View className="gap-4">
+        <OtpInput value={otp} onChange={setOtp} length={optLength} />
 
-      <Pressable
-        onPress={verify}
-        className={cn(
-          "p-4 bg-primary rounded-xl active:opacity-80",
-          (otp.length !== optLength || loading) && "opacity-50",
+        {error !== null && (
+          <View className="p-4 rounded-xl bg-destructive-accent">
+            <ThemedText className="text-destructive text-sm">
+              {error}
+            </ThemedText>
+          </View>
         )}
-        disabled={otp.length !== optLength || loading}
-      >
-        {loading ? (
-          <ActivityIndicator color={theme.primaryForeground} />
-        ) : (
-          <ThemedText className="text-primary-foreground text-center font-semibold">
-            Verify
-          </ThemedText>
-        )}
-      </Pressable>
 
-      <View className="flex-row justify-center items-center gap-1">
-        <ThemedText>Didn&apos;t recieve a OTP?</ThemedText>
-
-        <Pressable onPress={resendOtp}>
-          <ThemedText className="text-primary font-medium">Resend</ThemedText>
+        <Pressable
+          onPress={verify}
+          className={cn(
+            "p-4 bg-primary rounded-xl active:opacity-80",
+            (otp.length !== optLength || loading) && "opacity-50",
+          )}
+          disabled={otp.length !== optLength || loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={theme.primaryForeground} />
+          ) : (
+            <ThemedText className="text-primary-foreground text-center font-semibold">
+              Verify
+            </ThemedText>
+          )}
         </Pressable>
-      </View>
 
-      {error !== null && (
-        <View className="mt-3 px-4 py-3 rounded-xl bg-destructive-accent">
-          <ThemedText className="text-destructive text-sm">{error}</ThemedText>
+        <View className="flex-row justify-center items-center gap-1">
+          <ThemedText>Didn&apos;t recieve a OTP?</ThemedText>
+
+          <Pressable onPress={resendOtp}>
+            <ThemedText className="text-primary font-medium">Resend</ThemedText>
+          </Pressable>
         </View>
-      )}
+      </View>
     </ScrollView>
   );
 }
@@ -249,12 +247,14 @@ function ResetPassword({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const { control, handleSubmit, formState } = useForm<ResetPasswordForm>({
-    resolver: zodResolver(resetPasswordSchema),
-    defaultValues: { password: "", confirmPassword: "" },
-  });
+  const { control, handleSubmit, formState } = useForm<ResetPasswordFormValues>(
+    {
+      resolver: zodResolver(resetPasswordSchema),
+      defaultValues: { password: "", confirmPassword: "" },
+    },
+  );
 
-  const signUpWithEmail = async ({ password }: ResetPasswordForm) => {
+  const resetPassword = async ({ password }: ResetPasswordFormValues) => {
     setFormError(null);
     setLoading(true);
 
@@ -290,13 +290,13 @@ function ResetPassword({
         <View className="gap-1 mb-8">
           <ThemedText className="text-4xl font-bold">Reset Password</ThemedText>
 
-          <ThemedText className="text-base opacity-60">
+          <ThemedText className="text-muted-foreground">
             Enter your new password
           </ThemedText>
         </View>
 
-        <View className="gap-3">
-          <View>
+        <View className="gap-4">
+          <View className="gap-2">
             <Controller
               control={control}
               name="password"
@@ -327,13 +327,13 @@ function ResetPassword({
             </Pressable>
 
             {formState.errors.password !== undefined && (
-              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+              <ThemedText className="text-destructive text-xs">
                 {formState.errors.password.message}
               </ThemedText>
             )}
           </View>
 
-          <View>
+          <View className="gap-2">
             <Controller
               control={control}
               name="confirmPassword"
@@ -363,37 +363,37 @@ function ResetPassword({
             </Pressable>
 
             {formState.errors.confirmPassword !== undefined && (
-              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+              <ThemedText className="text-destructive text-xs">
                 {formState.errors.confirmPassword.message}
               </ThemedText>
             )}
           </View>
+
+          {formError !== null && (
+            <View className="p-4 rounded-xl bg-destructive-accent">
+              <ThemedText className="text-destructive text-sm">
+                {formError}
+              </ThemedText>
+            </View>
+          )}
+
+          <Pressable
+            className={cn(
+              "p-4 bg-primary rounded-xl items-center justify-center active:opacity-80",
+              loading && "opacity-50",
+            )}
+            onPress={handleSubmit(resetPassword)}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={theme.primaryForeground} />
+            ) : (
+              <ThemedText className="text-primary-foreground font-semibold">
+                Reset Password
+              </ThemedText>
+            )}
+          </Pressable>
         </View>
-
-        {formError !== null && (
-          <View className="mt-3 px-4 py-3 rounded-xl bg-destructive/10">
-            <ThemedText className="text-destructive text-sm">
-              {formError}
-            </ThemedText>
-          </View>
-        )}
-
-        <Pressable
-          className={cn(
-            "mt-6 p-4 bg-primary rounded-xl items-center justify-center",
-            (!formState.isValid || loading) && "opacity-50",
-          )}
-          onPress={handleSubmit(signUpWithEmail)}
-          disabled={!formState.isValid || loading}
-        >
-          {loading ? (
-            <ActivityIndicator color={theme.primaryForeground} />
-          ) : (
-            <ThemedText className="text-primary-foreground font-semibold">
-              Reset Password
-            </ThemedText>
-          )}
-        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -454,7 +454,7 @@ export default function ForgotPasswordFlow() {
         <View className="gap-1 mb-8">
           <ThemedText className="text-4xl font-bold">Success!</ThemedText>
 
-          <ThemedText className="text-base opacity-60">
+          <ThemedText className="text-muted-foreground">
             Your password has been reset successsfully. You can now login with
             your new password.
           </ThemedText>
@@ -462,7 +462,7 @@ export default function ForgotPasswordFlow() {
 
         <Pressable
           onPress={() => router.push("/(auth)")}
-          className="mt-6 p-4 bg-primary rounded-xl items-center justify-center"
+          className="p-4 bg-primary rounded-xl items-center justify-center"
         >
           <ThemedText className="text-primary-foreground font-semibold">
             Login

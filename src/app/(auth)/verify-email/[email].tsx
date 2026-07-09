@@ -39,8 +39,7 @@ export default function VerifyEmail() {
 
   return (
     <ScrollView
-      contentContainerClassName="flex-1 p-4 justify-center gap-4"
-      // contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="flex-1 p-4 justify-center"
       keyboardShouldPersistTaps="handled"
     >
       <View className="gap-1 mb-8">
@@ -51,38 +50,42 @@ export default function VerifyEmail() {
         </ThemedText>
       </View>
 
-      <OtpInput value={otp} onChange={setOtp} />
+      <View className="gap-4">
+        <OtpInput value={otp} onChange={setOtp} />
 
-      <Pressable
-        onPress={verify}
-        className={cn(
-          "p-4 bg-primary rounded-xl active:opacity-80",
-          loading && "opacity-50",
+        {error !== null && (
+          <View className="p-4 rounded-xl bg-destructive-accent">
+            <ThemedText className="text-destructive text-sm">
+              {error}
+            </ThemedText>
+          </View>
         )}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color={theme.primaryForeground} />
-        ) : (
-          <ThemedText className="text-primary-foreground text-center font-semibold">
-            Verify
-          </ThemedText>
-        )}
-      </Pressable>
 
-      <View className="flex-row justify-center items-center gap-1">
-        <ThemedText>Didn&apos;t recieve a OTP?</ThemedText>
-
-        <Pressable onPress={resendOtp}>
-          <ThemedText className="text-primary font-medium">Resend</ThemedText>
+        <Pressable
+          onPress={verify}
+          className={cn(
+            "p-4 bg-primary rounded-xl active:opacity-80",
+            loading && "opacity-50",
+          )}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={theme.primaryForeground} />
+          ) : (
+            <ThemedText className="text-primary-foreground text-center font-semibold">
+              Verify
+            </ThemedText>
+          )}
         </Pressable>
-      </View>
 
-      {error !== null && (
-        <View className="mt-3 px-4 py-3 rounded-xl bg-destructive-accent">
-          <ThemedText className="text-destructive text-sm">{error}</ThemedText>
+        <View className="flex-row justify-center items-center gap-1">
+          <ThemedText>Didn&apos;t recieve a OTP?</ThemedText>
+
+          <Pressable onPress={resendOtp}>
+            <ThemedText className="text-primary font-medium">Resend</ThemedText>
+          </Pressable>
         </View>
-      )}
+      </View>
     </ScrollView>
   );
 }

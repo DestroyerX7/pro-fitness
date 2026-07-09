@@ -45,11 +45,7 @@ export default function SignUp() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignUpForm>({
+  const { control, handleSubmit, formState } = useForm<SignUpForm>({
     resolver: zodResolver(signUpSchema),
     defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
@@ -155,170 +151,177 @@ export default function SignUp() {
             Create an account
           </ThemedText>
 
-          <ThemedText className="text-base opacity-60">
+          <ThemedText className="text-muted-foreground">
             Takes less than a minute to get started.
           </ThemedText>
         </View>
 
-        <View className="gap-3">
-          <View>
+        <View className="gap-4">
+          <View className="gap-2">
             <Controller
               control={control}
               name="name"
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field }) => (
                 <ThemedTextInput
                   placeholder="Name"
                   textContentType="name"
                   autoComplete="name"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
                 />
               )}
             />
-            {errors.name && (
-              <ThemedText className="text-destructive text-xs mt-1 ml-1">
-                {errors.name.message}
+
+            {formState.errors.name !== undefined && (
+              <ThemedText className="text-destructive text-xs">
+                {formState.errors.name.message}
               </ThemedText>
             )}
           </View>
 
-          <View>
+          <View className="gap-2">
             <Controller
               control={control}
               name="email"
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field }) => (
                 <ThemedTextInput
                   placeholder="Email"
                   textContentType="emailAddress"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
                 />
               )}
             />
-            {errors.email && (
-              <ThemedText className="text-destructive text-xs mt-1 ml-1">
-                {errors.email.message}
+
+            {formState.errors.email !== undefined && (
+              <ThemedText className="text-destructive text-xs">
+                {formState.errors.email.message}
               </ThemedText>
             )}
           </View>
 
-          <View>
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <ThemedTextInput
-                  placeholder="Password"
-                  textContentType="newPassword"
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                />
-              )}
-            />
-
-            <Pressable
-              onPress={() => setShowPassword((v) => !v)}
-              className="absolute right-4 top-0 h-14 justify-center"
-              hitSlop={8}
-            >
-              <MaterialCommunityIcons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
-                size={20}
-                color={theme.foreground}
-                style={{ opacity: 0.5 }}
+          <View className="gap-2">
+            <View>
+              <Controller
+                control={control}
+                name="password"
+                render={({ field }) => (
+                  <ThemedTextInput
+                    placeholder="Password"
+                    textContentType="newPassword"
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
-            </Pressable>
 
-            {errors.password && (
-              <ThemedText className="text-destructive text-xs mt-1 ml-1">
-                {errors.password.message}
-              </ThemedText>
-            )}
-          </View>
-
-          <View>
-            <Controller
-              control={control}
-              name="confirmPassword"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <ThemedTextInput
-                  placeholder="Confirm password"
-                  textContentType="password"
-                  secureTextEntry={!showConfirmPassword}
-                  autoCapitalize="none"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
+              <Pressable
+                onPress={() => setShowPassword((v) => !v)}
+                className="absolute right-4 top-0 bottom-0 justify-center"
+                hitSlop={8}
+              >
+                <MaterialCommunityIcons
+                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  size={20}
+                  color={theme.foreground}
+                  style={{ opacity: 0.5 }}
                 />
-              )}
-            />
-            <Pressable
-              onPress={() => setShowConfirmPassword((v) => !v)}
-              className="absolute right-4 top-0 h-14 justify-center"
-              hitSlop={8}
-            >
-              <MaterialCommunityIcons
-                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
-                size={20}
-                color={theme.foreground}
-                style={{ opacity: 0.5 }}
-              />
-            </Pressable>
+              </Pressable>
+            </View>
 
-            {errors.confirmPassword && (
-              <ThemedText className="text-destructive text-xs mt-1 ml-1">
-                {errors.confirmPassword.message}
+            {formState.errors.password !== undefined && (
+              <ThemedText className="text-destructive text-xs">
+                {formState.errors.password.message}
               </ThemedText>
             )}
           </View>
+
+          <View className="gap-2">
+            <View>
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { value, onChange, onBlur } }) => (
+                  <ThemedTextInput
+                    placeholder="Confirm password"
+                    textContentType="password"
+                    secureTextEntry={!showConfirmPassword}
+                    autoCapitalize="none"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                  />
+                )}
+              />
+
+              <Pressable
+                onPress={() => setShowConfirmPassword((v) => !v)}
+                className="absolute right-4 top-0 bottom-0 justify-center"
+                hitSlop={8}
+              >
+                <MaterialCommunityIcons
+                  name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
+                  size={20}
+                  color={theme.foreground}
+                  style={{ opacity: 0.5 }}
+                />
+              </Pressable>
+            </View>
+
+            {formState.errors.confirmPassword !== undefined && (
+              <ThemedText className="text-destructive text-xs">
+                {formState.errors.confirmPassword.message}
+              </ThemedText>
+            )}
+          </View>
+
+          {formError !== null && (
+            <View className="p-4 rounded-xl bg-destructive-accent">
+              <ThemedText className="text-destructive text-sm">
+                {formError}
+              </ThemedText>
+            </View>
+          )}
+
+          <Pressable
+            className={cn(
+              "p-4 bg-primary rounded-xl items-center justify-center",
+              loading !== null && "opacity-50",
+            )}
+            onPress={handleSubmit(signUpWithEmail)}
+            disabled={loading !== null}
+          >
+            {loading === "email" ? (
+              <ActivityIndicator color={theme.primaryForeground} />
+            ) : (
+              <ThemedText className="text-primary-foreground font-semibold">
+                Sign up
+              </ThemedText>
+            )}
+          </Pressable>
         </View>
 
-        {formError && (
-          <View className="mt-3 px-4 py-3 rounded-xl bg-destructive/10">
-            <ThemedText className="text-destructive text-sm">
-              {formError}
-            </ThemedText>
-          </View>
-        )}
-
-        <Pressable
-          className={cn(
-            "mt-6 p-4 bg-primary rounded-xl items-center justify-center",
-            loading !== null && "opacity-50",
-          )}
-          onPress={handleSubmit(signUpWithEmail)}
-          disabled={loading !== null}
-        >
-          {loading === "email" ? (
-            <ActivityIndicator color={theme.primaryForeground} />
-          ) : (
-            <ThemedText className="text-primary-foreground font-semibold">
-              Sign up
-            </ThemedText>
-          )}
-        </Pressable>
-
-        <View className="flex-row items-center gap-3 my-6">
+        <View className="flex-row items-center gap-2 my-8">
           <View className="flex-1 h-px bg-border" />
 
-          <ThemedText className="text-xs opacity-50">
+          <ThemedText className="text-xs text-muted-foreground">
             OR CONTINUE WITH
           </ThemedText>
           <View className="flex-1 h-px bg-border" />
         </View>
 
-        <View className="gap-3">
+        <View className="gap-4">
           <Pressable
             className={cn(
-              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-3",
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2",
               loading !== null && loading !== "google" && "opacity-50",
             )}
             onPress={signUpWithGoogle}
@@ -342,7 +345,7 @@ export default function SignUp() {
 
           <Pressable
             className={cn(
-              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-3",
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2",
               loading !== null && loading !== "apple" && "opacity-50",
             )}
             onPress={signUpWithApple}
@@ -363,14 +366,16 @@ export default function SignUp() {
               </>
             )}
           </Pressable>
-        </View>
 
-        <ThemedText className="text-center mt-8">
-          Already have an account?{" "}
-          <Link href="/(auth)">
-            <ThemedText className="text-primary font-medium">Log in</ThemedText>
-          </Link>
-        </ThemedText>
+          <ThemedText className="text-center">
+            Already have an account?{" "}
+            <Link href="/(auth)">
+              <ThemedText className="text-primary font-medium">
+                Log in
+              </ThemedText>
+            </Link>
+          </ThemedText>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

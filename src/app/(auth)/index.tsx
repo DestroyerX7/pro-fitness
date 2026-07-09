@@ -3,6 +3,7 @@ import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/nativewind";
+import { LoginFormValues, loginSchema } from "@/lib/zodSchema";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -18,14 +19,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { z } from "zod";
-
-const loginSchema = z.object({
-  email: z.email("Enter a valid email"),
-  password: z.string().min(1, "Password is required"),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -37,12 +30,12 @@ export default function Login() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const { control, handleSubmit, formState } = useForm<LoginForm>({
+  const { control, handleSubmit, formState } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
-  const loginWithEmail = async ({ email, password }: LoginForm) => {
+  const loginWithEmail = async ({ email, password }: LoginFormValues) => {
     setFormError(null);
     setLoading("email");
 
@@ -123,120 +116,122 @@ export default function Login() {
         <View className="gap-1 mb-8">
           <ThemedText className="text-4xl font-bold">Welcome back</ThemedText>
 
-          <ThemedText className="text-base opacity-60">
+          <ThemedText className="text-muted-foreground">
             Log in to pick up where you left off.
           </ThemedText>
         </View>
 
-        <View className="gap-3">
-          <View>
+        <View className="gap-4">
+          <View className="gap-2">
             <Controller
               control={control}
               name="email"
-              render={({ field: { value, onChange, onBlur } }) => (
+              render={({ field }) => (
                 <ThemedTextInput
                   placeholder="Email"
                   textContentType="emailAddress"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
                 />
               )}
             />
-            {formState.errors.email && (
-              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+
+            {formState.errors.email !== undefined && (
+              <ThemedText className="text-destructive text-xs">
                 {formState.errors.email.message}
               </ThemedText>
             )}
           </View>
 
-          <View>
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { value, onChange, onBlur } }) => (
-                <ThemedTextInput
-                  placeholder="Password"
-                  textContentType="password"
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                />
-              )}
-            />
-            <Pressable
-              onPress={() => setShowPassword((v) => !v)}
-              className="absolute right-4 top-0 h-14 justify-center"
-              hitSlop={8}
-            >
-              <MaterialCommunityIcons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
-                size={20}
-                color={theme.foreground}
-                style={{ opacity: 0.5 }}
+          <View className="gap-2">
+            <View>
+              <Controller
+                control={control}
+                name="password"
+                render={({ field }) => (
+                  <ThemedTextInput
+                    placeholder="Password"
+                    textContentType="password"
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
               />
-            </Pressable>
 
-            {formState.errors.password && (
-              <ThemedText className="text-destructive text-xs mt-1 ml-1">
+              <Pressable
+                onPress={() => setShowPassword((v) => !v)}
+                className="absolute right-4 top-0 bottom-0 justify-center"
+                hitSlop={8}
+              >
+                <MaterialCommunityIcons
+                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  size={20}
+                  color={theme.foreground}
+                  style={{ opacity: 0.5 }}
+                />
+              </Pressable>
+            </View>
+
+            {formState.errors.password !== undefined && (
+              <ThemedText className="text-destructive text-xs">
                 {formState.errors.password.message}
               </ThemedText>
             )}
           </View>
 
-          <Link href="/(auth)/forgot-password" asChild>
-            <Pressable className="self-end">
-              <ThemedText className="text-sm opacity-60">
-                Forgot password?
-              </ThemedText>
-            </Pressable>
+          <Link href="/(auth)/forgot-password">
+            <ThemedText className="text-sm text-muted-foreground text-right">
+              Forgot password?
+            </ThemedText>
           </Link>
+
+          {formError !== null && (
+            <View className="p-4 rounded-xl bg-destructive-accent">
+              <ThemedText className="text-destructive text-sm">
+                {formError}
+              </ThemedText>
+            </View>
+          )}
+
+          <Pressable
+            className={cn(
+              "p-4 bg-primary rounded-xl items-center justify-center",
+              loading !== null && "opacity-50",
+            )}
+            onPress={handleSubmit(loginWithEmail)}
+            disabled={loading !== null}
+          >
+            {loading === "email" ? (
+              <ActivityIndicator color={theme.primaryForeground} />
+            ) : (
+              <ThemedText className="text-primary-foreground font-semibold">
+                Log in
+              </ThemedText>
+            )}
+          </Pressable>
         </View>
 
-        {formError && (
-          <View className="mt-3 px-4 py-3 rounded-xl bg-destructive-accent">
-            <ThemedText className="text-destructive text-sm">
-              {formError}
-            </ThemedText>
-          </View>
-        )}
-
-        <Pressable
-          className={cn(
-            "mt-6 p-4 bg-primary rounded-xl items-center justify-center",
-            loading !== null && "opacity-50",
-          )}
-          onPress={handleSubmit(loginWithEmail)}
-          disabled={loading !== null}
-        >
-          {loading === "email" ? (
-            <ActivityIndicator color={theme.primaryForeground} />
-          ) : (
-            <ThemedText className="text-primary-foreground font-semibold">
-              Log in
-            </ThemedText>
-          )}
-        </Pressable>
-
-        <View className="flex-row items-center gap-3 my-6">
+        <View className="flex-row items-center gap-2 my-8">
           <View className="flex-1 h-px bg-border" />
 
-          <ThemedText className="text-xs opacity-50">
+          <ThemedText className="text-xs text-muted-foreground">
             OR CONTINUE WITH
           </ThemedText>
 
           <View className="flex-1 h-px bg-border" />
         </View>
 
-        <View className="gap-3">
+        <View className="gap-4">
           <Pressable
             className={cn(
-              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-3",
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2",
               loading !== null && loading !== "google" && "opacity-50",
             )}
             onPress={loginWithGoogle}
@@ -261,7 +256,7 @@ export default function Login() {
 
           <Pressable
             className={cn(
-              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-3",
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2",
               loading !== null && loading !== "apple" && "opacity-50",
             )}
             onPress={loginWithApple}
@@ -283,16 +278,16 @@ export default function Login() {
               </>
             )}
           </Pressable>
-        </View>
 
-        <ThemedText className="text-center mt-8">
-          Don&apos;t have an account?{" "}
-          <Link href="/(auth)/sign-up">
-            <ThemedText className="text-primary font-medium">
-              Sign up
-            </ThemedText>
-          </Link>
-        </ThemedText>
+          <ThemedText className="text-center">
+            Don&apos;t have an account?{" "}
+            <Link href="/(auth)/sign-up">
+              <ThemedText className="text-primary font-medium">
+                Sign up
+              </ThemedText>
+            </Link>
+          </ThemedText>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
