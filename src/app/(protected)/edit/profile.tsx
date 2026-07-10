@@ -150,42 +150,67 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
     });
   };
 
-  // TODO: Only go back when both the authClient and mutation have both finished
-  const onSubmit = async (data: ProfileFormValues) => {
-    const dailyCalorieTargetNum = Number(data.dailyCalorieTarget);
-    const dailyWorkoutMinutesTargetNum = Number(data.dailyWorkoutMinutesTarget);
-
-    if (user.name !== data.name || user.image !== data.imageUri) {
-      const imageUrl =
-        data.imageUri === null
-          ? null
-          : z.httpUrl().safeParse(data.imageUri).success
-            ? data.imageUri
-            : await uploadToCloudinary(data.imageUri);
-
-      authClient.updateUser({
-        name: data.name,
-        image: imageUrl,
-        fetchOptions: {
-          onSuccess: () => router.back(),
-          onError: () =>
-            Alert.alert(
-              "Couldn't save",
-              "Something went wrong while saving. Please try again.",
-            ),
-        },
-      });
+  const onSubmit = async ({
+    name,
+    dailyCalorieTarget,
+    dailyWorkoutMinutesTarget,
+    imageUri,
+  }: ProfileFormValues) => {
+    if (!formState.isDirty) {
+      return;
     }
+
+    const tasks: Promise<unknown>[] = [];
+
+    if (user.name !== name || user.image !== imageUri) {
+      const imageUrl =
+        imageUri === null
+          ? null
+          : z.httpUrl().safeParse(imageUri).success
+            ? imageUri
+            : await uploadToCloudinary(imageUri);
+
+      tasks.push(
+        new Promise((resolve, reject) => {
+          authClient.updateUser({
+            name,
+            image: imageUrl,
+            fetchOptions: {
+              onSuccess: () => resolve(undefined),
+              onError: (ctx) => reject(ctx.error),
+            },
+          });
+        }),
+      );
+    }
+
+    const dailyCalorieTargetNum = Number(dailyCalorieTarget);
+    const dailyWorkoutMinutesTargetNum = Number(dailyWorkoutMinutesTarget);
 
     if (
       dailyTarget.calorieTarget !== dailyCalorieTargetNum ||
       dailyTarget.workoutMinutesTarget !== dailyWorkoutMinutesTargetNum
     ) {
-      updateDailyTargetMutation.mutate({
-        calorieTarget: dailyCalorieTargetNum,
-        workoutMinutesTarget: dailyWorkoutMinutesTargetNum,
-      });
+      tasks.push(
+        updateDailyTargetMutation.mutateAsync({
+          calorieTarget: dailyCalorieTargetNum,
+          workoutMinutesTarget: dailyWorkoutMinutesTargetNum,
+        }),
+      );
     }
+
+    const results = await Promise.allSettled(tasks);
+    const hasError = results.some((r) => r.status === "rejected");
+
+    if (hasError) {
+      Alert.alert(
+        "Couldn't save",
+        "Something went wrong while saving. Please try again.",
+      );
+      return;
+    }
+
+    router.back();
   };
 
   const isSaving = formState.isSubmitting;
@@ -201,7 +226,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
 
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-6"
+        contentContainerClassName="p-4 gap-4"
         showsVerticalScrollIndicator={false}
       >
         {/* Image picker */}
@@ -348,40 +373,48 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
           <Pressable
             onPress={handleSubmit(onSubmit)}
             className={cn(
-              "h-12 items-center justify-center rounded-xl bg-primary active:opacity-80",
+              "p-4 items-center justify-center rounded-xl bg-primary active:opacity-80",
               (isSaving || !hasUnsavedChanges) && "opacity-50",
             )}
             disabled={isSaving || !hasUnsavedChanges}
           >
-            <ThemedText className="font-semibold text-primary-foreground">
-              {isSaving ? "Saving..." : "Save"}
-            </ThemedText>
+            {isSaving ? (
+              <ActivityIndicator color={theme.primaryForeground} />
+            ) : (
+              <ThemedText className="font-semibold text-primary-foreground">
+                Save
+              </ThemedText>
+            )}
           </Pressable>
 
           <Pressable
-            className="h-12 items-center justify-center bg-foreground rounded-xl flex-row gap-2 border active:opacity-80"
+            className="p-4 items-center justify-center bg-foreground rounded-xl flex-row gap-1 border active:opacity-80"
             onPress={async () => await authClient.signOut()}
           >
             <MaterialCommunityIcons
               name="logout"
-              size={24}
+              size={16}
               color={theme.background}
             />
 
-            <ThemedText className="text-background">Log out</ThemedText>
+            <ThemedText className="text-background font-semibold">
+              Log out
+            </ThemedText>
           </Pressable>
 
           <Pressable
-            className="h-12 items-center justify-center bg-muted rounded-xl flex-row gap-2 active:opacity-80"
+            className="p-4 items-center justify-center bg-muted rounded-xl flex-row gap-1 active:opacity-80"
             onPress={handleDeleteUser}
           >
             <MaterialCommunityIcons
               name="trash-can"
-              size={24}
+              size={16}
               color={theme.destructive}
             />
 
-            <ThemedText className="text-destructive">Delete Account</ThemedText>
+            <ThemedText className="text-destructive font-semibold">
+              Delete Account
+            </ThemedText>
           </Pressable>
         </View>
       </ScrollView>

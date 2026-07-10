@@ -64,7 +64,7 @@ export default function Scan() {
       defaultValues: {
         name: "",
         caloriesPerServing: "",
-        numberOfServings: "",
+        numServings: "",
         consumedAt: new Date(),
         imageUri: null,
       },
@@ -204,27 +204,32 @@ export default function Scan() {
     setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
   };
 
-  const onSubmit = async (data: ScanFormValues) => {
+  const onSubmit = async ({
+    name,
+    consumedAt,
+    caloriesPerServing,
+    numServings,
+    imageUri,
+  }: ScanFormValues) => {
     setLogging(true);
 
-    const caloriesPerServingNum = Number(data.caloriesPerServing);
-    const numberOfServingsNum = Number(data.numberOfServings);
-    const calories = Math.ceil(caloriesPerServingNum * numberOfServingsNum);
-    const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
+    const caloriesPerServingNum = Number(caloriesPerServing);
+    const numServingsNum = Number(numServings);
+    const calories = Math.ceil(caloriesPerServingNum * numServingsNum);
 
     const imageUrl =
-      data.imageUri === null
+      imageUri === null
         ? null
-        : z.httpUrl().safeParse(data.imageUri).success
-          ? data.imageUri
-          : await uploadToCloudinary(data.imageUri);
+        : z.httpUrl().safeParse(imageUri).success
+          ? imageUri
+          : await uploadToCloudinary(imageUri);
 
     createNutritionLogMutation.mutate({
       userId: user.id,
-      name: data.name,
+      name,
       calories,
       imageUrl,
-      consumedAt: consumedAtSqlTimestamp,
+      consumedAt: toSqlTimestamp(consumedAt),
     });
   };
 
@@ -313,7 +318,7 @@ export default function Scan() {
   if (product === null) {
     return (
       <CameraView
-        className=" flex-1"
+        className="flex-1"
         style={{ flex: 1 }}
         barcodeScannerSettings={{
           barcodeTypes: [
@@ -335,7 +340,7 @@ export default function Scan() {
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-6"
+        contentContainerClassName="p-4 gap-4"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -426,12 +431,16 @@ export default function Scan() {
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 placeholderTextColor={theme.mutedForeground}
-                className={formState.errors.name ? "border-destructive" : ""}
+                className={
+                  formState.errors.name !== undefined
+                    ? "border-destructive"
+                    : ""
+                }
               />
             )}
           />
 
-          {formState.errors.name && (
+          {formState.errors.name != undefined && (
             <ThemedText className="text-xs text-destructive">
               {formState.errors.name.message}
             </ThemedText>
@@ -446,7 +455,7 @@ export default function Scan() {
             control={control}
             name="consumedAt"
             render={({ field }) => (
-              <View className="text-foreground px-2 py-1 border border-border rounded-xl bg-muted">
+              <View className="text-foreground p-1.5 border border-border rounded-xl bg-muted">
                 <DateTimePicker
                   value={field.value}
                   mode="datetime"
@@ -478,7 +487,7 @@ export default function Scan() {
                   onBlur={field.onBlur}
                   placeholderTextColor={theme.mutedForeground}
                   className={
-                    formState.errors.caloriesPerServing
+                    formState.errors.caloriesPerServing !== undefined
                       ? "border-destructive"
                       : ""
                   }
@@ -486,7 +495,7 @@ export default function Scan() {
               )}
             />
 
-            {formState.errors.caloriesPerServing && (
+            {formState.errors.caloriesPerServing !== undefined && (
               <ThemedText className="text-xs text-destructive">
                 {formState.errors.caloriesPerServing.message}
               </ThemedText>
@@ -501,7 +510,7 @@ export default function Scan() {
 
             <Controller
               control={control}
-              name="numberOfServings"
+              name="numServings"
               render={({ field }) => (
                 <ThemedTextInput
                   placeholder="Number of servings"
@@ -511,7 +520,7 @@ export default function Scan() {
                   onBlur={field.onBlur}
                   placeholderTextColor={theme.mutedForeground}
                   className={
-                    formState.errors.numberOfServings
+                    formState.errors.numServings != undefined
                       ? "border-destructive"
                       : ""
                   }
@@ -519,9 +528,9 @@ export default function Scan() {
               )}
             />
 
-            {formState.errors.numberOfServings && (
+            {formState.errors.numServings != undefined && (
               <ThemedText className="text-xs text-destructive">
-                {formState.errors.numberOfServings.message}
+                {formState.errors.numServings.message}
               </ThemedText>
             )}
           </View>

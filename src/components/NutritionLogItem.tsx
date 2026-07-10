@@ -102,25 +102,25 @@ export function NutritionLogItemSkeleton() {
     <Card className="flex-row">
       <View className="flex-1 flex-row gap-4">
         <Animated.View
-          className="bg-muted w-16 aspect-square items-center justify-center rounded-xl overflow-hidden"
+          className="bg-border w-16 aspect-square items-center justify-center rounded-xl overflow-hidden"
           style={animatedStyle}
         />
 
         <View className="flex-1 gap-2">
           <Animated.View
-            className="h-8 w-3/4 rounded-lg bg-muted"
+            className="h-8 w-3/4 rounded-lg bg-border"
             style={animatedStyle}
           />
 
           <Animated.View
-            className="h-8 w-1/2 rounded-lg bg-muted"
+            className="h-8 w-1/2 rounded-lg bg-border"
             style={animatedStyle}
           />
         </View>
       </View>
 
       <Animated.View
-        className="h-8 w-24 rounded-lg bg-muted"
+        className="h-8 w-24 rounded-lg bg-border"
         style={animatedStyle}
       />
     </Card>

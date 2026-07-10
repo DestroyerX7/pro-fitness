@@ -152,12 +152,18 @@ function GoalForm({ goal }: { goal: Goal }) {
       >
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
-          contentContainerClassName="p-4 gap-6"
+          contentContainerClassName="p-4 gap-4"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           <View className="gap-2">
-            <ThemedText className="text-sm font-medium">Name</ThemedText>
+            <View className="flex-row justify-between">
+              <ThemedText className="text-sm font-medium">Name</ThemedText>
+
+              <ThemedText className="text-sm font-medium">
+                Created {goal.createdAt.toLocaleDateString()}
+              </ThemedText>
+            </View>
 
             <Controller
               control={control}
@@ -256,15 +262,6 @@ function GoalForm({ goal }: { goal: Goal }) {
                 </Pressable>
               )}
             />
-          </View>
-
-          {/* Created */}
-          <View className="gap-2">
-            <ThemedText className="text-sm font-medium">Created</ThemedText>
-
-            <ThemedText>
-              {new Date(goal.createdAt.toString()).toLocaleDateString()}
-            </ThemedText>
           </View>
 
           {/* Save */}

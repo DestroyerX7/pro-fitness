@@ -48,7 +48,7 @@ export const scanSchema = z.object({
       (val) => Number(val) > 0,
       "Calories per serving must be greater than 0",
     ),
-  numberOfServings: z
+  numServings: z
     .string()
     .trim()
     .min(1, "Please enter number of servings")

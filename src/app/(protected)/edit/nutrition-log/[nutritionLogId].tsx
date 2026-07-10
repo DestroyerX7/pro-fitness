@@ -58,7 +58,13 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogs.all(user.id),
       });
+      router.back();
     },
+    onError: () =>
+      Alert.alert(
+        "Couldn't save",
+        "Something went wrong while saving this log. Please try again.",
+      ),
   });
 
   const deleteNutritionLogMutation = useMutation({
@@ -67,7 +73,13 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogs.all(user.id),
       });
+      router.back();
     },
+    onError: () =>
+      Alert.alert(
+        "Couldn't delete",
+        "Something went wrong while deleting this log. Please try again.",
+      ),
   });
 
   const createNutritionLogPresetMutation = useMutation({
@@ -175,65 +187,42 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
 
     Alert.alert(
       `Delete ${nutritionLog.name}`,
-      "Are you sure you want to delete this calorie log?",
+      "Are you sure you want to delete this log?",
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            deleteNutritionLogMutation.mutate(nutritionLog.id, {
-              onSuccess: () => router.back(),
-              onError: () =>
-                Alert.alert(
-                  "Couldn't delete",
-                  "Something went wrong while deleting this log. Please try again.",
-                ),
-            });
-          },
+          onPress: () => deleteNutritionLogMutation.mutate(nutritionLog.id),
         },
       ],
     );
   };
 
-  const onSubmit = async (data: NutritionLogFormValues) => {
-    const caloriesNum = Number(data.calories);
-
-    // Could maybe use formState.isDirty
-    if (
-      nutritionLog.name === data.name &&
-      nutritionLog.calories === caloriesNum &&
-      nutritionLog.consumedAt.getTime() === data.consumedAt.getTime() &&
-      nutritionLog.imageUrl === data.imageUri
-    ) {
+  const onSubmit = async ({
+    calories,
+    name,
+    consumedAt,
+    imageUri,
+  }: NutritionLogFormValues) => {
+    if (!formState.isDirty) {
       return;
     }
 
-    const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
     const imageUrl =
-      data.imageUri === null
+      imageUri === null
         ? null
-        : z.httpUrl().safeParse(data.imageUri).success
-          ? data.imageUri
-          : await uploadToCloudinary(data.imageUri);
+        : z.httpUrl().safeParse(imageUri).success
+          ? imageUri
+          : await uploadToCloudinary(imageUri);
 
-    updateNutritionLogMutation.mutate(
-      {
-        name: data.name,
-        calories: caloriesNum,
-        consumedAt: consumedAtSqlTimestamp,
-        imageUrl,
-        nutritionLogId: nutritionLog.id,
-      },
-      {
-        onSuccess: () => router.back(),
-        onError: () =>
-          Alert.alert(
-            "Couldn't save",
-            "Something went wrong while saving this log. Please try again.",
-          ),
-      },
-    );
+    updateNutritionLogMutation.mutate({
+      name,
+      calories: Number(calories),
+      consumedAt: toSqlTimestamp(consumedAt),
+      imageUrl,
+      nutritionLogId: nutritionLog.id,
+    });
   };
 
   const isSaving =
@@ -248,7 +237,11 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
           headerRight: () => (
             <Pressable
               className="p-2 items-center flex-row gap-2"
-              disabled={createNutritionLogPresetMutation.isPending}
+              disabled={
+                isSaving ||
+                isDeleting ||
+                createNutritionLogPresetMutation.isPending
+              }
               onPress={handleCreateNutritionLogPreset}
             >
               <MaterialCommunityIcons
@@ -269,7 +262,7 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
       >
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
-          contentContainerClassName="p-4 gap-6"
+          contentContainerClassName="p-4 gap-4"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -423,7 +416,7 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
               control={control}
               name="consumedAt"
               render={({ field: { value, onChange } }) => (
-                <View className="rounded-xl border border-border bg-muted px-2 py-1">
+                <View className="rounded-xl border border-border bg-muted p-1.5">
                   <DateTimePicker
                     value={value}
                     mode="datetime"

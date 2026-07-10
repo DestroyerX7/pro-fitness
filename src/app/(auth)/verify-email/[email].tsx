@@ -6,6 +6,7 @@ import { cn } from "@/lib/nativewind";
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function VerifyEmail() {
   const [otp, setOtp] = useState("");
@@ -14,6 +15,7 @@ export default function VerifyEmail() {
   const [error, setError] = useState<string | null>(null);
 
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const verify = async () => {
     setLoading(true);
@@ -39,7 +41,12 @@ export default function VerifyEmail() {
 
   return (
     <ScrollView
-      contentContainerClassName="flex-1 p-4 justify-center"
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom + 16,
+        paddingHorizontal: 16,
+      }}
       keyboardShouldPersistTaps="handled"
     >
       <View className="gap-1 mb-8">

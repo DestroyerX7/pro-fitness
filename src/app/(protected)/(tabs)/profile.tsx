@@ -167,34 +167,6 @@ export default function Profile() {
           </ThemedText>
         </View>
 
-        {/* <View className="h-px bg-border" />
-
-        <View className="flex-row justify-between">
-          <ThemedText className="text-xl">Daily Calorie Goal</ThemedText>
-
-          {dailyTarget !== undefined ? (
-            <ThemedText className="text-muted-foreground text-xl">
-              {dailyTarget.calorieTarget} calories
-            </ThemedText>
-          ) : (
-            <View className="h-8 w-32 bg-muted rounded-lg" />
-          )}
-        </View>
-
-        <View className="h-px bg-border" />
-
-        <View className="flex-row justify-between">
-          <ThemedText className="text-xl">Daily Workout Goal</ThemedText>
-
-          {dailyTarget !== undefined ? (
-            <ThemedText className="text-muted-foreground text-xl">
-              {dailyTarget.workoutMinutesTarget} minutes
-            </ThemedText>
-          ) : (
-            <View className="h-8 w-32 bg-muted rounded-lg" />
-          )}
-        </View> */}
-
         <View className="h-px bg-border" />
 
         <View className="flex-row justify-between">
@@ -217,7 +189,7 @@ export default function Profile() {
               {dailyTarget.calorieTarget} calories
             </ThemedText>
           ) : (
-            <View className="h-8 w-32 bg-muted rounded-lg" />
+            <View className="h-8 w-32 bg-border rounded-lg" />
           )}
         </View>
 
@@ -231,7 +203,7 @@ export default function Profile() {
               {dailyTarget.workoutMinutesTarget} minutes
             </ThemedText>
           ) : (
-            <View className="h-8 w-32 bg-muted rounded-lg" />
+            <View className="h-8 w-32 bg-border rounded-lg" />
           )}
         </View>
       </Card>
@@ -268,12 +240,12 @@ export default function Profile() {
       </Card>
 
       <Pressable
-        className="bg-foreground p-4 rounded-xl flex-row gap-2 items-center border active:opacity-80"
+        className="bg-foreground p-4 rounded-xl flex-row gap-1 items-center border active:opacity-80"
         onPress={async () => await authClient.signOut()}
       >
         <MaterialCommunityIcons
           name="logout"
-          size={24}
+          size={16}
           color={theme.background}
         />
 

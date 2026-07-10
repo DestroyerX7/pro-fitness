@@ -83,7 +83,7 @@ export default function Goal() {
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-6"
+        contentContainerClassName="p-4 gap-4"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >

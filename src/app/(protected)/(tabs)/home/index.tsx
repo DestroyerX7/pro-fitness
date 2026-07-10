@@ -1,6 +1,7 @@
 import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
-import Card from "@/components/Card";
-import DailyGoalCard from "@/components/DailyTargetCard";
+import DailyTargetCard, {
+  DailyTargetCardSkeleton,
+} from "@/components/DailyTargetCard";
 import GoalItem from "@/components/GoalItem";
 import NutritionLogItem from "@/components/NutritionLogItem";
 import TabButton from "@/components/TabButton";
@@ -14,7 +15,7 @@ import useTheme from "@/hooks/useTheme";
 import useWorkoutLogs from "@/hooks/useWorkoutLogs";
 import { Goal, updateDailyTarget, updateGoal } from "@/lib/api";
 import { toSqlDate } from "@/lib/dates";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -248,55 +249,9 @@ export default function Index() {
         contentContainerClassName="gap-4 p-4"
         showsVerticalScrollIndicator={false}
       >
-        <Card className="gap-4">
-          <View className="flex-row justify-between">
-            <ThemedText className="text-2xl font-bold">
-              Today&apos;s Calories
-            </ThemedText>
+        <DailyTargetCardSkeleton title="Today's Calories" />
 
-            <View>
-              <MaterialIcons
-                name="mode-edit"
-                size={24}
-                color={theme.foreground}
-              />
-            </View>
-          </View>
-
-          <View className="h-8 w-1/4 bg-border rounded-md" />
-
-          <View className="h-8 bg-border rounded-full" />
-
-          <View className="flex-row justify-between">
-            <View className="h-8 bg-border w-1/2 rounded-md" />
-
-            <View className="h-8 bg-border w-1/4 rounded-md" />
-          </View>
-        </Card>
-
-        <Card className="gap-4">
-          <View className="flex-row justify-between">
-            <ThemedText className="text-2xl font-bold">Workout Time</ThemedText>
-
-            <View>
-              <MaterialIcons
-                name="mode-edit"
-                size={24}
-                color={theme.foreground}
-              />
-            </View>
-          </View>
-
-          <View className="h-8 w-1/4 bg-border rounded-md" />
-
-          <View className="h-8 bg-border rounded-full" />
-
-          <View className="flex-row justify-between">
-            <View className="h-8 bg-border w-1/2 rounded-md" />
-
-            <View className="h-8 bg-border w-1/4 rounded-md" />
-          </View>
-        </Card>
+        <DailyTargetCardSkeleton title="Workout Time" />
 
         <ScrollView
           horizontal
@@ -355,15 +310,15 @@ export default function Index() {
         <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
       }
     >
-      <DailyGoalCard
+      <DailyTargetCard
         title="Today's Calories"
         completedAmount={loggedCalories}
         targetAmount={dailyTarget.calorieTarget}
         remainingText="calories"
         topRight={
           <Pressable onPress={handleEditDailyCalorieTarget}>
-            <MaterialIcons
-              name="mode-edit"
+            <MaterialCommunityIcons
+              name="pencil"
               size={24}
               color={theme.foreground}
             />
@@ -371,7 +326,7 @@ export default function Index() {
         }
       />
 
-      <DailyGoalCard
+      <DailyTargetCard
         title="Workout Time"
         completedAmount={loggedWorkoutTime}
         targetAmount={dailyTarget.workoutMinutesTarget}
@@ -379,8 +334,8 @@ export default function Index() {
         fillColor={theme.primary}
         topRight={
           <Pressable onPress={handleEditDailyWorkoutMinutesTarget}>
-            <MaterialIcons
-              name="mode-edit"
+            <MaterialCommunityIcons
+              name="pencil"
               size={24}
               color={theme.foreground}
             />

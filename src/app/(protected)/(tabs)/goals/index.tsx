@@ -220,6 +220,7 @@ export default function Goals() {
               })
             }
             onLongPress={() => handleEditGoal(goal.id)}
+            className="active:opacity-80"
           >
             <GoalItem
               name={goal.name}

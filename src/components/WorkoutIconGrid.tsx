@@ -21,7 +21,7 @@ const workoutLogIcons: WorkoutLogIcon[] = [
   { library: "MaterialCommunityIcons", name: "bowling" },
   { library: "MaterialCommunityIcons", name: "ski" },
   { library: "MaterialCommunityIcons", name: "snowboard" },
-  { library: "MaterialIcons", name: "ice-skating" },
+  { library: "MaterialCommunityIcons", name: "skate" },
   { library: "MaterialCommunityIcons", name: "bow-arrow" },
 ];
 
@@ -34,13 +34,13 @@ function chunk<T>(arr: T[], size: number): T[][] {
 type Props = {
   value: WorkoutLogIcon;
   numColumns?: number;
-  onValueChange?: (workoutLogIcon: WorkoutLogIcon) => void;
+  onChange?: (workoutLogIcon: WorkoutLogIcon) => void;
 } & ViewProps;
 
 export default function WorkoutIconGrid({
   value,
   numColumns = 6,
-  onValueChange,
+  onChange,
   className,
   ...props
 }: Props) {
@@ -81,7 +81,7 @@ export default function WorkoutIconGrid({
                     ? "border-foreground"
                     : "border-transparent",
                 )}
-                onPress={() => onValueChange?.(item)}
+                onPress={() => onChange?.(item)}
               >
                 <WorkoutLogIconDisplay
                   workoutLogIcon={item}

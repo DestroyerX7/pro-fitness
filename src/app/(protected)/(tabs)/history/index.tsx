@@ -14,6 +14,7 @@ import useWorkoutLogs from "@/hooks/useWorkoutLogs";
 import { Goal, NutritionLog, WorkoutLog } from "@/lib/api";
 import { toSqlDate } from "@/lib/dates";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -445,6 +446,33 @@ export default function History() {
         : 0,
   );
 
+  const handleEditNutritionLog = async (nutritionLogId: string) => {
+    router.push({
+      pathname: "/(protected)/edit/nutrition-log/[nutritionLogId]",
+      params: { nutritionLogId },
+    });
+
+    await Haptics.selectionAsync();
+  };
+
+  const handleEditWorkoutLog = async (workoutLogId: string) => {
+    router.push({
+      pathname: "/(protected)/edit/workout-log/[workoutLogId]",
+      params: { workoutLogId },
+    });
+
+    await Haptics.selectionAsync();
+  };
+
+  const handleEditGoal = async (goalId: string) => {
+    router.push({
+      pathname: "/(protected)/edit/goal/[goalId]",
+      params: { goalId },
+    });
+
+    await Haptics.selectionAsync();
+  };
+
   if (activeTab === "nutrition") {
     return (
       <SectionList
@@ -519,11 +547,16 @@ export default function History() {
           </View>
         )}
         renderItem={({ item }) => (
-          <NutritionLogItem
-            name={item.name}
-            calories={item.calories}
-            consumedAt={item.consumedAt}
-          />
+          <Pressable
+            className="active:opacity-80"
+            onPress={() => handleEditNutritionLog(item.id)}
+          >
+            <NutritionLogItem
+              name={item.name}
+              calories={item.calories}
+              consumedAt={item.consumedAt}
+            />
+          </Pressable>
         )}
         ListEmptyComponent={
           <View className="gap-4 items-center p-4">
@@ -628,7 +661,17 @@ export default function History() {
           </View>
         )}
         renderItem={({ item }) => (
-          <WorkoutLogItem {...item} workoutLogIcon={item.icon} />
+          <Pressable
+            className="active:opacity-80"
+            onPress={() => handleEditWorkoutLog(item.id)}
+          >
+            <WorkoutLogItem
+              workoutLogIcon={item.icon}
+              name={item.name}
+              performedAt={item.performedAt}
+              durationMinutes={item.durationMinutes}
+            />
+          </Pressable>
         )}
         ListEmptyComponent={
           <View className="gap-4 items-center p-4">
@@ -684,11 +727,16 @@ export default function History() {
         </View>
       )}
       renderItem={({ item }) => (
-        <GoalItem
-          name={item.name}
-          completed={item.completed}
-          description={item.description}
-        />
+        <Pressable
+          className="active:opacity-80"
+          onPress={() => handleEditGoal(item.id)}
+        >
+          <GoalItem
+            name={item.name}
+            completed={item.completed}
+            description={item.description}
+          />
+        </Pressable>
       )}
       ListEmptyComponent={
         <View className="gap-4 items-center p-4">

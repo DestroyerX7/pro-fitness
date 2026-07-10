@@ -136,6 +136,11 @@ export default function Login() {
                   value={field.value}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
+                  className={
+                    formState.errors.email !== undefined
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
               )}
             />
@@ -161,6 +166,11 @@ export default function Login() {
                     value={field.value}
                     onChangeText={field.onChange}
                     onBlur={field.onBlur}
+                    className={
+                      formState.errors.password !== undefined
+                        ? "border-destructive"
+                        : ""
+                    }
                   />
                 )}
               />
@@ -173,8 +183,7 @@ export default function Login() {
                 <MaterialCommunityIcons
                   name={showPassword ? "eye-outline" : "eye-off-outline"}
                   size={20}
-                  color={theme.foreground}
-                  style={{ opacity: 0.5 }}
+                  color={theme.mutedForeground}
                 />
               </Pressable>
             </View>

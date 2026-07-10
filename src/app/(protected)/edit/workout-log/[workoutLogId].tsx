@@ -55,7 +55,13 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.workoutLogs.all(user.id),
       });
+      router.back();
     },
+    onError: () =>
+      Alert.alert(
+        "Couldn't save",
+        "Something went wrong while saving this log. Please try again.",
+      ),
   });
 
   const deleteWorkoutLogMutation = useMutation({
@@ -64,7 +70,13 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.workoutLogs.all(user.id),
       });
+      router.back();
     },
+    onError: () =>
+      Alert.alert(
+        "Couldn't delete",
+        "Something went wrong while deleting this log. Please try again.",
+      ),
   });
 
   const createWorkoutLogPresetMutation = useMutation({
@@ -107,54 +119,29 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            deleteWorkoutLogMutation.mutate(workoutLog.id, {
-              onSuccess: () => router.back(),
-              onError: () =>
-                Alert.alert(
-                  "Couldn't delete",
-                  "Something went wrong while deleting this log. Please try again.",
-                ),
-            });
-          },
+          onPress: () => deleteWorkoutLogMutation.mutate(workoutLog.id),
         },
       ],
     );
   };
 
-  const onSubmit = async (data: WorkoutLogFormValues) => {
-    const durationMinutesNum = Number(data.durationMinutes);
-
-    // Could maybe use formState.isDirty
-    if (
-      workoutLog.name === data.name &&
-      workoutLog.durationMinutes === durationMinutesNum &&
-      workoutLog.performedAt.getTime() === data.performedAt.getTime() &&
-      workoutLog.icon.library === data.icon.library &&
-      workoutLog.icon.name === data.icon.name
-    ) {
+  const onSubmit = async ({
+    name,
+    durationMinutes,
+    icon,
+    performedAt,
+  }: WorkoutLogFormValues) => {
+    if (!formState.isDirty) {
       return;
     }
 
-    const performedAtSqlTimestamp = toSqlTimestamp(data.performedAt);
-
-    updateWorkoutLogMutation.mutate(
-      {
-        name: data.name,
-        durationMinutes: durationMinutesNum,
-        performedAt: performedAtSqlTimestamp,
-        icon: data.icon,
-        workoutLogId: workoutLog.id,
-      },
-      {
-        onSuccess: () => router.back(),
-        onError: () =>
-          Alert.alert(
-            "Couldn't save",
-            "Something went wrong while saving this log. Please try again.",
-          ),
-      },
-    );
+    updateWorkoutLogMutation.mutate({
+      name,
+      durationMinutes: Number(durationMinutes),
+      performedAt: toSqlTimestamp(performedAt),
+      icon,
+      workoutLogId: workoutLog.id,
+    });
   };
 
   const isSaving = formState.isSubmitting || updateWorkoutLogMutation.isPending;
@@ -168,7 +155,11 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
           headerRight: () => (
             <Pressable
               className="p-2 items-center flex-row gap-2"
-              disabled={createWorkoutLogPresetMutation.isPending}
+              disabled={
+                isSaving ||
+                isDeleting ||
+                createWorkoutLogPresetMutation.isPending
+              }
               onPress={handleCreateWorkoutLogPreset}
             >
               <MaterialCommunityIcons
@@ -189,7 +180,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
       >
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
-          contentContainerClassName="p-4 gap-6"
+          contentContainerClassName="p-4 gap-4"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -307,7 +298,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
               control={control}
               name="performedAt"
               render={({ field }) => (
-                <View className="rounded-xl border border-border bg-muted px-2 py-1">
+                <View className="rounded-xl border border-border bg-muted p-1.5">
                   <DateTimePicker
                     value={field.value}
                     mode="datetime"
@@ -330,7 +321,7 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
                 <WorkoutIconGrid
                   className="p-4 bg-muted border rounded-xl border-border"
                   value={field.value}
-                  onValueChange={field.onChange}
+                  onChange={field.onChange}
                 />
               )}
             />

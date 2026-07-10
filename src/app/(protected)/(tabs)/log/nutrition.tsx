@@ -140,20 +140,23 @@ export default function Nutrition() {
     setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
   };
 
-  const onSubmit = async (data: NutritionLogFormValues) => {
+  const onSubmit = async ({
+    name,
+    calories,
+    imageUri,
+    consumedAt,
+  }: NutritionLogFormValues) => {
     setLogging(true);
 
-    const caloriesNum = Number(data.calories);
     const imageUrl =
-      data.imageUri !== null ? await uploadToCloudinary(data.imageUri) : null;
-    const consumedAtSqlTimestamp = toSqlTimestamp(data.consumedAt);
+      imageUri !== null ? await uploadToCloudinary(imageUri) : null;
 
     createNutritionLogMutation.mutate({
       userId: user.id,
-      name: data.name,
-      calories: caloriesNum,
+      name,
+      calories: Number(calories),
       imageUrl,
-      consumedAt: consumedAtSqlTimestamp,
+      consumedAt: toSqlTimestamp(consumedAt),
     });
   };
 
@@ -165,7 +168,7 @@ export default function Nutrition() {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="p-4 gap-6"
+        contentContainerClassName="p-4 gap-4"
         keyboardShouldPersistTaps="handled"
       >
         {/* Image picker */}
@@ -240,12 +243,14 @@ export default function Nutrition() {
                 onBlur={field.onBlur}
                 placeholder="Name"
                 placeholderTextColor={theme.mutedForeground}
-                className={formState.errors.name ? "border-destructive" : ""}
+                className={
+                  formState.errors.name != undefined ? "border-destructive" : ""
+                }
               />
             )}
           />
 
-          {formState.errors.name && (
+          {formState.errors.name != undefined && (
             <ThemedText className="text-xs text-destructive">
               {formState.errors.name.message}
             </ThemedText>
@@ -263,7 +268,11 @@ export default function Nutrition() {
               <Pressable
                 key={label}
                 onPress={() =>
-                  setValue("name", label, { shouldValidate: true })
+                  setValue("name", label, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  })
                 }
                 className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
               >
@@ -289,13 +298,15 @@ export default function Nutrition() {
                 placeholderTextColor={theme.mutedForeground}
                 keyboardType="number-pad"
                 className={
-                  formState.errors.calories ? "border-destructive" : ""
+                  formState.errors.calories !== undefined
+                    ? "border-destructive"
+                    : ""
                 }
               />
             )}
           />
 
-          {formState.errors.calories && (
+          {formState.errors.calories !== undefined && (
             <ThemedText className="text-xs text-destructive">
               {formState.errors.calories.message}
             </ThemedText>
@@ -310,7 +321,7 @@ export default function Nutrition() {
             control={control}
             name="consumedAt"
             render={({ field: { value, onChange } }) => (
-              <View className="rounded-xl border border-border bg-muted px-2 py-1">
+              <View className="rounded-xl border border-border bg-muted p-1.5">
                 <DateTimePicker
                   value={value}
                   mode="datetime"

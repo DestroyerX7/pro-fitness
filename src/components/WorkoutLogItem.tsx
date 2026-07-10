@@ -26,11 +26,7 @@ export default function WorkoutLogItem({
 
   return (
     <Card className={cn("flex-row gap-4", className)} {...props}>
-      <View
-        className={
-          "bg-muted w-16 aspect-square items-center justify-center rounded-xl overflow-hidden"
-        }
-      >
+      <View className="bg-muted w-16 aspect-square items-center justify-center rounded-xl overflow-hidden">
         <WorkoutLogIconDisplay
           workoutLogIcon={workoutLogIcon}
           color={theme.cardForeground}

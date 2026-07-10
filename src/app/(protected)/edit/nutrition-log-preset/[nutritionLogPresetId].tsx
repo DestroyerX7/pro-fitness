@@ -61,7 +61,13 @@ function NutritionLogPresetForm({
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogPresets.all(user.id),
       });
+      router.back();
     },
+    onError: () =>
+      Alert.alert(
+        "Couldn't save",
+        "Something went wrong while saving this preset. Please try again.",
+      ),
   });
 
   const deleteNutritionLogPresetMutation = useMutation({
@@ -70,7 +76,13 @@ function NutritionLogPresetForm({
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogPresets.all(user.id),
       });
+      router.back();
     },
+    onError: () =>
+      Alert.alert(
+        "Couldn't delete",
+        "Something went wrong while deleting this preset. Please try again.",
+      ),
   });
 
   const pickImage = async () => {
@@ -155,56 +167,35 @@ function NutritionLogPresetForm({
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            deleteNutritionLogPresetMutation.mutate(nutritionLogPreset.id, {
-              onSuccess: () => router.back(),
-              onError: () =>
-                Alert.alert(
-                  "Couldn't delete",
-                  "Something went wrong while deleting this preset. Please try again.",
-                ),
-            });
-          },
+          onPress: () =>
+            deleteNutritionLogPresetMutation.mutate(nutritionLogPreset.id),
         },
       ],
     );
   };
 
-  const onSubmit = async (data: NutritionLogPresetFormValues) => {
-    const caloriesNum = Number(data.calories);
-
-    // Could maybe use formState.isDirty
-    if (
-      nutritionLogPreset.name === data.name &&
-      nutritionLogPreset.calories === caloriesNum &&
-      nutritionLogPreset.imageUrl === data.imageUri
-    ) {
+  const onSubmit = async ({
+    calories,
+    imageUri,
+    name,
+  }: NutritionLogPresetFormValues) => {
+    if (!formState.isDirty) {
       return;
     }
 
     const imageUrl =
-      data.imageUri === null
+      imageUri === null
         ? null
-        : z.httpUrl().safeParse(data.imageUri).success
-          ? data.imageUri
-          : await uploadToCloudinary(data.imageUri);
+        : z.httpUrl().safeParse(imageUri).success
+          ? imageUri
+          : await uploadToCloudinary(imageUri);
 
-    updateNutritionLogPresetMutation.mutate(
-      {
-        name: data.name,
-        calories: caloriesNum,
-        imageUrl,
-        nutritionLogPresetId: nutritionLogPreset.id,
-      },
-      {
-        onSuccess: () => router.back(),
-        onError: () =>
-          Alert.alert(
-            "Couldn't save",
-            "Something went wrong while saving this preset. Please try again.",
-          ),
-      },
-    );
+    updateNutritionLogPresetMutation.mutate({
+      name,
+      calories: Number(calories),
+      imageUrl,
+      nutritionLogPresetId: nutritionLogPreset.id,
+    });
   };
 
   const isSaving =
@@ -219,7 +210,7 @@ function NutritionLogPresetForm({
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-6"
+        contentContainerClassName="p-4 gap-4"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >

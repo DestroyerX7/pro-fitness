@@ -81,21 +81,14 @@ export function GoalItemSkeleton() {
 
       <View className="gap-2 flex-1">
         <Animated.View
-          className="h-8 w-1/2 rounded-lg bg-muted"
+          className="h-8 w-1/2 rounded-lg bg-border"
           style={animatedStyle}
         />
 
-        <View className="gap-1">
-          <Animated.View
-            className="h-6 rounded-md bg-muted"
-            style={animatedStyle}
-          />
-
-          <Animated.View
-            className="h-6 w-3/4 rounded-md bg-muted"
-            style={animatedStyle}
-          />
-        </View>
+        <Animated.View
+          className="h-8 rounded-md bg-border"
+          style={animatedStyle}
+        />
       </View>
     </Card>
   );

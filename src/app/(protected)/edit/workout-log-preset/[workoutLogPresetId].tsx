@@ -58,7 +58,13 @@ function WorkoutLogPresetForm({
       queryClient.invalidateQueries({
         queryKey: queryKeys.workoutLogPresets.all(user.id),
       });
+      router.back();
     },
+    onError: () =>
+      Alert.alert(
+        "Couldn't save",
+        "Something went wrong while saving this preset. Please try again.",
+      ),
   });
 
   const deleteWorkoutLogPresetMutation = useMutation({
@@ -67,7 +73,13 @@ function WorkoutLogPresetForm({
       queryClient.invalidateQueries({
         queryKey: queryKeys.workoutLogPresets.all(user.id),
       });
+      router.back();
     },
+    onError: () =>
+      Alert.alert(
+        "Couldn't delete",
+        "Something went wrong while deleting this preset. Please try again.",
+      ),
   });
 
   const handleDelete = async () => {
@@ -81,50 +93,28 @@ function WorkoutLogPresetForm({
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            deleteWorkoutLogPresetMutation.mutate(workoutLogPreset.id, {
-              onSuccess: () => router.back(),
-              onError: () =>
-                Alert.alert(
-                  "Couldn't delete",
-                  "Something went wrong while deleting this preset. Please try again.",
-                ),
-            });
-          },
+          onPress: () =>
+            deleteWorkoutLogPresetMutation.mutate(workoutLogPreset.id),
         },
       ],
     );
   };
 
-  const onSubmit = async (data: WorkoutLogPresetFormValues) => {
-    const durationMinutesNum = Number(data.durationMinutes);
-
-    // Could maybe use formState.isDirty
-    if (
-      workoutLogPreset.name === data.name &&
-      workoutLogPreset.durationMinutes === durationMinutesNum &&
-      workoutLogPreset.icon.library === data.icon.library &&
-      workoutLogPreset.icon.name === data.icon.name
-    ) {
+  const onSubmit = async ({
+    name,
+    durationMinutes,
+    icon,
+  }: WorkoutLogPresetFormValues) => {
+    if (!formState.isDirty) {
       return;
     }
 
-    updateWorkoutLogMutation.mutate(
-      {
-        name: data.name,
-        durationMinutes: durationMinutesNum,
-        icon: data.icon,
-        workoutLogPresetId: workoutLogPreset.id,
-      },
-      {
-        onSuccess: () => router.back(),
-        onError: () =>
-          Alert.alert(
-            "Couldn't save",
-            "Something went wrong while saving this preset. Please try again.",
-          ),
-      },
-    );
+    updateWorkoutLogMutation.mutate({
+      name,
+      durationMinutes: Number(durationMinutes),
+      icon,
+      workoutLogPresetId: workoutLogPreset.id,
+    });
   };
 
   const isSaving = formState.isSubmitting || updateWorkoutLogMutation.isPending;
@@ -138,7 +128,7 @@ function WorkoutLogPresetForm({
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-6"
+        contentContainerClassName="p-4 gap-4"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -258,7 +248,7 @@ function WorkoutLogPresetForm({
               <WorkoutIconGrid
                 className="p-4 bg-muted border rounded-xl border-border"
                 value={field.value}
-                onValueChange={field.onChange}
+                onChange={field.onChange}
               />
             )}
           />

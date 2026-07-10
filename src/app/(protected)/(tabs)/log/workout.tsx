@@ -77,18 +77,20 @@ export default function Workout() {
     onSettled: () => setLogging(false),
   });
 
-  const onSubmit = async (data: WorkoutLogFormValues) => {
+  const onSubmit = async ({
+    name,
+    durationMinutes,
+    performedAt,
+    icon,
+  }: WorkoutLogFormValues) => {
     setLogging(true);
-
-    const durationMinutesNum = Number(data.durationMinutes);
-    const performedAtSqlTimestamp = toSqlTimestamp(data.performedAt);
 
     createWorkoutLogMutation.mutate({
       userId: user.id,
-      name: data.name,
-      durationMinutes: durationMinutesNum,
-      performedAt: performedAtSqlTimestamp,
-      icon: data.icon,
+      name,
+      durationMinutes: Number(durationMinutes),
+      performedAt: toSqlTimestamp(performedAt),
+      icon,
     });
   };
 
@@ -99,7 +101,7 @@ export default function Workout() {
     >
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-6"
+        contentContainerClassName="p-4 gap-4"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -145,7 +147,11 @@ export default function Workout() {
               <Pressable
                 key={label}
                 onPress={() =>
-                  setValue("name", label, { shouldValidate: true })
+                  setValue("name", label, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  })
                 }
                 className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
               >
@@ -188,7 +194,11 @@ export default function Workout() {
               <Pressable
                 key={label}
                 onPress={() =>
-                  setValue("durationMinutes", label, { shouldValidate: true })
+                  setValue("durationMinutes", label, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  })
                 }
                 className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
               >
@@ -199,13 +209,13 @@ export default function Workout() {
         </View>
 
         <View className="gap-2">
-          <ThemedText className="text-sm font-medium">Performed At</ThemedText>
+          <ThemedText className="text-sm font-medium">Performed at</ThemedText>
 
           <Controller
             control={control}
             name="performedAt"
             render={({ field }) => (
-              <View className="rounded-xl border border-border bg-muted px-2 py-1">
+              <View className="rounded-xl border border-border bg-muted p-1.5">
                 <DateTimePicker
                   value={field.value}
                   mode="datetime"
@@ -228,7 +238,7 @@ export default function Workout() {
               <WorkoutIconGrid
                 className="p-4 bg-muted border rounded-xl border-border"
                 value={field.value}
-                onValueChange={field.onChange}
+                onChange={field.onChange}
               />
             )}
           />

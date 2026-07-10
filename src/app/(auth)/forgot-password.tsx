@@ -95,6 +95,11 @@ function EnterEmail({ onNext }: { onNext?: (email: string) => void }) {
                   value={field.value}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
+                  className={
+                    formState.errors.email !== undefined
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
               )}
             />
@@ -153,6 +158,7 @@ function EnterOtp({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const insets = useSafeAreaInsets();
   const theme = useTheme();
 
   const verify = async () => {
@@ -179,7 +185,13 @@ function EnterOtp({
 
   return (
     <ScrollView
-      contentContainerClassName="flex-1 p-4 justify-center"
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom + 16,
+        paddingHorizontal: 16,
+        justifyContent: "center",
+      }}
       keyboardShouldPersistTaps="handled"
     >
       <View className="gap-1 mb-8">
@@ -225,6 +237,12 @@ function EnterOtp({
             <ThemedText className="text-primary font-medium">Resend</ThemedText>
           </Pressable>
         </View>
+
+        <Link href="/(auth)">
+          <ThemedText className="text-muted-foreground text-center">
+            ← Back to login
+          </ThemedText>
+        </Link>
       </View>
     </ScrollView>
   );
@@ -233,11 +251,11 @@ function EnterOtp({
 function ResetPassword({
   email,
   otp,
-  onReset,
+  onNext,
 }: {
   email: string;
   otp: string;
-  onReset?: () => void;
+  onNext?: () => void;
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -270,7 +288,7 @@ function ResetPassword({
       return;
     }
 
-    onReset?.();
+    onNext?.();
   };
 
   return (
@@ -309,6 +327,11 @@ function ResetPassword({
                   value={field.value}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
+                  className={
+                    formState.errors.password !== undefined
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
               )}
             />
@@ -319,10 +342,9 @@ function ResetPassword({
               hitSlop={8}
             >
               <MaterialCommunityIcons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                name={showPassword ? "eye-outline" : "eye-off-outline"}
                 size={20}
-                color={theme.foreground}
-                style={{ opacity: 0.5 }}
+                color={theme.mutedForeground}
               />
             </Pressable>
 
@@ -346,6 +368,11 @@ function ResetPassword({
                   value={field.value}
                   onChangeText={field.onChange}
                   onBlur={field.onBlur}
+                  className={
+                    formState.errors.confirmPassword !== undefined
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
               )}
             />
@@ -355,10 +382,9 @@ function ResetPassword({
               hitSlop={8}
             >
               <MaterialCommunityIcons
-                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
                 size={20}
-                color={theme.foreground}
-                style={{ opacity: 0.5 }}
+                color={theme.mutedForeground}
               />
             </Pressable>
 
@@ -393,6 +419,12 @@ function ResetPassword({
               </ThemedText>
             )}
           </Pressable>
+
+          <Link href="/(auth)">
+            <ThemedText className="text-muted-foreground">
+              ← Back to login
+            </ThemedText>
+          </Link>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -432,7 +464,7 @@ export default function ForgotPasswordFlow() {
       <ResetPassword
         email={email}
         otp={otp}
-        onReset={() => setStep("success")}
+        onNext={() => setStep("success")}
       />
     );
   }
