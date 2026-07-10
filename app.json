@@ -4,37 +4,36 @@
     "slug": "pro-fitness",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icons/icon.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "profitness",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "icon": {
-        "dark": "./assets/icons/ios-dark.png",
-        "light": "./assets/icons/ios-light.png",
-        "tinted": "./assets/icons/ios-light.png"
+        "dark": "./assets/images/ios-icon-dark.png",
+        "light": "./assets/images/ios-icon-default.png",
+        "tinted": "./assets/images/ios-icon-tinted.png"
       },
       "bundleIdentifier": "com.destroyerinc.profitness",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
-        "com.apple.developer.applesignin": [
-          "Default"
-        ]
+        "com.apple.developer.applesignin": ["Default"]
       }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#0080ff",
-        "foregroundImage": "./assets/icons/adaptive-icon.png",
-        "monochromeImage": "./assets/icons/adaptive-icon.png"
+        "backgroundImage": "./assets//images/android-icon-background.png",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "server",
-      "favicon": "./assets/icons/favicon.png",
+      "favicon": "./assets/images/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
@@ -42,14 +41,13 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/icons/splash-icon-light.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
           "backgroundColor": "#0080ff",
+          "image": "./assets/images/icon.png",
           "dark": {
-            "image": "./assets/icons/splash-icon-dark.png",
-            "backgroundColor": "#000000"
-          }
+            "image": "./assets/images/icon.png",
+            "backgroundColor": "#111111"
+          },
+          "imageWidth": 200
         }
       ],
       [
