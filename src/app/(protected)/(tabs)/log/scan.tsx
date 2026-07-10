@@ -440,7 +440,7 @@ export default function Scan() {
             )}
           />
 
-          {formState.errors.name != undefined && (
+          {formState.errors.name !== undefined && (
             <ThemedText className="text-xs text-destructive">
               {formState.errors.name.message}
             </ThemedText>
@@ -520,7 +520,7 @@ export default function Scan() {
                   onBlur={field.onBlur}
                   placeholderTextColor={theme.mutedForeground}
                   className={
-                    formState.errors.numServings != undefined
+                    formState.errors.numServings !== undefined
                       ? "border-destructive"
                       : ""
                   }
@@ -528,7 +528,7 @@ export default function Scan() {
               )}
             />
 
-            {formState.errors.numServings != undefined && (
+            {formState.errors.numServings !== undefined && (
               <ThemedText className="text-xs text-destructive">
                 {formState.errors.numServings.message}
               </ThemedText>

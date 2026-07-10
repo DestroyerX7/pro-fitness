@@ -244,13 +244,13 @@ export default function Nutrition() {
                 placeholder="Name"
                 placeholderTextColor={theme.mutedForeground}
                 className={
-                  formState.errors.name != undefined ? "border-destructive" : ""
+                  formState.errors.name !== undefined ? "border-destructive" : ""
                 }
               />
             )}
           />
 
-          {formState.errors.name != undefined && (
+          {formState.errors.name !== undefined && (
             <ThemedText className="text-xs text-destructive">
               {formState.errors.name.message}
             </ThemedText>
