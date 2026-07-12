@@ -144,7 +144,7 @@ export default function Preset() {
       params: { nutritionLogPresetId },
     });
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleEditWorkoutLogPreset = async (workoutLogPresetId: string) => {
@@ -153,7 +153,7 @@ export default function Preset() {
       params: { workoutLogPresetId },
     });
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleRefresh = async () => {
@@ -276,7 +276,7 @@ export default function Preset() {
             </Pressable>
           ))
         ) : (
-          <View className="p-4 border border-border rounded-xl items-center">
+          <View className="p-4 gap-2 items-center">
             <MaterialCommunityIcons
               name="tune"
               size={64}
@@ -284,12 +284,12 @@ export default function Preset() {
             />
 
             <ThemedText className="text-2xl font-bold">
-              No saved calorie presets
+              No calorie log presets
             </ThemedText>
 
             <ThemedText className="text-muted-foreground text-center">
-              Edit a calorie log and press create preset based off it&apos;s
-              values
+              Edit a calorie log, then tap &quot;Create preset&quot; to save its
+              values as a new preset.
             </ThemedText>
           </View>
         )
@@ -309,7 +309,7 @@ export default function Preset() {
           </Pressable>
         ))
       ) : (
-        <View className="p-4 border border-border rounded-xl items-center">
+        <View className="p-4 gap-2 items-center">
           <MaterialCommunityIcons
             name="tune"
             size={64}
@@ -317,12 +317,12 @@ export default function Preset() {
           />
 
           <ThemedText className="text-2xl font-bold">
-            No saved workout presets
+            No workout log presets
           </ThemedText>
 
           <ThemedText className="text-muted-foreground text-center">
-            Edit a workout log and press create preset based off it&apos;s
-            values
+            Edit a workout log, then tap &quot;Create preset&quot; to save its
+            values as a new preset.
           </ThemedText>
         </View>
       )}

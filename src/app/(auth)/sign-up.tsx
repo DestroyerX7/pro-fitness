@@ -51,51 +51,65 @@ export default function SignUp() {
   });
 
   const signUpWithEmail = async ({ name, email, password }: SignUpForm) => {
-    setFormError(null);
-    setLoading("email");
+    try {
+      setFormError(null);
+      setLoading("email");
 
-    const { error: signUpError } = await authClient.signUp.email({
-      name,
-      email,
-      password,
-    });
+      const { error: signUpError } = await authClient.signUp.email({
+        name,
+        email,
+        password,
+      });
 
-    if (signUpError !== null) {
-      setFormError(signUpError.message ?? "Something went wrong. Try again.");
+      if (signUpError !== null) {
+        setFormError(
+          signUpError.message ?? "Something went wrong. Please try again.",
+        );
+        return;
+      }
+
+      const { error: otpError } = await authClient.emailOtp.sendVerificationOtp(
+        {
+          email,
+          type: "email-verification",
+        },
+      );
+
+      if (otpError !== null) {
+        setFormError(
+          otpError.message ?? "Something went wrong. Please try again.",
+        );
+        return;
+      }
+
+      router.push({
+        pathname: "/(auth)/verify-email/[email]",
+        params: { email },
+      });
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
       setLoading(null);
-      return;
     }
-
-    const { error: otpError } = await authClient.emailOtp.sendVerificationOtp({
-      email,
-      type: "email-verification",
-    });
-
-    if (otpError !== null) {
-      setFormError(otpError.message ?? "Something went wrong. Try again.");
-      setLoading(null);
-      return;
-    }
-
-    router.push({
-      pathname: "/(auth)/verify-email/[email]",
-      params: { email },
-    });
   };
 
   const signUpWithGoogle = async () => {
-    setFormError(null);
-    setLoading("google");
+    try {
+      setFormError(null);
+      setLoading("google");
 
-    const { error } = await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/(protected)/(tabs)/home", // Callback url is required or it breaks
-    });
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/(protected)/(tabs)/home", // Callback url is required or it breaks
+      });
 
-    setLoading(null);
-
-    if (error !== null) {
-      setFormError(error.message ?? "Couldn't sign in with Google.");
+      if (error !== null) {
+        setFormError(error.message ?? "Couldn't sign up with Google.");
+      }
+    } catch {
+      setFormError("Couldn't sign up with Google.");
+    } finally {
+      setLoading(null);
     }
   };
 
@@ -124,9 +138,18 @@ export default function SignUp() {
       });
 
       if (error !== null) {
-        setFormError(error.message ?? "Couldn't sign in with Apple.");
+        setFormError(error.message ?? "Couldn't sign up with Apple.");
       }
-    } catch {
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code === "ERR_REQUEST_CANCELED"
+      ) {
+        return;
+      }
+
+      setFormError("Couldn't sign up with Apple.");
     } finally {
       setLoading(null);
     }
@@ -144,6 +167,7 @@ export default function SignUp() {
           paddingBottom: insets.bottom + 16,
           paddingHorizontal: 16,
         }}
+        showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-1 mb-8">

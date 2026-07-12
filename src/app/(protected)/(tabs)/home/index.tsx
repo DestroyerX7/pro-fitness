@@ -27,6 +27,8 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function Index() {
   const queryClient = useQueryClient();
@@ -63,6 +65,7 @@ export default function Index() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const updateDailyTargetMutation = useMutation({
     mutationFn: updateDailyTarget,
@@ -70,6 +73,16 @@ export default function Index() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.dailyTarget.byUser(user.id),
       });
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error.message,
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
 
@@ -118,7 +131,7 @@ export default function Index() {
 
     Alert.prompt(
       "Edit calorie target",
-      "Update your daily calorie target",
+      "Update your daily calorie target.",
       (calorieTargetText) =>
         updateDailyTargetMutation.mutate({
           calorieTarget: Number(calorieTargetText),
@@ -128,7 +141,7 @@ export default function Index() {
       "number-pad",
     );
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleEditDailyWorkoutMinutesTarget = async () => {
@@ -138,7 +151,7 @@ export default function Index() {
 
     Alert.prompt(
       "Edit workout target",
-      "Update your daily workout target",
+      "Update your daily workout target.",
       (workoutMinutesTargetText) =>
         updateDailyTargetMutation.mutate({
           workoutMinutesTarget: Number(workoutMinutesTargetText),
@@ -148,7 +161,7 @@ export default function Index() {
       "number-pad",
     );
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleEditNutritionLog = async (nutritionLogId: string) => {
@@ -157,7 +170,7 @@ export default function Index() {
       params: { nutritionLogId },
     });
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleEditWorkoutLog = async (workoutLogId: string) => {
@@ -166,7 +179,7 @@ export default function Index() {
       params: { workoutLogId },
     });
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleEditGoal = async (goalId: string) => {
@@ -175,7 +188,7 @@ export default function Index() {
       params: { goalId },
     });
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleRefresh = async () => {
@@ -374,6 +387,7 @@ export default function Index() {
               className="active:opacity-80"
               key={nutritionLog.id}
               onPress={() => handleEditNutritionLog(nutritionLog.id)}
+              onLongPress={() => handleEditNutritionLog(nutritionLog.id)}
             >
               <NutritionLogItem
                 name={nutritionLog.name}
@@ -414,6 +428,7 @@ export default function Index() {
               className="active:opacity-80"
               key={workoutLog.id}
               onPress={() => handleEditWorkoutLog(workoutLog.id)}
+              onLongPress={() => handleEditWorkoutLog(workoutLog.id)}
             >
               <WorkoutLogItem
                 name={workoutLog.name}

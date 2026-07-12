@@ -45,6 +45,13 @@ function GoalForm({ goal }: { goal: Goal }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.goals.all(user.id),
       });
+
+      router.back();
+    },
+    onError: (error) => {
+      Alert.alert("Couldn't save", error.message);
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
 
@@ -54,12 +61,16 @@ function GoalForm({ goal }: { goal: Goal }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.goals.all(user.id),
       });
+      router.back();
+    },
+    onError: (error) => {
+      Alert.alert("Couldn't delete", error.message);
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     },
   });
 
   const handleDelete = async () => {
-    await Haptics.selectionAsync();
-
     Alert.alert(
       `Delete ${goal.name}`,
       "Are you sure you want to delete this goal?",
@@ -68,23 +79,15 @@ function GoalForm({ goal }: { goal: Goal }) {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            deleteGoalMutation.mutate(goal.id, {
-              onSuccess: () => router.back(),
-              onError: () =>
-                Alert.alert(
-                  "Couldn't delete",
-                  "Something went wrong while deleting this goal. Please try again.",
-                ),
-            });
-          },
+          onPress: () => deleteGoalMutation.mutate(goal.id),
         },
       ],
     );
+
+    Haptics.selectionAsync();
   };
 
   const onSubmit = async (data: GoalFormValues) => {
-    // Could maybe use formState.isDirty
     if (
       goal.name === data.name &&
       goal.description === data.description &&
@@ -94,23 +97,13 @@ function GoalForm({ goal }: { goal: Goal }) {
       return;
     }
 
-    updateGoalMutation.mutate(
-      {
-        name: data.name,
-        description: data.description,
-        completed: data.completed,
-        hidden: data.hidden,
-        goalId: goal.id,
-      },
-      {
-        onSuccess: () => router.back(),
-        onError: () =>
-          Alert.alert(
-            "Couldn't save",
-            "Something went wrong while saving this log. Please try again.",
-          ),
-      },
-    );
+    updateGoalMutation.mutate({
+      name: data.name,
+      description: data.description,
+      completed: data.completed,
+      hidden: data.hidden,
+      goalId: goal.id,
+    });
   };
 
   const isSaving = formState.isSubmitting || updateGoalMutation.isPending;

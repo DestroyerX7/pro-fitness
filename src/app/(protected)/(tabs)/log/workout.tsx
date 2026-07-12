@@ -50,31 +50,10 @@ export default function Workout() {
 
   const createWorkoutLogMutation = useMutation({
     mutationFn: createWorkoutLog,
-    onSuccess: (data) => {
+    onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: queryKeys.workoutLogs.all(user.id),
-      });
-
-      Toast.show({
-        type: "loggedWorkout",
-        text1: "Logged!",
-        text2: `${data.name} • ${data.durationMinutes} mins`,
-        topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    },
-    onError: (error) => {
-      Toast.show({
-        type: "error",
-        text1: "Something went wrong",
-        text2: error.message,
-        topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    },
-    onSettled: () => setLogging(false),
+      }),
   });
 
   const onSubmit = async ({
@@ -83,15 +62,37 @@ export default function Workout() {
     performedAt,
     icon,
   }: WorkoutLogFormValues) => {
-    setLogging(true);
+    try {
+      setLogging(true);
 
-    createWorkoutLogMutation.mutate({
-      userId: user.id,
-      name,
-      durationMinutes: Number(durationMinutes),
-      performedAt: toSqlTimestamp(performedAt),
-      icon,
-    });
+      await createWorkoutLogMutation.mutateAsync({
+        userId: user.id,
+        name,
+        durationMinutes: Number(durationMinutes),
+        performedAt: toSqlTimestamp(performedAt),
+        icon,
+      });
+
+      Toast.show({
+        type: "loggedWorkout",
+        text1: "Logged!",
+        text2: `${name} • ${durationMinutes} mins`,
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error instanceof Error ? error.message : "Please try again.",
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setLogging(false);
+    }
   };
 
   return (

@@ -55,13 +55,14 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.workoutLogs.all(user.id),
       });
+
       router.back();
     },
-    onError: () =>
-      Alert.alert(
-        "Couldn't save",
-        "Something went wrong while saving this log. Please try again.",
-      ),
+    onError: (error) => {
+      Alert.alert("Couldn't save", error.message);
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
   });
 
   const deleteWorkoutLogMutation = useMutation({
@@ -70,13 +71,14 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.workoutLogs.all(user.id),
       });
+
       router.back();
     },
-    onError: () =>
-      Alert.alert(
-        "Couldn't delete",
-        "Something went wrong while deleting this log. Please try again.",
-      ),
+    onError: (error) => {
+      Alert.alert("Couldn't delete", error.message);
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
   });
 
   const createWorkoutLogPresetMutation = useMutation({
@@ -88,13 +90,18 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
+    onError: (error) => {
+      Alert.alert("Couldn't create preset", error.message);
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
   });
 
   const handleCreateWorkoutLogPreset = () => {
     if (formState.isDirty) {
       Alert.alert(
         "Save changes to create preset",
-        "You have unsaved changes. Save them first before you can create preset",
+        "You have unsaved changes. Save them first before you can create preset.",
       );
 
       return;
@@ -109,8 +116,6 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
   };
 
   const handleDelete = async () => {
-    await Haptics.selectionAsync();
-
     Alert.alert(
       `Delete ${workoutLog.name}`,
       "Are you sure you want to delete this workout log?",
@@ -123,6 +128,8 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
         },
       ],
     );
+
+    Haptics.selectionAsync();
   };
 
   const onSubmit = async ({

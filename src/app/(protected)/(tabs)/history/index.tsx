@@ -99,7 +99,11 @@ function TabBar({
   setActiveTab?: (tab: "nutrition" | "workout" | "goal") => void;
 }) {
   return (
-    <ScrollView horizontal contentContainerClassName="gap-2">
+    <ScrollView
+      horizontal
+      contentContainerClassName="gap-2"
+      showsVerticalScrollIndicator={false}
+    >
       <TabButton
         text="Calories"
         active={activeTab === "nutrition"}
@@ -452,7 +456,7 @@ export default function History() {
       params: { nutritionLogId },
     });
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleEditWorkoutLog = async (workoutLogId: string) => {
@@ -461,7 +465,7 @@ export default function History() {
       params: { workoutLogId },
     });
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleEditGoal = async (goalId: string) => {
@@ -470,7 +474,7 @@ export default function History() {
       params: { goalId },
     });
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   if (activeTab === "nutrition") {
@@ -550,6 +554,7 @@ export default function History() {
           <Pressable
             className="active:opacity-80"
             onPress={() => handleEditNutritionLog(item.id)}
+            onLongPress={() => handleEditNutritionLog(item.id)}
           >
             <NutritionLogItem
               name={item.name}
@@ -664,6 +669,7 @@ export default function History() {
           <Pressable
             className="active:opacity-80"
             onPress={() => handleEditWorkoutLog(item.id)}
+            onLongPress={() => handleEditWorkoutLog(item.id)}
           >
             <WorkoutLogItem
               workoutLogIcon={item.icon}
@@ -730,6 +736,7 @@ export default function History() {
         <Pressable
           className="active:opacity-80"
           onPress={() => handleEditGoal(item.id)}
+          onLongPress={() => handleEditGoal(item.id)}
         >
           <GoalItem
             name={item.name}

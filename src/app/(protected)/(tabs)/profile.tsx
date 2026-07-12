@@ -8,6 +8,7 @@ import { uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/nativewind";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
@@ -19,6 +20,8 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function Profile() {
   const { user } = useAuthenticatedAuth();
@@ -28,11 +31,12 @@ export default function Profile() {
 
   const { preference, setPreference } = useThemePreference();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option", [
+    Alert.alert("Select Image", "Choose an option.", [
       {
         text: "Take Photo",
         onPress: () => openCamera(),
@@ -49,51 +53,102 @@ export default function Profile() {
   };
 
   const openCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Camera access is needed to take a photo.",
-      );
-      return;
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Camera access is needed to take a photo.",
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (result.canceled) {
+        return;
+      }
+
+      const imageUrl = await uploadToCloudinary(result.assets[0].uri);
+      const { error } = await authClient.updateUser({
+        image: imageUrl,
+      });
+
+      if (error !== null) {
+        Toast.show({
+          type: "error",
+          text1: "Something went wrong",
+          text2: error.message ?? "Couldn't update image.",
+          topOffset: insets.top + 16,
+        });
+
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2:
+          error instanceof Error ? error.message : "Couldn't update image.",
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    const imageUrl = await uploadToCloudinary(result.assets[0].uri);
-    authClient.updateUser({ image: imageUrl });
   };
 
   const openLibrary = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    try {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Photo library access is needed to select an image.",
-      );
-      return;
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Photo library access is needed to select an image.",
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (result.canceled) {
+        return;
+      }
+
+      const imageUrl = await uploadToCloudinary(result.assets[0].uri);
+      const { error } = await authClient.updateUser({
+        image: imageUrl,
+      });
+
+      if (error !== null) {
+        Toast.show({
+          type: "error",
+          text1: "Something went wrong",
+          text2: error.message ?? "Couldn't update image.",
+          topOffset: insets.top + 16,
+        });
+
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2:
+          error instanceof Error ? error.message : "Couldn't update image.",
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    const imageUrl = await uploadToCloudinary(result.assets[0].uri);
-    authClient.updateUser({ image: imageUrl });
   };
 
   const handleRefresh = async () => {
@@ -173,7 +228,7 @@ export default function Profile() {
           <ThemedText className="text-xl">Account Created</ThemedText>
 
           <ThemedText className="text-muted-foreground text-xl">
-            {new Date(user.createdAt).toLocaleDateString()}
+            {user.createdAt.toLocaleDateString()}
           </ThemedText>
         </View>
       </Card>

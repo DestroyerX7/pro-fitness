@@ -41,18 +41,27 @@ function EnterEmail({ onNext }: { onNext?: (email: string) => void }) {
     });
 
   const sendCode = async ({ email }: ForgotPasswordFormValues) => {
-    setFormError(null);
-    setLoading(true);
+    try {
+      setFormError(null);
+      setLoading(true);
 
-    const { error } = await authClient.emailOtp.requestPasswordReset({ email });
+      const { error } = await authClient.emailOtp.requestPasswordReset({
+        email,
+      });
 
-    if (error !== null) {
-      setFormError(error.message ?? "Something went wrong. Try again.");
+      if (error !== null) {
+        setFormError(
+          error.message ?? "Something went wrong. Please try again.",
+        );
+        return;
+      }
+
+      onNext?.(email);
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    onNext?.(email);
   };
 
   return (
@@ -67,6 +76,7 @@ function EnterEmail({ onNext }: { onNext?: (email: string) => void }) {
           paddingBottom: insets.bottom + 16,
           paddingHorizontal: 16,
         }}
+        showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-1 mb-8">
@@ -162,25 +172,34 @@ function EnterOtp({
   const theme = useTheme();
 
   const verify = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { error } = await authClient.emailOtp.checkVerificationOtp({
-      email,
-      otp,
-      type: "forget-password",
-    });
+      const { error } = await authClient.emailOtp.checkVerificationOtp({
+        email,
+        otp,
+        type: "forget-password",
+      });
 
-    if (error !== null) {
-      setError(error.message ?? "Couldn't verify code.");
+      if (error !== null) {
+        setError(error.message ?? "Couldn't verify code.");
+        return;
+      }
+
+      onVerified?.(otp);
+    } catch {
+      setError("Couldn't verify code.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    onVerified?.(otp);
   };
 
   const resendOtp = async () => {
-    await authClient.emailOtp.requestPasswordReset({ email });
+    try {
+      await authClient.emailOtp.requestPasswordReset({ email });
+    } catch {
+      setError("Couldn't resend code.");
+    }
   };
 
   return (
@@ -192,6 +211,7 @@ function EnterOtp({
         paddingHorizontal: 16,
         justifyContent: "center",
       }}
+      showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
       <View className="gap-1 mb-8">
@@ -273,22 +293,29 @@ function ResetPassword({
   );
 
   const resetPassword = async ({ password }: ResetPasswordFormValues) => {
-    setFormError(null);
-    setLoading(true);
+    try {
+      setFormError(null);
+      setLoading(true);
 
-    const { error } = await authClient.emailOtp.resetPassword({
-      email,
-      password,
-      otp,
-    });
+      const { error } = await authClient.emailOtp.resetPassword({
+        email,
+        password,
+        otp,
+      });
 
-    if (error !== null) {
-      setFormError(error.message ?? "Something went wrong. Try again.");
+      if (error !== null) {
+        setFormError(
+          error.message ?? "Something went wrong. Please try again.",
+        );
+        return;
+      }
+
+      onNext?.();
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    onNext?.();
   };
 
   return (
@@ -303,6 +330,7 @@ function ResetPassword({
           paddingBottom: insets.bottom + 16,
           paddingHorizontal: 16,
         }}
+        showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-1 mb-8">
@@ -481,6 +509,7 @@ export default function ForgotPasswordFlow() {
           paddingBottom: insets.bottom + 16,
           paddingHorizontal: 16,
         }}
+        showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-1 mb-8">

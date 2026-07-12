@@ -11,6 +11,7 @@ import { ProfileFormValues, profileSchema } from "@/lib/zodSchema";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router, Stack } from "expo-router";
@@ -67,7 +68,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
 
             if (error !== null) {
               Alert.alert(
-                error.message ?? "Something went wrong, please try again",
+                error.message ?? "Something went wrong. Please try again.",
               );
 
               return;
@@ -80,7 +81,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
   };
 
   const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option", [
+    Alert.alert("Select Image", "Choose an option.", [
       {
         text: "Take Photo",
         onPress: () => openCamera(),
@@ -104,6 +105,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
         "Permission required",
         "Camera access is needed to take a photo.",
       );
+
       return;
     }
 
@@ -131,6 +133,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
         "Permission required",
         "Photo library access is needed to select an image.",
       );
+
       return;
     }
 
@@ -163,24 +166,24 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
     const tasks: Promise<unknown>[] = [];
 
     if (user.name !== name || user.image !== imageUri) {
-      const imageUrl =
-        imageUri === null
-          ? null
-          : z.httpUrl().safeParse(imageUri).success
-            ? imageUri
-            : await uploadToCloudinary(imageUri);
-
       tasks.push(
-        new Promise((resolve, reject) => {
-          authClient.updateUser({
+        (async () => {
+          const imageUrl =
+            imageUri === null
+              ? null
+              : z.httpUrl().safeParse(imageUri).success
+                ? imageUri
+                : await uploadToCloudinary(imageUri);
+
+          const { error } = await authClient.updateUser({
             name,
             image: imageUrl,
-            fetchOptions: {
-              onSuccess: () => resolve(undefined),
-              onError: (ctx) => reject(ctx.error),
-            },
           });
-        }),
+
+          if (error !== null) {
+            throw error;
+          }
+        })(),
       );
     }
 
@@ -207,6 +210,9 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
         "Couldn't save",
         "Something went wrong while saving. Please try again.",
       );
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
       return;
     }
 

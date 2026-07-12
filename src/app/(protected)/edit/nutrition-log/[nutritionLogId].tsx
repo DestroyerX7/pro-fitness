@@ -58,13 +58,7 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogs.all(user.id),
       });
-      router.back();
     },
-    onError: () =>
-      Alert.alert(
-        "Couldn't save",
-        "Something went wrong while saving this log. Please try again.",
-      ),
   });
 
   const deleteNutritionLogMutation = useMutation({
@@ -73,13 +67,14 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogs.all(user.id),
       });
+
       router.back();
     },
-    onError: () =>
-      Alert.alert(
-        "Couldn't delete",
-        "Something went wrong while deleting this log. Please try again.",
-      ),
+    onError: (error) => {
+      Alert.alert("Couldn't delete", error.message);
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
   });
 
   const createNutritionLogPresetMutation = useMutation({
@@ -91,13 +86,18 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     },
+    onError: (error) => {
+      Alert.alert("Couldn't create preset", error.message);
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
   });
 
   const handleCreateNutritionLogPreset = () => {
     if (formState.isDirty) {
       Alert.alert(
         "Save changes to create preset",
-        "You have unsaved changes. Save them first before you can create preset",
+        "You have unsaved changes. Save them first before you can create preset.",
       );
 
       return;
@@ -112,7 +112,7 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
   };
 
   const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option", [
+    Alert.alert("Select Image", "Choose an option.", [
       {
         text: "Take Photo",
         onPress: () => openCamera(),
@@ -183,8 +183,6 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
   };
 
   const handleDelete = async () => {
-    await Haptics.selectionAsync();
-
     Alert.alert(
       `Delete ${nutritionLog.name}`,
       "Are you sure you want to delete this log?",
@@ -197,6 +195,8 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
         },
       ],
     );
+
+    Haptics.selectionAsync();
   };
 
   const onSubmit = async ({
@@ -205,28 +205,38 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
     consumedAt,
     imageUri,
   }: NutritionLogFormValues) => {
-    if (!formState.isDirty) {
-      return;
+    try {
+      if (!formState.isDirty) {
+        return;
+      }
+
+      const imageUrl =
+        imageUri === null
+          ? null
+          : z.httpUrl().safeParse(imageUri).success
+            ? imageUri
+            : await uploadToCloudinary(imageUri);
+
+      await updateNutritionLogMutation.mutateAsync({
+        name,
+        calories: Number(calories),
+        consumedAt: toSqlTimestamp(consumedAt),
+        imageUrl,
+        nutritionLogId: nutritionLog.id,
+      });
+
+      router.back();
+    } catch (error) {
+      Alert.alert(
+        "Couldn't save",
+        error instanceof Error ? error.message : "Plase try again.",
+      );
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-
-    const imageUrl =
-      imageUri === null
-        ? null
-        : z.httpUrl().safeParse(imageUri).success
-          ? imageUri
-          : await uploadToCloudinary(imageUri);
-
-    updateNutritionLogMutation.mutate({
-      name,
-      calories: Number(calories),
-      consumedAt: toSqlTimestamp(consumedAt),
-      imageUrl,
-      nutritionLogId: nutritionLog.id,
-    });
   };
 
-  const isSaving =
-    formState.isSubmitting || updateNutritionLogMutation.isPending;
+  const isSaving = formState.isSubmitting;
   const isDeleting = deleteNutritionLogMutation.isPending;
   const hasUnsavedChanges = formState.isDirty;
 
@@ -276,10 +286,10 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
                   <Pressable
                     onPress={pickImage}
                     className={cn(
-                      "flex-1 items-center justify-center overflow-hidden rounded-2xl",
+                      "flex-1 items-center justify-center overflow-hidden rounded-2xl border",
                       field.value !== null
-                        ? "border border-transparent"
-                        : "border border-dashed border-border bg-muted",
+                        ? "border-transparent"
+                        : "border-dashed border-border bg-muted",
                     )}
                   >
                     {field.value !== null ? (

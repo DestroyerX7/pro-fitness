@@ -70,7 +70,7 @@ export default function Goals() {
       params: { goalId },
     });
 
-    await Haptics.selectionAsync();
+    Haptics.selectionAsync();
   };
 
   const handleRefresh = async () => {

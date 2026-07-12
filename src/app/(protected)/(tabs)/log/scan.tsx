@@ -75,31 +75,10 @@ export default function Scan() {
 
   const createNutritionLogMutation = useMutation({
     mutationFn: createNutritionLog,
-    onSuccess: (data) => {
+    onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogs.all(user.id),
-      });
-
-      Toast.show({
-        type: "loggedCalories",
-        text1: "Logged!",
-        text2: `${data.name} • ${data.calories} cal`,
-        topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    },
-    onError: (error) => {
-      Toast.show({
-        type: "error",
-        text1: "Something went wrong",
-        text2: error.message,
-        topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    },
-    onSettled: () => setLogging(false),
+      }),
   });
 
   const handleBarcodeScanned = (scanningResult: BarcodeScanningResult) => {
@@ -142,7 +121,7 @@ export default function Scan() {
   };
 
   const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option", [
+    Alert.alert("Select Image", "Choose an option.", [
       {
         text: "Take Photo",
         onPress: () => openCamera(),
@@ -211,26 +190,48 @@ export default function Scan() {
     numServings,
     imageUri,
   }: ScanFormValues) => {
-    setLogging(true);
+    try {
+      setLogging(true);
 
-    const caloriesPerServingNum = Number(caloriesPerServing);
-    const numServingsNum = Number(numServings);
-    const calories = Math.ceil(caloriesPerServingNum * numServingsNum);
+      const caloriesPerServingNum = Number(caloriesPerServing);
+      const numServingsNum = Number(numServings);
+      const calories = Math.ceil(caloriesPerServingNum * numServingsNum);
 
-    const imageUrl =
-      imageUri === null
-        ? null
-        : z.httpUrl().safeParse(imageUri).success
-          ? imageUri
-          : await uploadToCloudinary(imageUri);
+      const imageUrl =
+        imageUri === null
+          ? null
+          : z.httpUrl().safeParse(imageUri).success
+            ? imageUri
+            : await uploadToCloudinary(imageUri);
 
-    createNutritionLogMutation.mutate({
-      userId: user.id,
-      name,
-      calories,
-      imageUrl,
-      consumedAt: toSqlTimestamp(consumedAt),
-    });
+      await createNutritionLogMutation.mutateAsync({
+        userId: user.id,
+        name,
+        calories,
+        imageUrl,
+        consumedAt: toSqlTimestamp(consumedAt),
+      });
+
+      Toast.show({
+        type: "loggedCalories",
+        text1: "Logged!",
+        text2: `${name} • ${calories} cal`,
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error instanceof Error ? error.message : "Please try again.",
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setLogging(false);
+    }
   };
 
   const rescan = () => {
@@ -253,7 +254,9 @@ export default function Scan() {
           className="p-4 bg-primary rounded-xl active:opacity-80"
           onPress={requestPermission}
         >
-          <ThemedText>Grant Permission</ThemedText>
+          <ThemedText className="text-primary-foreground">
+            Grant Permission
+          </ThemedText>
         </Pressable>
       </View>
     );

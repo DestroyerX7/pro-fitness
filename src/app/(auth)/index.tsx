@@ -36,33 +36,44 @@ export default function Login() {
   });
 
   const loginWithEmail = async ({ email, password }: LoginFormValues) => {
-    setFormError(null);
-    setLoading("email");
+    try {
+      setFormError(null);
+      setLoading("email");
 
-    const { error } = await authClient.signIn.email({
-      email,
-      password,
-    });
+      const { error } = await authClient.signIn.email({
+        email,
+        password,
+      });
 
-    if (error !== null) {
-      setFormError(error.message ?? "Something went wrong. Try again.");
+      if (error !== null) {
+        setFormError(
+          error.message ?? "Something went wrong. Please try again.",
+        );
+      }
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
       setLoading(null);
     }
   };
 
   const loginWithGoogle = async () => {
-    setFormError(null);
-    setLoading("google");
+    try {
+      setFormError(null);
+      setLoading("google");
 
-    const { error } = await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/(protected)/(tabs)/home", // Callback url is required or it breaks
-    });
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/(protected)/(tabs)/home",
+      });
 
-    setLoading(null);
-
-    if (error !== null) {
-      setFormError(error.message ?? "Couldn't sign in with Google.");
+      if (error !== null) {
+        setFormError(error.message ?? "Couldn't login with Google.");
+      }
+    } catch {
+      setFormError("Couldn't login with Google.");
+    } finally {
+      setLoading(null);
     }
   };
 
@@ -91,9 +102,18 @@ export default function Login() {
       });
 
       if (error !== null) {
-        setFormError(error.message ?? "Couldn't sign in with Apple.");
+        setFormError(error.message ?? "Couldn't login with Apple.");
       }
-    } catch {
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code === "ERR_REQUEST_CANCELED"
+      ) {
+        return;
+      }
+
+      setFormError("Couldn't login with Apple.");
     } finally {
       setLoading(null);
     }
@@ -111,6 +131,7 @@ export default function Login() {
           paddingBottom: insets.bottom + 16,
           paddingHorizontal: 16,
         }}
+        showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <View className="gap-1 mb-8">

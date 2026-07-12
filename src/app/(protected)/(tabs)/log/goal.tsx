@@ -41,8 +41,19 @@ export default function Goal() {
 
   const createGoalMutation = useMutation({
     mutationFn: createGoal,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.all(user.id) });
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.all(user.id) }),
+  });
+
+  const onSubmit = async (data: GoalFormValues) => {
+    try {
+      setCreatingGoal(true);
+
+      await createGoalMutation.mutateAsync({
+        userId: user.id,
+        name: data.name,
+        description: data.description,
+      });
 
       Toast.show({
         type: "createdGoal",
@@ -52,28 +63,18 @@ export default function Goal() {
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    },
-    onError: (error) => {
+    } catch (error) {
       Toast.show({
         type: "error",
         text1: "Something went wrong",
-        text2: error.message,
+        text2: error instanceof Error ? error.message : "Please try again.",
         topOffset: insets.top + 16,
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    },
-    onSettled: () => setCreatingGoal(false),
-  });
-
-  const onSubmit = async (data: GoalFormValues) => {
-    setCreatingGoal(true);
-
-    createGoalMutation.mutate({
-      userId: user.id,
-      name: data.name,
-      description: data.description,
-    });
+    } finally {
+      setCreatingGoal(false);
+    }
   };
 
   return (

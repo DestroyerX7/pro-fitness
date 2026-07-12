@@ -57,17 +57,10 @@ function NutritionLogPresetForm({
 
   const updateNutritionLogPresetMutation = useMutation({
     mutationFn: updateNutritionLogPreset,
-    onSuccess: () => {
+    onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogPresets.all(user.id),
-      });
-      router.back();
-    },
-    onError: () =>
-      Alert.alert(
-        "Couldn't save",
-        "Something went wrong while saving this preset. Please try again.",
-      ),
+      }),
   });
 
   const deleteNutritionLogPresetMutation = useMutation({
@@ -76,17 +69,18 @@ function NutritionLogPresetForm({
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogPresets.all(user.id),
       });
+
       router.back();
     },
-    onError: () =>
-      Alert.alert(
-        "Couldn't delete",
-        "Something went wrong while deleting this preset. Please try again.",
-      ),
+    onError: (error) => {
+      Alert.alert("Couldn't delete", error.message);
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    },
   });
 
   const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option", [
+    Alert.alert("Select Image", "Choose an option.", [
       {
         text: "Take Photo",
         onPress: () => openCamera(),
@@ -137,6 +131,7 @@ function NutritionLogPresetForm({
         "Permission required",
         "Photo library access is needed to select an image.",
       );
+
       return;
     }
 
@@ -157,11 +152,9 @@ function NutritionLogPresetForm({
   };
 
   const handleDelete = async () => {
-    await Haptics.selectionAsync();
-
     Alert.alert(
       `Delete ${nutritionLogPreset.name}`,
-      "Are you sure you want to delete this nutrition log preset?",
+      "Are you sure you want to delete this preset?",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -172,6 +165,8 @@ function NutritionLogPresetForm({
         },
       ],
     );
+
+    Haptics.selectionAsync();
   };
 
   const onSubmit = async ({
@@ -179,27 +174,37 @@ function NutritionLogPresetForm({
     imageUri,
     name,
   }: NutritionLogPresetFormValues) => {
-    if (!formState.isDirty) {
-      return;
+    try {
+      if (!formState.isDirty) {
+        return;
+      }
+
+      const imageUrl =
+        imageUri === null
+          ? null
+          : z.httpUrl().safeParse(imageUri).success
+            ? imageUri
+            : await uploadToCloudinary(imageUri);
+
+      await updateNutritionLogPresetMutation.mutateAsync({
+        name,
+        calories: Number(calories),
+        imageUrl,
+        nutritionLogPresetId: nutritionLogPreset.id,
+      });
+
+      router.back();
+    } catch (error) {
+      Alert.alert(
+        "Couldn't save",
+        error instanceof Error ? error.message : "Please try again.",
+      );
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-
-    const imageUrl =
-      imageUri === null
-        ? null
-        : z.httpUrl().safeParse(imageUri).success
-          ? imageUri
-          : await uploadToCloudinary(imageUri);
-
-    updateNutritionLogPresetMutation.mutate({
-      name,
-      calories: Number(calories),
-      imageUrl,
-      nutritionLogPresetId: nutritionLogPreset.id,
-    });
   };
 
-  const isSaving =
-    formState.isSubmitting || updateNutritionLogPresetMutation.isPending;
+  const isSaving = formState.isSubmitting;
   const isDeleting = deleteNutritionLogPresetMutation.isPending;
   const hasUnsavedChanges = formState.isDirty;
 
@@ -224,10 +229,10 @@ function NutritionLogPresetForm({
                 <Pressable
                   onPress={pickImage}
                   className={cn(
-                    "flex-1 items-center justify-center overflow-hidden rounded-2xl",
+                    "flex-1 items-center justify-center overflow-hidden rounded-2xl border",
                     field.value !== null
-                      ? "border border-transparent"
-                      : "border border-dashed border-border bg-muted",
+                      ? "border-transparent"
+                      : "border-dashed border-border bg-muted",
                   )}
                 >
                   {field.value !== null ? (

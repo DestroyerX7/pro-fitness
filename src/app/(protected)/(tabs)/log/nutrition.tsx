@@ -50,35 +50,14 @@ export default function Nutrition() {
 
   const createNutritionLogMutation = useMutation({
     mutationFn: createNutritionLog,
-    onSuccess: (data) => {
+    onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: queryKeys.nutritionLogs.all(user.id),
-      });
-
-      Toast.show({
-        type: "loggedCalories",
-        text1: "Logged!",
-        text2: `${data.name} • ${data.calories} cal`,
-        topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    },
-    onError: (error) => {
-      Toast.show({
-        type: "error",
-        text1: "Something went wrong",
-        text2: error.message,
-        topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    },
-    onSettled: () => setLogging(false),
+      }),
   });
 
   const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option", [
+    Alert.alert("Select Image", "Choose an option.", [
       {
         text: "Take Photo",
         onPress: () => openCamera(),
@@ -146,18 +125,40 @@ export default function Nutrition() {
     imageUri,
     consumedAt,
   }: NutritionLogFormValues) => {
-    setLogging(true);
+    try {
+      setLogging(true);
 
-    const imageUrl =
-      imageUri !== null ? await uploadToCloudinary(imageUri) : null;
+      const imageUrl =
+        imageUri !== null ? await uploadToCloudinary(imageUri) : null;
 
-    createNutritionLogMutation.mutate({
-      userId: user.id,
-      name,
-      calories: Number(calories),
-      imageUrl,
-      consumedAt: toSqlTimestamp(consumedAt),
-    });
+      await createNutritionLogMutation.mutateAsync({
+        userId: user.id,
+        name,
+        calories: Number(calories),
+        imageUrl,
+        consumedAt: toSqlTimestamp(consumedAt),
+      });
+
+      Toast.show({
+        type: "loggedCalories",
+        text1: "Logged!",
+        text2: `${name} • ${calories} cal`,
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: error instanceof Error ? error.message : "Please try again.",
+        topOffset: insets.top + 16,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setLogging(false);
+    }
   };
 
   return (
@@ -181,10 +182,10 @@ export default function Nutrition() {
                 <Pressable
                   onPress={pickImage}
                   className={cn(
-                    "flex-1 items-center justify-center overflow-hidden rounded-2xl",
+                    "flex-1 items-center justify-center overflow-hidden rounded-2xl border",
                     field.value !== null
-                      ? "border border-transparent"
-                      : "border border-dashed border-border bg-muted",
+                      ? "border-transparent"
+                      : "border-dashed border-border bg-muted",
                   )}
                 >
                   {field.value !== null ? (
@@ -244,7 +245,9 @@ export default function Nutrition() {
                 placeholder="Name"
                 placeholderTextColor={theme.mutedForeground}
                 className={
-                  formState.errors.name !== undefined ? "border-destructive" : ""
+                  formState.errors.name !== undefined
+                    ? "border-destructive"
+                    : ""
                 }
               />
             )}
