@@ -291,14 +291,14 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
                 }
                 className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
               >
-                <ThemedText className="text-sm">{label}</ThemedText>
+                <ThemedText className="text-sm">{label} mins</ThemedText>
               </Pressable>
             ))}
           </View>
         </View>
 
         <View className="gap-2">
-          <ThemedText className="text-sm font-medium">Performed At</ThemedText>
+          <ThemedText className="text-sm font-medium">Performed at</ThemedText>
 
           <Controller
             control={control}

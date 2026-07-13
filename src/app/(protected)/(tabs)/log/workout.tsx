@@ -9,6 +9,7 @@ import { toSqlTimestamp } from "@/lib/dates";
 import { cn } from "@/lib/nativewind";
 import { WorkoutLogFormValues, workoutLogSchema } from "@/lib/zodSchema";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -112,17 +113,32 @@ export default function Workout() {
             control={control}
             name="name"
             render={({ field }) => (
-              <ThemedTextInput
-                placeholder="Name"
-                value={field.value}
-                onChangeText={field.onChange}
-                onBlur={field.onBlur}
-                className={
-                  formState.errors.name !== undefined
-                    ? "border-destructive"
-                    : ""
-                }
-              />
+              <View className="relative">
+                <ThemedTextInput
+                  placeholder="Name"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  className={cn(
+                    "pr-12",
+                    formState.errors.name !== undefined && "border-destructive",
+                  )}
+                />
+
+                {field.value.length > 0 && (
+                  <Pressable
+                    onPress={() => field.onChange("")}
+                    hitSlop={8}
+                    className="absolute right-4 top-0 bottom-0 justify-center active:opacity-80"
+                  >
+                    <MaterialCommunityIcons
+                      name="close-circle"
+                      size={20}
+                      color={theme.mutedForeground}
+                    />
+                  </Pressable>
+                )}
+              </View>
             )}
           />
 
@@ -202,7 +218,7 @@ export default function Workout() {
                 }
                 className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
               >
-                <ThemedText className="text-sm">{label}</ThemedText>
+                <ThemedText className="text-sm">{label} mins</ThemedText>
               </Pressable>
             ))}
           </View>

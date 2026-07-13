@@ -180,18 +180,33 @@ export default function Nutrition() {
             control={control}
             name="name"
             render={({ field }) => (
-              <ThemedTextInput
-                value={field.value}
-                onChangeText={field.onChange}
-                onBlur={field.onBlur}
-                placeholder="Name"
-                placeholderTextColor={theme.mutedForeground}
-                className={
-                  formState.errors.name !== undefined
-                    ? "border-destructive"
-                    : ""
-                }
-              />
+              <View className="relative">
+                <ThemedTextInput
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  placeholder="Name"
+                  placeholderTextColor={theme.mutedForeground}
+                  className={cn(
+                    "pr-12",
+                    formState.errors.name !== undefined && "border-destructive",
+                  )}
+                />
+
+                {field.value.length > 0 && (
+                  <Pressable
+                    onPress={() => field.onChange("")}
+                    hitSlop={8}
+                    className="absolute right-4 top-0 bottom-0 justify-center active:opacity-80"
+                  >
+                    <MaterialCommunityIcons
+                      name="close-circle"
+                      size={20}
+                      color={theme.mutedForeground}
+                    />
+                  </Pressable>
+                )}
+              </View>
             )}
           />
 

@@ -232,11 +232,11 @@ export default function SignUp() {
           </View>
 
           <View className="gap-2">
-            <View>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field }) => (
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <View className="relative">
                   <ThemedTextInput
                     placeholder="Password"
                     textContentType="newPassword"
@@ -245,27 +245,27 @@ export default function SignUp() {
                     value={field.value}
                     onChangeText={field.onChange}
                     onBlur={field.onBlur}
-                    className={
-                      formState.errors.password !== undefined
-                        ? "border-destructive"
-                        : ""
-                    }
+                    className={cn(
+                      "pr-12",
+                      formState.errors.password !== undefined &&
+                        "border-destructive",
+                    )}
                   />
-                )}
-              />
 
-              <Pressable
-                onPress={() => setShowPassword((v) => !v)}
-                className="absolute right-4 top-0 bottom-0 justify-center"
-                hitSlop={8}
-              >
-                <MaterialCommunityIcons
-                  name={showPassword ? "eye-outline" : "eye-off-outline"}
-                  size={20}
-                  color={theme.mutedForeground}
-                />
-              </Pressable>
-            </View>
+                  <Pressable
+                    onPress={() => setShowPassword((v) => !v)}
+                    className="absolute right-4 top-0 bottom-0 justify-center active:opacity-80"
+                    hitSlop={8}
+                  >
+                    <MaterialCommunityIcons
+                      name={showPassword ? "eye-outline" : "eye-off-outline"}
+                      size={20}
+                      color={theme.mutedForeground}
+                    />
+                  </Pressable>
+                </View>
+              )}
+            />
 
             {formState.errors.password !== undefined && (
               <ThemedText className="text-destructive text-xs">
@@ -275,11 +275,11 @@ export default function SignUp() {
           </View>
 
           <View className="gap-2">
-            <View>
-              <Controller
-                control={control}
-                name="confirmPassword"
-                render={({ field: { value, onChange, onBlur } }) => (
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <View className="relative">
                   <ThemedTextInput
                     placeholder="Confirm password"
                     textContentType="password"
@@ -288,27 +288,29 @@ export default function SignUp() {
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
-                    className={
-                      formState.errors.confirmPassword !== undefined
-                        ? "border-destructive"
-                        : ""
-                    }
+                    className={cn(
+                      "pr-12",
+                      formState.errors.confirmPassword !== undefined &&
+                        "border-destructive",
+                    )}
                   />
-                )}
-              />
 
-              <Pressable
-                onPress={() => setShowConfirmPassword((v) => !v)}
-                className="absolute right-4 top-0 bottom-0 justify-center"
-                hitSlop={8}
-              >
-                <MaterialCommunityIcons
-                  name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
-                  size={20}
-                  color={theme.mutedForeground}
-                />
-              </Pressable>
-            </View>
+                  <Pressable
+                    onPress={() => setShowConfirmPassword((v) => !v)}
+                    className="absolute right-4 top-0 bottom-0 justify-center active:opacity-80"
+                    hitSlop={8}
+                  >
+                    <MaterialCommunityIcons
+                      name={
+                        showConfirmPassword ? "eye-outline" : "eye-off-outline"
+                      }
+                      size={20}
+                      color={theme.mutedForeground}
+                    />
+                  </Pressable>
+                </View>
+              )}
+            />
 
             {formState.errors.confirmPassword !== undefined && (
               <ThemedText className="text-destructive text-xs">

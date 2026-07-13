@@ -26,6 +26,7 @@ import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -188,19 +189,37 @@ export default function Scan() {
 
   if (status === null || !status.granted) {
     return (
-      <View className="flex-1 justify-center items-center gap-4">
-        <ThemedText className="text-xl font-semibold">
-          We need camera permission
+      <View className="flex-1 justify-center items-center gap-4 p-4">
+        <ThemedText className="text-xl font-semibold text-center">
+          Camera permission required
         </ThemedText>
 
-        <Pressable
-          className="p-4 bg-primary rounded-xl active:opacity-80"
-          onPress={requestPermission}
-        >
-          <ThemedText className="text-primary-foreground">
-            Grant Permission
-          </ThemedText>
-        </Pressable>
+        {status !== null && status.canAskAgain === false ? (
+          <>
+            <ThemedText className="text-sm text-muted-foreground text-center">
+              You've previously denied camera access. Enable it in Settings to
+              continue.
+            </ThemedText>
+
+            <Pressable
+              className="p-4 bg-primary rounded-xl active:opacity-80"
+              onPress={() => Linking.openSettings()}
+            >
+              <ThemedText className="text-primary-foreground font-semibold">
+                Open Settings
+              </ThemedText>
+            </Pressable>
+          </>
+        ) : (
+          <Pressable
+            className="p-4 bg-primary rounded-xl active:opacity-80"
+            onPress={requestPermission}
+          >
+            <ThemedText className="text-primary-foreground font-semibold">
+              Grant Permission
+            </ThemedText>
+          </Pressable>
+        )}
       </View>
     );
   }
@@ -222,7 +241,7 @@ export default function Scan() {
             color={theme.primaryForeground}
           />
 
-          <ThemedText className="text-primary-foreground text-center text-lg font-semibold">
+          <ThemedText className="text-primary-foreground font-semibold">
             Rescan
           </ThemedText>
         </Pressable>
@@ -300,7 +319,7 @@ export default function Scan() {
             color={theme.secondaryForeground}
           />
 
-          <ThemedText className="text-secondary-foreground text-center font-semibold">
+          <ThemedText className="text-secondary-foreground font-semibold">
             Rescan
           </ThemedText>
         </Pressable>
@@ -316,9 +335,8 @@ export default function Scan() {
                   onPress={pickImage}
                   className={cn(
                     "flex-1 items-center justify-center overflow-hidden rounded-2xl",
-                    field.value !== null
-                      ? "border border-transparent"
-                      : "border border-dashed border-border bg-muted",
+                    field.value === null &&
+                      "border border-dashed border-border bg-muted",
                   )}
                 >
                   {field.value !== null ? (
@@ -371,18 +389,34 @@ export default function Scan() {
             control={control}
             name="name"
             render={({ field }) => (
-              <ThemedTextInput
-                placeholder="Name"
-                value={field.value}
-                onChangeText={field.onChange}
-                onBlur={field.onBlur}
-                placeholderTextColor={theme.mutedForeground}
-                className={
-                  formState.errors.name !== undefined
-                    ? "border-destructive"
-                    : ""
-                }
-              />
+              <View>
+                <ThemedTextInput
+                  placeholder="Name"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  placeholderTextColor={theme.mutedForeground}
+                  className={
+                    formState.errors.name !== undefined
+                      ? "border-destructive"
+                      : ""
+                  }
+                />
+
+                {field.value.length > 0 && (
+                  <Pressable
+                    onPress={() => field.onChange("")}
+                    hitSlop={8}
+                    className="absolute right-4 top-0 bottom-0 justify-center active:opacity-80"
+                  >
+                    <MaterialCommunityIcons
+                      name="close-circle"
+                      size={20}
+                      color={theme.mutedForeground}
+                    />
+                  </Pressable>
+                )}
+              </View>
             )}
           />
 

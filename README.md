@@ -117,6 +117,12 @@ eas build --platform ios --profile preview
 eas build --platform ios --profile production
 ```
 
+### Submit production Build (iOS)
+
+```bash
+eas submit --platform ios
+```
+
 ## Tech Stack
 
 - [Expo](https://expo.dev/) — Cross-platform React Native framework

@@ -166,11 +166,11 @@ export default function Login() {
           </View>
 
           <View className="gap-2">
-            <View>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field }) => (
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <View className="relative">
                   <ThemedTextInput
                     placeholder="Password"
                     textContentType="password"
@@ -179,27 +179,27 @@ export default function Login() {
                     value={field.value}
                     onChangeText={field.onChange}
                     onBlur={field.onBlur}
-                    className={
-                      formState.errors.password !== undefined
-                        ? "border-destructive"
-                        : ""
-                    }
+                    className={cn(
+                      "pr-12",
+                      formState.errors.password !== undefined &&
+                        "border-destructive",
+                    )}
                   />
-                )}
-              />
 
-              <Pressable
-                onPress={() => setShowPassword((v) => !v)}
-                className="absolute right-4 top-0 bottom-0 justify-center"
-                hitSlop={8}
-              >
-                <MaterialCommunityIcons
-                  name={showPassword ? "eye-outline" : "eye-off-outline"}
-                  size={20}
-                  color={theme.mutedForeground}
-                />
-              </Pressable>
-            </View>
+                  <Pressable
+                    onPress={() => setShowPassword((v) => !v)}
+                    className="absolute right-4 top-0 bottom-0 justify-center active:opacity-80"
+                    hitSlop={8}
+                  >
+                    <MaterialCommunityIcons
+                      name={showPassword ? "eye-outline" : "eye-off-outline"}
+                      size={20}
+                      color={theme.mutedForeground}
+                    />
+                  </Pressable>
+                </View>
+              )}
+            />
 
             {formState.errors.password !== undefined && (
               <ThemedText className="text-destructive text-xs">

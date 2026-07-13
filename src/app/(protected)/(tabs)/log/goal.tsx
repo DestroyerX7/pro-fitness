@@ -6,6 +6,7 @@ import useTheme from "@/hooks/useTheme";
 import { createGoal } from "@/lib/api";
 import { cn } from "@/lib/nativewind";
 import { GoalFormValues, goalSchema } from "@/lib/zodSchema";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -90,17 +91,32 @@ export default function Goal() {
             control={control}
             name="name"
             render={({ field }) => (
-              <ThemedTextInput
-                placeholder="Name"
-                value={field.value}
-                onChangeText={field.onChange}
-                onBlur={field.onBlur}
-                className={
-                  formState.errors.name !== undefined
-                    ? "border-destructive"
-                    : ""
-                }
-              />
+              <View className="relative">
+                <ThemedTextInput
+                  placeholder="Name"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  className={cn(
+                    "pr-12",
+                    formState.errors.name !== undefined && "border-destructive",
+                  )}
+                />
+
+                {field.value.length > 0 && (
+                  <Pressable
+                    onPress={() => field.onChange("")}
+                    hitSlop={8}
+                    className="absolute right-4 top-0 bottom-0 justify-center active:opacity-80"
+                  >
+                    <MaterialCommunityIcons
+                      name="close-circle"
+                      size={20}
+                      color={theme.mutedForeground}
+                    />
+                  </Pressable>
+                )}
+              </View>
             )}
           />
 

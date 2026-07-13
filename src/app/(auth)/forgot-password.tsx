@@ -347,34 +347,36 @@ function ResetPassword({
               control={control}
               name="password"
               render={({ field }) => (
-                <ThemedTextInput
-                  placeholder="Password"
-                  textContentType="newPassword"
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                  value={field.value}
-                  onChangeText={field.onChange}
-                  onBlur={field.onBlur}
-                  className={
-                    formState.errors.password !== undefined
-                      ? "border-destructive"
-                      : ""
-                  }
-                />
+                <View className="relative">
+                  <ThemedTextInput
+                    placeholder="Password"
+                    textContentType="newPassword"
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    className={cn(
+                      "pr-12",
+                      formState.errors.password !== undefined &&
+                        "border-destructive",
+                    )}
+                  />
+
+                  <Pressable
+                    onPress={() => setShowPassword((v) => !v)}
+                    className="absolute right-4 top-0 bottom-0 justify-center active:opacity-80"
+                    hitSlop={8}
+                  >
+                    <MaterialCommunityIcons
+                      name={showPassword ? "eye-outline" : "eye-off-outline"}
+                      size={20}
+                      color={theme.mutedForeground}
+                    />
+                  </Pressable>
+                </View>
               )}
             />
-
-            <Pressable
-              onPress={() => setShowPassword((v) => !v)}
-              className="absolute right-4 top-0 h-14 justify-center"
-              hitSlop={8}
-            >
-              <MaterialCommunityIcons
-                name={showPassword ? "eye-outline" : "eye-off-outline"}
-                size={20}
-                color={theme.mutedForeground}
-              />
-            </Pressable>
 
             {formState.errors.password !== undefined && (
               <ThemedText className="text-destructive text-xs">
@@ -388,33 +390,38 @@ function ResetPassword({
               control={control}
               name="confirmPassword"
               render={({ field }) => (
-                <ThemedTextInput
-                  placeholder="Confirm password"
-                  textContentType="password"
-                  secureTextEntry={!showConfirmPassword}
-                  autoCapitalize="none"
-                  value={field.value}
-                  onChangeText={field.onChange}
-                  onBlur={field.onBlur}
-                  className={
-                    formState.errors.confirmPassword !== undefined
-                      ? "border-destructive"
-                      : ""
-                  }
-                />
+                <View className="relative">
+                  <ThemedTextInput
+                    placeholder="Confirm password"
+                    textContentType="password"
+                    secureTextEntry={!showConfirmPassword}
+                    autoCapitalize="none"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    className={cn(
+                      "pr-12",
+                      formState.errors.confirmPassword !== undefined &&
+                        "border-destructive",
+                    )}
+                  />
+
+                  <Pressable
+                    onPress={() => setShowConfirmPassword((v) => !v)}
+                    className="absolute right-4 top-0 bottom-0 justify-center active:opacity-80"
+                    hitSlop={8}
+                  >
+                    <MaterialCommunityIcons
+                      name={
+                        showConfirmPassword ? "eye-outline" : "eye-off-outline"
+                      }
+                      size={20}
+                      color={theme.mutedForeground}
+                    />
+                  </Pressable>
+                </View>
               )}
             />
-            <Pressable
-              onPress={() => setShowConfirmPassword((v) => !v)}
-              className="absolute right-4 top-0 h-14 justify-center"
-              hitSlop={8}
-            >
-              <MaterialCommunityIcons
-                name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
-                size={20}
-                color={theme.mutedForeground}
-              />
-            </Pressable>
 
             {formState.errors.confirmPassword !== undefined && (
               <ThemedText className="text-destructive text-xs">
