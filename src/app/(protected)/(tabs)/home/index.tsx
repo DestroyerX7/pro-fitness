@@ -19,7 +19,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams } from "expo-router/build/hooks";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -58,8 +59,12 @@ export default function Index() {
     error: goalsError,
   } = useGoals(user.id);
 
+  const { tab } = useLocalSearchParams<{
+    tab?: "nutrition" | "workout" | "goal";
+  }>();
+
   const [activeTab, setActiveTab] = useState<"nutrition" | "workout" | "goal">(
-    "nutrition",
+    tab ?? "nutrition",
   );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -123,6 +128,12 @@ export default function Index() {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.all(user.id) });
     },
   });
+
+  useEffect(() => {
+    if (tab !== undefined) {
+      setActiveTab(tab);
+    }
+  }, [tab]);
 
   const handleEditDailyCalorieTarget = async () => {
     if (dailyTarget === undefined) {

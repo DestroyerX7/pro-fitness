@@ -560,6 +560,7 @@ export default function History() {
               name={item.name}
               calories={item.calories}
               consumedAt={item.consumedAt}
+              imageUrl={item.imageUrl}
             />
           </Pressable>
         )}

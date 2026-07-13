@@ -157,6 +157,11 @@ export default function Scan() {
         text1: "Logged!",
         text2: `${name} • ${calories} cal`,
         topOffset: insets.top + 16,
+        onPress: () =>
+          router.push({
+            pathname: "/(protected)/(tabs)/home",
+            params: { tab: "nutrition" },
+          }),
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

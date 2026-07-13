@@ -9,6 +9,7 @@ import { GoalFormValues, goalSchema } from "@/lib/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -55,6 +56,7 @@ export default function Goal() {
         text1: "Goal created!",
         text2: data.name,
         topOffset: insets.top + 16,
+        onPress: () => router.push("/(protected)/(tabs)/goals"),
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

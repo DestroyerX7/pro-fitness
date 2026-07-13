@@ -13,6 +13,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -83,6 +84,11 @@ export default function Nutrition() {
         text1: "Logged!",
         text2: `${name} • ${calories} cal`,
         topOffset: insets.top + 16,
+        onPress: () =>
+          router.push({
+            pathname: "/(protected)/(tabs)/home",
+            params: { tab: "nutrition" },
+          }),
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

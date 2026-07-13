@@ -80,6 +80,11 @@ export default function Preset() {
         text1: "Couldn't log calories",
         text2: error.message,
         topOffset: insets.top + 16,
+        onPress: () =>
+          router.push({
+            pathname: "/(protected)/(tabs)/home",
+            params: { tab: "nutrition" },
+          }),
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -98,6 +103,11 @@ export default function Preset() {
         text1: "Logged!",
         text2: `${data.name} • ${data.durationMinutes} mins`,
         topOffset: insets.top + 16,
+        onPress: () =>
+          router.push({
+            pathname: "/(protected)/(tabs)/home",
+            params: { tab: "workout" },
+          }),
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

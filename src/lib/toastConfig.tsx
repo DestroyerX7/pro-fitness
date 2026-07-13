@@ -75,8 +75,11 @@ export const toastConfig: ToastConfig = {
       </View>
     </Pressable>
   ),
-  createdGoal: ({ text1, text2 }) => (
-    <View className="bg-card flex-row gap-2 p-4 rounded-xl w-11/12">
+  createdGoal: ({ text1, text2, onPress }) => (
+    <Pressable
+      onPress={onPress}
+      className="bg-card flex-row gap-2 p-4 rounded-xl w-11/12"
+    >
       <ThemedText className="text-card-foreground text-2xl">🎯</ThemedText>
 
       <View className="flex-1">
@@ -88,6 +91,6 @@ export const toastConfig: ToastConfig = {
           {text2}
         </ThemedText>
       </View>
-    </View>
+    </Pressable>
   ),
 };

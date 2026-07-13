@@ -12,6 +12,7 @@ import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -73,6 +74,11 @@ export default function Workout() {
         text1: "Logged!",
         text2: `${name} • ${durationMinutes} mins`,
         topOffset: insets.top + 16,
+        onPress: () =>
+          router.push({
+            pathname: "/(protected)/(tabs)/home",
+            params: { tab: "workout" },
+          }),
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
