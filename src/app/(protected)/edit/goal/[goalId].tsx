@@ -16,7 +16,6 @@ import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
@@ -144,169 +143,165 @@ function GoalForm({ goal }: { goal: Goal }) {
         }}
       />
 
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="p-4 gap-4"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
       >
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          contentContainerClassName="p-4 gap-4"
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="gap-2">
-            <View className="flex-row justify-between">
-              <ThemedText className="text-sm font-medium">Name</ThemedText>
+        <View className="gap-2">
+          <View className="flex-row justify-between">
+            <ThemedText className="text-sm font-medium">Name</ThemedText>
 
-              <ThemedText className="text-sm font-medium">
-                Created {goal.createdAt.toLocaleDateString()}
+            <ThemedText className="text-sm font-medium">
+              Created {goal.createdAt.toLocaleDateString()}
+            </ThemedText>
+          </View>
+
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <ThemedTextInput
+                placeholder="Name"
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                className={
+                  formState.errors.name !== undefined
+                    ? "border-destructive"
+                    : ""
+                }
+              />
+            )}
+          />
+
+          {formState.errors.name !== undefined && (
+            <ThemedText className="text-destructive text-xs">
+              {formState.errors.name.message}
+            </ThemedText>
+          )}
+        </View>
+
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Description</ThemedText>
+
+          <Controller
+            control={control}
+            name="description"
+            render={({ field }) => (
+              <ThemedTextInput
+                className={cn(
+                  "h-32",
+                  formState.errors.description !== undefined &&
+                    "border-destructive",
+                )}
+                placeholder="Description..."
+                value={field.value ?? ""}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                textAlignVertical="top"
+                multiline
+              />
+            )}
+          />
+
+          {formState.errors.description !== undefined && (
+            <ThemedText className="text-destructive text-xs">
+              {formState.errors.description.message}
+            </ThemedText>
+          )}
+        </View>
+
+        {/* Status */}
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Status</ThemedText>
+
+          <Controller
+            control={control}
+            name="completed"
+            render={({ field }) => (
+              <Pressable
+                onPress={() => field.onChange(!field.value)}
+                onBlur={field.onBlur}
+                className="bg-muted p-4 rounded-xl border border-border flex-row items-center gap-2"
+              >
+                <View
+                  className={cn(
+                    "w-8 h-8 border-2 rounded-full items-center justify-center",
+                    field.value
+                      ? "bg-primary border-primary"
+                      : "bg-transparent border-border",
+                  )}
+                >
+                  {field.value && (
+                    <MaterialCommunityIcons
+                      name="check"
+                      size={16}
+                      color={theme.primaryForeground}
+                    />
+                  )}
+                </View>
+
+                <View className="flex-1 flex-row justify-between">
+                  <ThemedText className="font-semibold">
+                    {field.value ? "Completed" : "In progress"}
+                  </ThemedText>
+
+                  <ThemedText className="text-muted-foreground">
+                    {field.value ? "Nice work!" : "Keep going"}
+                  </ThemedText>
+                </View>
+              </Pressable>
+            )}
+          />
+        </View>
+
+        {/* Save */}
+        <Pressable
+          onPress={handleSubmit(onSubmit)}
+          className={cn(
+            "items-center rounded-xl bg-primary p-4 active:opacity-80",
+            !canSave && "opacity-50",
+          )}
+          disabled={!canSave}
+        >
+          <ThemedText className="font-semibold text-primary-foreground">
+            {updateGoalMutation.isPending ? (
+              <ActivityIndicator color={theme.primaryForeground} />
+            ) : (
+              "Save"
+            )}
+          </ThemedText>
+        </Pressable>
+
+        {/* Delete */}
+        <Pressable
+          className={cn(
+            "p-4 rounded-xl bg-muted items-center active:opacity-80",
+            !canDelete && "opacity-50",
+          )}
+          disabled={!canDelete}
+          onPress={handleDelete}
+        >
+          {deleteGoalMutation.isPending ? (
+            <ActivityIndicator color={theme.destructive} />
+          ) : (
+            <View className="flex-row gap-1 items-center">
+              <MaterialCommunityIcons
+                name="trash-can"
+                size={16}
+                color={theme.destructive}
+              />
+
+              <ThemedText className="text-destructive font-semibold">
+                Delete
               </ThemedText>
             </View>
-
-            <Controller
-              control={control}
-              name="name"
-              render={({ field }) => (
-                <ThemedTextInput
-                  placeholder="Name"
-                  value={field.value}
-                  onChangeText={field.onChange}
-                  onBlur={field.onBlur}
-                  className={
-                    formState.errors.name !== undefined
-                      ? "border-destructive"
-                      : ""
-                  }
-                />
-              )}
-            />
-
-            {formState.errors.name !== undefined && (
-              <ThemedText className="text-destructive text-xs">
-                {formState.errors.name.message}
-              </ThemedText>
-            )}
-          </View>
-
-          <View className="gap-2">
-            <ThemedText className="text-sm font-medium">Description</ThemedText>
-
-            <Controller
-              control={control}
-              name="description"
-              render={({ field }) => (
-                <ThemedTextInput
-                  className={cn(
-                    "h-32",
-                    formState.errors.description !== undefined &&
-                      "border-destructive",
-                  )}
-                  placeholder="Description..."
-                  value={field.value ?? ""}
-                  onChangeText={field.onChange}
-                  onBlur={field.onBlur}
-                  textAlignVertical="top"
-                  multiline
-                />
-              )}
-            />
-
-            {formState.errors.description !== undefined && (
-              <ThemedText className="text-destructive text-xs">
-                {formState.errors.description.message}
-              </ThemedText>
-            )}
-          </View>
-
-          {/* Status */}
-          <View className="gap-2">
-            <ThemedText className="text-sm font-medium">Status</ThemedText>
-
-            <Controller
-              control={control}
-              name="completed"
-              render={({ field }) => (
-                <Pressable
-                  onPress={() => field.onChange(!field.value)}
-                  onBlur={field.onBlur}
-                  className="bg-muted p-4 rounded-xl border border-border flex-row items-center gap-2"
-                >
-                  <View
-                    className={cn(
-                      "w-8 h-8 border-2 rounded-full items-center justify-center",
-                      field.value
-                        ? "bg-primary border-primary"
-                        : "bg-transparent border-border",
-                    )}
-                  >
-                    {field.value && (
-                      <MaterialCommunityIcons
-                        name="check"
-                        size={16}
-                        color={theme.primaryForeground}
-                      />
-                    )}
-                  </View>
-
-                  <View className="flex-1 flex-row justify-between">
-                    <ThemedText className="font-semibold">
-                      {field.value ? "Completed" : "In progress"}
-                    </ThemedText>
-
-                    <ThemedText className="text-muted-foreground">
-                      {field.value ? "Nice work!" : "Keep going"}
-                    </ThemedText>
-                  </View>
-                </Pressable>
-              )}
-            />
-          </View>
-
-          {/* Save */}
-          <Pressable
-            onPress={handleSubmit(onSubmit)}
-            className={cn(
-              "items-center rounded-xl bg-primary p-4 active:opacity-80",
-              !canSave && "opacity-50",
-            )}
-            disabled={!canSave}
-          >
-            <ThemedText className="font-semibold text-primary-foreground">
-              {updateGoalMutation.isPending ? (
-                <ActivityIndicator color={theme.primaryForeground} />
-              ) : (
-                "Save"
-              )}
-            </ThemedText>
-          </Pressable>
-
-          {/* Delete */}
-          <Pressable
-            className={cn(
-              "p-4 rounded-xl bg-muted items-center active:opacity-80",
-              !canDelete && "opacity-50",
-            )}
-            disabled={!canDelete}
-            onPress={handleDelete}
-          >
-            {deleteGoalMutation.isPending ? (
-              <ActivityIndicator color={theme.destructive} />
-            ) : (
-              <View className="flex-row gap-1 items-center">
-                <MaterialCommunityIcons
-                  name="trash-can"
-                  size={16}
-                  color={theme.destructive}
-                />
-
-                <ThemedText className="text-destructive font-semibold">
-                  Delete
-                </ThemedText>
-              </View>
-            )}
-          </Pressable>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          )}
+        </Pressable>
+      </ScrollView>
     </>
   );
 }

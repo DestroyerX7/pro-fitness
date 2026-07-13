@@ -140,15 +140,7 @@ export default function SignUp() {
       if (error !== null) {
         setFormError(error.message ?? "Couldn't sign up with Apple.");
       }
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        "code" in error &&
-        error.code === "ERR_REQUEST_CANCELED"
-      ) {
-        return;
-      }
-
+    } catch {
       setFormError("Couldn't sign up with Apple.");
     } finally {
       setLoading(null);

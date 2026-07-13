@@ -20,6 +20,7 @@ import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   ScrollView,
   View,
@@ -164,6 +165,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName="p-4 gap-4"
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
       >
         {/* Image picker */}
         <View className="items-center gap-2">

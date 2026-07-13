@@ -104,15 +104,7 @@ export default function Login() {
       if (error !== null) {
         setFormError(error.message ?? "Couldn't login with Apple.");
       }
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        "code" in error &&
-        error.code === "ERR_REQUEST_CANCELED"
-      ) {
-        return;
-      }
-
+    } catch {
       setFormError("Couldn't login with Apple.");
     } finally {
       setLoading(null);

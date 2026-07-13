@@ -25,7 +25,6 @@ import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
@@ -188,204 +187,196 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
         }}
       />
 
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerClassName="p-4 gap-4"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
       >
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          contentContainerClassName="p-4 gap-4"
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="gap-2">
-            <ThemedText className="text-sm font-medium">Name</ThemedText>
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Name</ThemedText>
 
-            <Controller
-              control={control}
-              name="name"
-              render={({ field }) => (
-                <ThemedTextInput
-                  placeholder="Name"
-                  value={field.value}
-                  onChangeText={field.onChange}
-                  onBlur={field.onBlur}
-                  className={
-                    formState.errors.name !== undefined
-                      ? "border-destructive"
-                      : ""
-                  }
-                />
-              )}
-            />
-
-            {formState.errors.name !== undefined && (
-              <ThemedText className="text-destructive text-xs">
-                {formState.errors.name.message}
-              </ThemedText>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <ThemedTextInput
+                placeholder="Name"
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                className={
+                  formState.errors.name !== undefined
+                    ? "border-destructive"
+                    : ""
+                }
+              />
             )}
+          />
 
-            <View className="flex-row flex-wrap gap-2">
-              {[
-                "Push",
-                "Pull",
-                "Legs",
-                "Upper",
-                "Lower",
-                "Chest",
-                "Shoulders",
-                "Arms",
-                "Cardio",
-              ].map((label) => (
-                <Pressable
-                  key={label}
-                  onPress={() =>
-                    setValue("name", label, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                      shouldTouch: true,
-                    })
-                  }
-                  className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
-                >
-                  <ThemedText className="text-sm">{label}</ThemedText>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
-          <View className="gap-2">
-            <ThemedText className="text-sm font-medium">Duration</ThemedText>
-
-            <Controller
-              control={control}
-              name="durationMinutes"
-              render={({ field }) => (
-                <ThemedTextInput
-                  placeholder="Duration"
-                  keyboardType="number-pad"
-                  value={field.value}
-                  onChangeText={field.onChange}
-                  onBlur={field.onBlur}
-                  className={
-                    formState.errors.durationMinutes !== undefined
-                      ? "border-destructive"
-                      : ""
-                  }
-                />
-              )}
-            />
-
-            {formState.errors.durationMinutes !== undefined && (
-              <ThemedText className="text-destructive text-xs">
-                {formState.errors.durationMinutes.message}
-              </ThemedText>
-            )}
-
-            <View className="flex-row flex-wrap gap-2">
-              {["15", "30", "45", "60", "75", "90", "105", "120"].map(
-                (label) => (
-                  <Pressable
-                    key={label}
-                    onPress={() =>
-                      setValue("durationMinutes", label, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                        shouldTouch: true,
-                      })
-                    }
-                    className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
-                  >
-                    <ThemedText className="text-sm">{label}</ThemedText>
-                  </Pressable>
-                ),
-              )}
-            </View>
-          </View>
-
-          <View className="gap-2">
-            <ThemedText className="text-sm font-medium">
-              Performed At
+          {formState.errors.name !== undefined && (
+            <ThemedText className="text-destructive text-xs">
+              {formState.errors.name.message}
             </ThemedText>
+          )}
 
-            <Controller
-              control={control}
-              name="performedAt"
-              render={({ field }) => (
-                <View className="rounded-xl border border-border bg-muted p-1.5">
-                  <DateTimePicker
-                    value={field.value}
-                    mode="datetime"
-                    onValueChange={(_, selectedDate) =>
-                      field.onChange(selectedDate)
-                    }
-                  />
-                </View>
-              )}
-            />
+          <View className="flex-row flex-wrap gap-2">
+            {[
+              "Push",
+              "Pull",
+              "Legs",
+              "Upper",
+              "Lower",
+              "Chest",
+              "Shoulders",
+              "Arms",
+              "Cardio",
+            ].map((label) => (
+              <Pressable
+                key={label}
+                onPress={() =>
+                  setValue("name", label, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  })
+                }
+                className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
+              >
+                <ThemedText className="text-sm">{label}</ThemedText>
+              </Pressable>
+            ))}
           </View>
+        </View>
 
-          <View className="gap-2">
-            <ThemedText className="text-sm font-medium">Icon</ThemedText>
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Duration</ThemedText>
 
-            <Controller
-              control={control}
-              name="icon"
-              render={({ field }) => (
-                <WorkoutIconGrid
-                  className="p-4 bg-muted border rounded-xl border-border"
+          <Controller
+            control={control}
+            name="durationMinutes"
+            render={({ field }) => (
+              <ThemedTextInput
+                placeholder="Duration"
+                keyboardType="number-pad"
+                value={field.value}
+                onChangeText={field.onChange}
+                onBlur={field.onBlur}
+                className={
+                  formState.errors.durationMinutes !== undefined
+                    ? "border-destructive"
+                    : ""
+                }
+              />
+            )}
+          />
+
+          {formState.errors.durationMinutes !== undefined && (
+            <ThemedText className="text-destructive text-xs">
+              {formState.errors.durationMinutes.message}
+            </ThemedText>
+          )}
+
+          <View className="flex-row flex-wrap gap-2">
+            {["15", "30", "45", "60", "75", "90", "105", "120"].map((label) => (
+              <Pressable
+                key={label}
+                onPress={() =>
+                  setValue("durationMinutes", label, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  })
+                }
+                className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
+              >
+                <ThemedText className="text-sm">{label}</ThemedText>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Performed At</ThemedText>
+
+          <Controller
+            control={control}
+            name="performedAt"
+            render={({ field }) => (
+              <View className="rounded-xl border border-border bg-muted p-1.5">
+                <DateTimePicker
                   value={field.value}
-                  onChange={field.onChange}
+                  mode="datetime"
+                  onValueChange={(_, selectedDate) =>
+                    field.onChange(selectedDate)
+                  }
                 />
-              )}
-            />
-          </View>
-
-          {/* Save */}
-          <Pressable
-            onPress={handleSubmit(onSubmit)}
-            className={cn(
-              "items-center rounded-xl bg-primary p-4 active:opacity-80",
-              !canSave && "opacity-50",
-            )}
-            disabled={!canSave}
-          >
-            {updateWorkoutLogMutation.isPending ? (
-              <ActivityIndicator color={theme.primaryForeground} />
-            ) : (
-              <ThemedText className="font-semibold text-primary-foreground">
-                Save
-              </ThemedText>
-            )}
-          </Pressable>
-
-          {/* Delete */}
-          <Pressable
-            className={cn(
-              "p-4 rounded-xl bg-muted items-center active:opacity-80",
-              !canDelete && "opacity-50",
-            )}
-            disabled={!canDelete}
-            onPress={handleDelete}
-          >
-            {deleteWorkoutLogMutation.isPending ? (
-              <ActivityIndicator color={theme.destructive} />
-            ) : (
-              <View className="flex-row gap-1 items-center">
-                <MaterialCommunityIcons
-                  name="trash-can"
-                  size={16}
-                  color={theme.destructive}
-                />
-
-                <ThemedText className="text-destructive font-semibold">
-                  Delete
-                </ThemedText>
               </View>
             )}
-          </Pressable>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          />
+        </View>
+
+        <View className="gap-2">
+          <ThemedText className="text-sm font-medium">Icon</ThemedText>
+
+          <Controller
+            control={control}
+            name="icon"
+            render={({ field }) => (
+              <WorkoutIconGrid
+                className="p-4 bg-muted border rounded-xl border-border"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </View>
+
+        {/* Save */}
+        <Pressable
+          onPress={handleSubmit(onSubmit)}
+          className={cn(
+            "items-center rounded-xl bg-primary p-4 active:opacity-80",
+            !canSave && "opacity-50",
+          )}
+          disabled={!canSave}
+        >
+          {updateWorkoutLogMutation.isPending ? (
+            <ActivityIndicator color={theme.primaryForeground} />
+          ) : (
+            <ThemedText className="font-semibold text-primary-foreground">
+              Save
+            </ThemedText>
+          )}
+        </Pressable>
+
+        {/* Delete */}
+        <Pressable
+          className={cn(
+            "p-4 rounded-xl bg-muted items-center active:opacity-80",
+            !canDelete && "opacity-50",
+          )}
+          disabled={!canDelete}
+          onPress={handleDelete}
+        >
+          {deleteWorkoutLogMutation.isPending ? (
+            <ActivityIndicator color={theme.destructive} />
+          ) : (
+            <View className="flex-row gap-1 items-center">
+              <MaterialCommunityIcons
+                name="trash-can"
+                size={16}
+                color={theme.destructive}
+              />
+
+              <ThemedText className="text-destructive font-semibold">
+                Delete
+              </ThemedText>
+            </View>
+          )}
+        </Pressable>
+      </ScrollView>
     </>
   );
 }

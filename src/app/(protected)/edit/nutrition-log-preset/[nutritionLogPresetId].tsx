@@ -27,7 +27,6 @@ import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
@@ -148,202 +147,194 @@ function NutritionLogPresetForm({
     !deleteNutritionLogPresetMutation.isPending && !formState.isSubmitting;
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerClassName="p-4 gap-4"
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
     >
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerClassName="p-4 gap-4"
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Image picker */}
-        <View className="items-center gap-2">
-          <Controller
-            control={control}
-            name="imageUri"
-            render={({ field }) => (
-              <View className="relative h-48 w-48">
-                <Pressable
-                  onPress={pickImage}
-                  className={cn(
-                    "flex-1 items-center justify-center overflow-hidden rounded-2xl",
-                    field.value === null &&
-                      "border border-dashed border-border bg-muted",
-                  )}
-                >
-                  {field.value !== null ? (
-                    <Image
-                      source={{ uri: field.value }}
-                      style={{ flex: 1, width: "100%" }}
-                    />
-                  ) : (
-                    <MaterialCommunityIcons
-                      name="camera"
-                      size={48}
-                      color={theme.mutedForeground}
-                    />
-                  )}
-                </Pressable>
-
-                {field.value !== null && (
-                  <Pressable
-                    onPress={() => field.onChange(null)}
-                    hitSlop={8}
-                    className="absolute -right-3 -top-3 h-8 w-8 items-center justify-center rounded-full bg-destructive shadow active:opacity-80"
-                  >
-                    <MaterialCommunityIcons
-                      name="trash-can-outline"
-                      size={16}
-                      color={theme.destructiveForeground}
-                    />
-                  </Pressable>
-                )}
-              </View>
-            )}
-          />
-
-          <View className="items-center">
-            <ThemedText className="text-sm font-medium">
-              Add an image
-            </ThemedText>
-
-            <ThemedText className="text-xs text-muted-foreground">
-              Tap to select an image
-            </ThemedText>
-          </View>
-        </View>
-
-        {/* Name */}
-        <View className="gap-2">
-          <ThemedText className="text-sm font-medium">Name</ThemedText>
-
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <ThemedTextInput
-                value={field.value}
-                onChangeText={field.onChange}
-                onBlur={field.onBlur}
-                placeholder="Name"
-                className={
-                  formState.errors.name !== undefined
-                    ? "border-destructive"
-                    : ""
-                }
-              />
-            )}
-          />
-
-          {formState.errors.name !== undefined && (
-            <ThemedText className="text-xs text-destructive">
-              {formState.errors.name.message}
-            </ThemedText>
-          )}
-
-          <View className="flex-row flex-wrap gap-2">
-            {[
-              "Breakfast",
-              "Lunch",
-              "Dinner",
-              "Snack",
-              "Pre-workout",
-              "Post-workout",
-            ].map((label) => (
+      {/* Image picker */}
+      <View className="items-center gap-2">
+        <Controller
+          control={control}
+          name="imageUri"
+          render={({ field }) => (
+            <View className="relative h-48 w-48">
               <Pressable
-                key={label}
-                onPress={() =>
-                  setValue("name", label, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                    shouldTouch: true,
-                  })
-                }
-                className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
+                onPress={pickImage}
+                className={cn(
+                  "flex-1 items-center justify-center overflow-hidden rounded-2xl",
+                  field.value === null &&
+                    "border border-dashed border-border bg-muted",
+                )}
               >
-                <ThemedText className="text-sm">{label}</ThemedText>
+                {field.value !== null ? (
+                  <Image
+                    source={{ uri: field.value }}
+                    style={{ flex: 1, width: "100%" }}
+                  />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="camera"
+                    size={48}
+                    color={theme.mutedForeground}
+                  />
+                )}
               </Pressable>
-            ))}
-          </View>
-        </View>
 
-        {/* Calories */}
-        <View className="gap-2">
-          <ThemedText className="text-sm font-medium">Calories</ThemedText>
-
-          <Controller
-            control={control}
-            name="calories"
-            render={({ field }) => (
-              <ThemedTextInput
-                value={field.value}
-                onChangeText={field.onChange}
-                onBlur={field.onBlur}
-                placeholder="Calories"
-                keyboardType="number-pad"
-                className={
-                  formState.errors.calories !== undefined
-                    ? "border-destructive"
-                    : ""
-                }
-              />
-            )}
-          />
-
-          {formState.errors.calories !== undefined && (
-            <ThemedText className="text-xs text-destructive">
-              {formState.errors.calories.message}
-            </ThemedText>
-          )}
-        </View>
-
-        {/* Save */}
-        <Pressable
-          onPress={handleSubmit(onSubmit)}
-          className={cn(
-            "items-center rounded-xl bg-primary p-4 active:opacity-80",
-            !canSave && "opacity-50",
-          )}
-          disabled={!canSave}
-        >
-          {formState.isSubmitting ? (
-            <ActivityIndicator color={theme.primaryForeground} />
-          ) : (
-            <ThemedText className="font-semibold text-primary-foreground">
-              Save
-            </ThemedText>
-          )}
-        </Pressable>
-
-        {/* Delete */}
-        <Pressable
-          className={cn(
-            "p-4 rounded-xl bg-muted items-center active:opacity-80",
-            !canDelete && "opacity-50",
-          )}
-          disabled={!canDelete}
-          onPress={handleDelete}
-        >
-          {deleteNutritionLogPresetMutation.isPending ? (
-            <ActivityIndicator color={theme.destructive} />
-          ) : (
-            <View className="flex-row gap-1 items-center">
-              <MaterialCommunityIcons
-                name="trash-can"
-                size={16}
-                color={theme.destructive}
-              />
-
-              <ThemedText className="text-destructive font-semibold">
-                Delete
-              </ThemedText>
+              {field.value !== null && (
+                <Pressable
+                  onPress={() => field.onChange(null)}
+                  hitSlop={8}
+                  className="absolute -right-3 -top-3 h-8 w-8 items-center justify-center rounded-full bg-destructive shadow active:opacity-80"
+                >
+                  <MaterialCommunityIcons
+                    name="trash-can-outline"
+                    size={16}
+                    color={theme.destructiveForeground}
+                  />
+                </Pressable>
+              )}
             </View>
           )}
-        </Pressable>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        />
+
+        <View className="items-center">
+          <ThemedText className="text-sm font-medium">Add an image</ThemedText>
+
+          <ThemedText className="text-xs text-muted-foreground">
+            Tap to select an image
+          </ThemedText>
+        </View>
+      </View>
+
+      {/* Name */}
+      <View className="gap-2">
+        <ThemedText className="text-sm font-medium">Name</ThemedText>
+
+        <Controller
+          control={control}
+          name="name"
+          render={({ field }) => (
+            <ThemedTextInput
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="Name"
+              className={
+                formState.errors.name !== undefined ? "border-destructive" : ""
+              }
+            />
+          )}
+        />
+
+        {formState.errors.name !== undefined && (
+          <ThemedText className="text-xs text-destructive">
+            {formState.errors.name.message}
+          </ThemedText>
+        )}
+
+        <View className="flex-row flex-wrap gap-2">
+          {[
+            "Breakfast",
+            "Lunch",
+            "Dinner",
+            "Snack",
+            "Pre-workout",
+            "Post-workout",
+          ].map((label) => (
+            <Pressable
+              key={label}
+              onPress={() =>
+                setValue("name", label, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                  shouldTouch: true,
+                })
+              }
+              className="rounded-full border border-border bg-muted px-3 py-2 active:opacity-80"
+            >
+              <ThemedText className="text-sm">{label}</ThemedText>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      {/* Calories */}
+      <View className="gap-2">
+        <ThemedText className="text-sm font-medium">Calories</ThemedText>
+
+        <Controller
+          control={control}
+          name="calories"
+          render={({ field }) => (
+            <ThemedTextInput
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="Calories"
+              keyboardType="number-pad"
+              className={
+                formState.errors.calories !== undefined
+                  ? "border-destructive"
+                  : ""
+              }
+            />
+          )}
+        />
+
+        {formState.errors.calories !== undefined && (
+          <ThemedText className="text-xs text-destructive">
+            {formState.errors.calories.message}
+          </ThemedText>
+        )}
+      </View>
+
+      {/* Save */}
+      <Pressable
+        onPress={handleSubmit(onSubmit)}
+        className={cn(
+          "items-center rounded-xl bg-primary p-4 active:opacity-80",
+          !canSave && "opacity-50",
+        )}
+        disabled={!canSave}
+      >
+        {formState.isSubmitting ? (
+          <ActivityIndicator color={theme.primaryForeground} />
+        ) : (
+          <ThemedText className="font-semibold text-primary-foreground">
+            Save
+          </ThemedText>
+        )}
+      </Pressable>
+
+      {/* Delete */}
+      <Pressable
+        className={cn(
+          "p-4 rounded-xl bg-muted items-center active:opacity-80",
+          !canDelete && "opacity-50",
+        )}
+        disabled={!canDelete}
+        onPress={handleDelete}
+      >
+        {deleteNutritionLogPresetMutation.isPending ? (
+          <ActivityIndicator color={theme.destructive} />
+        ) : (
+          <View className="flex-row gap-1 items-center">
+            <MaterialCommunityIcons
+              name="trash-can"
+              size={16}
+              color={theme.destructive}
+            />
+
+            <ThemedText className="text-destructive font-semibold">
+              Delete
+            </ThemedText>
+          </View>
+        )}
+      </Pressable>
+    </ScrollView>
   );
 }
 
