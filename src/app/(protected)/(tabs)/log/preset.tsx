@@ -77,7 +77,7 @@ export default function Preset() {
     onError: (error) => {
       Toast.show({
         type: "error",
-        text1: "Something went wrong",
+        text1: "Couldn't log calories",
         text2: error.message,
         topOffset: insets.top + 16,
       });
@@ -105,7 +105,7 @@ export default function Preset() {
     onError: (error) => {
       Toast.show({
         type: "error",
-        text1: "Something went wrong",
+        text1: "Couldn't log workout",
         text2: error.message,
         topOffset: insets.top + 16,
       });
@@ -114,27 +114,31 @@ export default function Preset() {
     },
   });
 
-  const logCalories = async (nutritionLogPreset: NutritionLogPreset) => {
-    const consumedAtSqlTimestamp = toSqlTimestamp(new Date());
-
+  const logCalories = async ({
+    name,
+    calories,
+    imageUrl,
+  }: NutritionLogPreset) => {
     createNutritionLogMutation.mutate({
       userId: user.id,
-      name: nutritionLogPreset.name,
-      calories: nutritionLogPreset.calories,
-      imageUrl: nutritionLogPreset.imageUrl,
-      consumedAt: consumedAtSqlTimestamp,
+      name,
+      calories,
+      imageUrl,
+      consumedAt: toSqlTimestamp(new Date()),
     });
   };
 
-  const logWorkout = async (workoutLogPreset: WorkoutLogPreset) => {
-    const performedAtSqlTimestamp = toSqlTimestamp(new Date());
-
+  const logWorkout = async ({
+    name,
+    durationMinutes,
+    icon,
+  }: WorkoutLogPreset) => {
     createWorkoutLogMutation.mutate({
       userId: user.id,
-      name: workoutLogPreset.name,
-      durationMinutes: workoutLogPreset.durationMinutes,
-      performedAt: performedAtSqlTimestamp,
-      icon: workoutLogPreset.icon,
+      name,
+      durationMinutes,
+      performedAt: toSqlTimestamp(new Date()),
+      icon,
     });
   };
 

@@ -151,9 +151,12 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
     });
   };
 
-  const isSaving = formState.isSubmitting || updateWorkoutLogMutation.isPending;
-  const isDeleting = deleteWorkoutLogMutation.isPending;
-  const hasUnsavedChanges = formState.isDirty;
+  const canSave =
+    !updateWorkoutLogMutation.isPending &&
+    !deleteWorkoutLogMutation.isPending &&
+    formState.isDirty;
+  const canDelete =
+    !updateWorkoutLogMutation.isPending && !deleteWorkoutLogMutation.isPending;
 
   return (
     <>
@@ -163,17 +166,21 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
             <Pressable
               className="p-2 items-center flex-row gap-2"
               disabled={
-                isSaving ||
-                isDeleting ||
+                updateWorkoutLogMutation.isPending ||
+                deleteWorkoutLogMutation.isPending ||
                 createWorkoutLogPresetMutation.isPending
               }
               onPress={handleCreateWorkoutLogPreset}
             >
-              <MaterialCommunityIcons
-                name="tune"
-                size={24}
-                color={theme.foreground}
-              />
+              {createWorkoutLogPresetMutation.isPending ? (
+                <ActivityIndicator color={theme.foreground} />
+              ) : (
+                <MaterialCommunityIcons
+                  name="tune"
+                  size={24}
+                  color={theme.foreground}
+                />
+              )}
 
               <ThemedText>Create Preset</ThemedText>
             </Pressable>
@@ -339,11 +346,11 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
             onPress={handleSubmit(onSubmit)}
             className={cn(
               "items-center rounded-xl bg-primary p-4 active:opacity-80",
-              (isSaving || !hasUnsavedChanges || isDeleting) && "opacity-50",
+              !canSave && "opacity-50",
             )}
-            disabled={isSaving || !hasUnsavedChanges || isDeleting}
+            disabled={!canSave}
           >
-            {isSaving ? (
+            {updateWorkoutLogMutation.isPending ? (
               <ActivityIndicator color={theme.primaryForeground} />
             ) : (
               <ThemedText className="font-semibold text-primary-foreground">
@@ -356,12 +363,12 @@ function WorkoutLogForm({ workoutLog }: { workoutLog: WorkoutLog }) {
           <Pressable
             className={cn(
               "p-4 rounded-xl bg-muted items-center active:opacity-80",
-              (isDeleting || isSaving) && "opacity-50",
+              !canDelete && "opacity-50",
             )}
-            disabled={isDeleting || isSaving}
+            disabled={!canDelete}
             onPress={handleDelete}
           >
-            {isDeleting ? (
+            {deleteWorkoutLogMutation.isPending ? (
               <ActivityIndicator color={theme.destructive} />
             ) : (
               <View className="flex-row gap-1 items-center">

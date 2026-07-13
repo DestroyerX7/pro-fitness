@@ -3,6 +3,7 @@ import Card from "@/components/Card";
 import ThemedText from "@/components/ThemedText";
 import { useThemePreference } from "@/components/ThemeProvider";
 import useDailyTarget from "@/hooks/useDailyTarget";
+import { useImagePicker } from "@/hooks/useImagePicker";
 import useTheme from "@/hooks/useTheme";
 import { uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
@@ -10,16 +11,9 @@ import { cn } from "@/lib/nativewind";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  View,
-} from "react-native";
+import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
@@ -35,45 +29,10 @@ export default function Profile() {
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option.", [
-      {
-        text: "Take Photo",
-        onPress: () => openCamera(),
-      },
-      {
-        text: "Choose from Library",
-        onPress: () => openLibrary(),
-      },
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-    ]);
-  };
-
-  const openCamera = async () => {
+  const { pickImage } = useImagePicker(async (uri) => {
     try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      const imageUrl = await uploadToCloudinary(uri);
 
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission required",
-          "Camera access is needed to take a photo.",
-        );
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        quality: 1,
-      });
-
-      if (result.canceled) {
-        return;
-      }
-
-      const imageUrl = await uploadToCloudinary(result.assets[0].uri);
       const { error } = await authClient.updateUser({
         image: imageUrl,
       });
@@ -81,8 +40,8 @@ export default function Profile() {
       if (error !== null) {
         Toast.show({
           type: "error",
-          text1: "Something went wrong",
-          text2: error.message ?? "Couldn't update image.",
+          text1: "Couldn't update image",
+          text2: error.message ?? "Please try again.",
           topOffset: insets.top + 16,
         });
 
@@ -91,65 +50,14 @@ export default function Profile() {
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Something went wrong",
-        text2:
-          error instanceof Error ? error.message : "Couldn't update image.",
+        text1: "Couldn't update image",
+        text2: error instanceof Error ? error.message : "Please try again.",
         topOffset: insets.top + 16,
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-  };
-
-  const openLibrary = async () => {
-    try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission required",
-          "Photo library access is needed to select an image.",
-        );
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        allowsEditing: true,
-        quality: 1,
-      });
-
-      if (result.canceled) {
-        return;
-      }
-
-      const imageUrl = await uploadToCloudinary(result.assets[0].uri);
-      const { error } = await authClient.updateUser({
-        image: imageUrl,
-      });
-
-      if (error !== null) {
-        Toast.show({
-          type: "error",
-          text1: "Something went wrong",
-          text2: error.message ?? "Couldn't update image.",
-          topOffset: insets.top + 16,
-        });
-
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Something went wrong",
-        text2:
-          error instanceof Error ? error.message : "Couldn't update image.",
-        topOffset: insets.top + 16,
-      });
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    }
-  };
+  });
 
   const handleRefresh = async () => {
     if (isRefreshing) {

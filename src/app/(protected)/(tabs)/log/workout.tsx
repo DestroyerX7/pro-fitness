@@ -12,7 +12,6 @@ import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -46,8 +45,6 @@ export default function Workout() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
 
-  const [logging, setLogging] = useState(false);
-
   const createWorkoutLogMutation = useMutation({
     mutationFn: createWorkoutLog,
     onSuccess: () =>
@@ -63,8 +60,6 @@ export default function Workout() {
     icon,
   }: WorkoutLogFormValues) => {
     try {
-      setLogging(true);
-
       await createWorkoutLogMutation.mutateAsync({
         userId: user.id,
         name,
@@ -84,14 +79,12 @@ export default function Workout() {
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Something went wrong",
+        text1: "Couldn't log workout",
         text2: error instanceof Error ? error.message : "Please try again.",
         topOffset: insets.top + 16,
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setLogging(false);
     }
   };
 
@@ -249,11 +242,11 @@ export default function Workout() {
           onPress={handleSubmit(onSubmit)}
           className={cn(
             "bg-primary p-4 rounded-xl active:opacity-80",
-            logging && "opacity-50",
+            formState.isSubmitting && "opacity-50",
           )}
-          disabled={logging}
+          disabled={formState.isSubmitting}
         >
-          {logging ? (
+          {formState.isSubmitting ? (
             <ActivityIndicator color={theme.primaryForeground} />
           ) : (
             <ThemedText className="text-primary-foreground text-center font-semibold">

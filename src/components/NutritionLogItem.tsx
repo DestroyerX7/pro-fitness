@@ -53,7 +53,7 @@ export default function NutritionLogItem({
         </View>
 
         <View className="flex-1">
-          <ThemedText className="text-card-foreground text-2xl font-bold">
+          <ThemedText className="text-card-foreground text-2xl font-bold line-clamp-3">
             {name}
           </ThemedText>
 

@@ -3,6 +3,7 @@ import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { queryKeys } from "@/constants/query-keys";
 import useDailyTarget from "@/hooks/useDailyTarget";
+import { useImagePicker } from "@/hooks/useImagePicker";
 import useTheme from "@/hooks/useTheme";
 import { DailyTarget, updateDailyTarget, uploadToCloudinary } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
@@ -13,7 +14,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
 import { router, Stack } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -45,11 +45,10 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
 
   const updateDailyTargetMutation = useMutation({
     mutationFn: updateDailyTarget,
-    onSuccess: () => {
+    onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: queryKeys.dailyTarget.byUser(user.id),
-      });
-    },
+      }),
   });
 
   const handleDeleteUser = () => {
@@ -80,78 +79,13 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
     );
   };
 
-  const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option.", [
-      {
-        text: "Take Photo",
-        onPress: () => openCamera(),
-      },
-      {
-        text: "Choose from Library",
-        onPress: () => openLibrary(),
-      },
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-    ]);
-  };
-
-  const openCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Camera access is needed to take a photo.",
-      );
-
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, {
+  const { pickImage } = useImagePicker((uri) =>
+    setValue("imageUri", uri, {
       shouldValidate: true,
       shouldDirty: true,
       shouldTouch: true,
-    });
-  };
-
-  const openLibrary = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Photo library access is needed to select an image.",
-      );
-
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, {
-      shouldValidate: true,
-      shouldDirty: true,
-      shouldTouch: true,
-    });
-  };
+    }),
+  );
 
   const onSubmit = async ({
     name,
@@ -165,7 +99,10 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
 
     const tasks: Promise<unknown>[] = [];
 
-    if (user.name !== name || user.image !== imageUri) {
+    if (
+      formState.dirtyFields.name !== undefined ||
+      formState.dirtyFields.imageUri !== undefined
+    ) {
       tasks.push(
         (async () => {
           const imageUrl =
@@ -187,17 +124,14 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
       );
     }
 
-    const dailyCalorieTargetNum = Number(dailyCalorieTarget);
-    const dailyWorkoutMinutesTargetNum = Number(dailyWorkoutMinutesTarget);
-
     if (
-      dailyTarget.calorieTarget !== dailyCalorieTargetNum ||
-      dailyTarget.workoutMinutesTarget !== dailyWorkoutMinutesTargetNum
+      formState.dirtyFields.dailyCalorieTarget !== undefined ||
+      formState.dirtyFields.dailyWorkoutMinutesTarget !== undefined
     ) {
       tasks.push(
         updateDailyTargetMutation.mutateAsync({
-          calorieTarget: dailyCalorieTargetNum,
-          workoutMinutesTarget: dailyWorkoutMinutesTargetNum,
+          calorieTarget: Number(dailyCalorieTarget),
+          workoutMinutesTarget: Number(dailyWorkoutMinutesTarget),
         }),
       );
     }
@@ -206,10 +140,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
     const hasError = results.some((r) => r.status === "rejected");
 
     if (hasError) {
-      Alert.alert(
-        "Couldn't save",
-        "Something went wrong while saving. Please try again.",
-      );
+      Alert.alert("Couldn't save", "Please try again.");
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
@@ -219,8 +150,7 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
     router.back();
   };
 
-  const isSaving = formState.isSubmitting;
-  const hasUnsavedChanges = formState.isDirty;
+  const canSave = !formState.isSubmitting && formState.isDirty;
 
   return (
     <>
@@ -380,11 +310,11 @@ function ProfileForm({ dailyTarget }: { dailyTarget: DailyTarget }) {
             onPress={handleSubmit(onSubmit)}
             className={cn(
               "p-4 items-center justify-center rounded-xl bg-primary active:opacity-80",
-              (isSaving || !hasUnsavedChanges) && "opacity-50",
+              !canSave && "opacity-50",
             )}
-            disabled={isSaving || !hasUnsavedChanges}
+            disabled={!canSave}
           >
-            {isSaving ? (
+            {formState.isSubmitting ? (
               <ActivityIndicator color={theme.primaryForeground} />
             ) : (
               <ThemedText className="font-semibold text-primary-foreground">

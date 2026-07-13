@@ -77,7 +77,7 @@ export default function Index() {
     onError: (error) => {
       Toast.show({
         type: "error",
-        text1: "Something went wrong",
+        text1: "Couldn't update daily target",
         text2: error.message,
         topOffset: insets.top + 16,
       });
@@ -132,10 +132,17 @@ export default function Index() {
     Alert.prompt(
       "Edit calorie target",
       "Update your daily calorie target.",
-      (calorieTargetText) =>
+      (calorieTargetText) => {
+        const calorieTarget = Number(calorieTargetText);
+
+        if (calorieTarget === dailyTarget.calorieTarget) {
+          return;
+        }
+
         updateDailyTargetMutation.mutate({
-          calorieTarget: Number(calorieTargetText),
-        }),
+          calorieTarget: calorieTarget,
+        });
+      },
       "plain-text",
       dailyTarget.calorieTarget.toString(),
       "number-pad",
@@ -152,10 +159,17 @@ export default function Index() {
     Alert.prompt(
       "Edit workout target",
       "Update your daily workout target.",
-      (workoutMinutesTargetText) =>
+      (workoutMinutesTargetText) => {
+        const workoutMinutesTarget = Number(workoutMinutesTargetText);
+
+        if (workoutMinutesTarget === dailyTarget.workoutMinutesTarget) {
+          return;
+        }
+
         updateDailyTargetMutation.mutate({
-          workoutMinutesTarget: Number(workoutMinutesTargetText),
-        }),
+          workoutMinutesTarget,
+        });
+      },
       "plain-text",
       dailyTarget.workoutMinutesTarget.toString(),
       "number-pad",

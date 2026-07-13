@@ -2,6 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { queryKeys } from "@/constants/query-keys";
+import { useImagePicker } from "@/hooks/useImagePicker";
 import useTheme from "@/hooks/useTheme";
 import {
   createNutritionLogPreset,
@@ -20,7 +21,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -111,76 +111,13 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
     });
   };
 
-  const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option.", [
-      {
-        text: "Take Photo",
-        onPress: () => openCamera(),
-      },
-      {
-        text: "Choose from Library",
-        onPress: () => openLibrary(),
-      },
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-    ]);
-  };
-
-  const openCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Camera access is needed to take a photo.",
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, {
+  const { pickImage } = useImagePicker((uri) =>
+    setValue("imageUri", uri, {
       shouldValidate: true,
       shouldDirty: true,
       shouldTouch: true,
-    });
-  };
-
-  const openLibrary = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Photo library access is needed to select an image.",
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, {
-      shouldValidate: true,
-      shouldDirty: true,
-      shouldTouch: true,
-    });
-  };
+    }),
+  );
 
   const handleDelete = async () => {
     Alert.alert(
@@ -236,10 +173,13 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
     }
   };
 
-  const isSaving = formState.isSubmitting;
-  const isDeleting = deleteNutritionLogMutation.isPending;
-  const hasUnsavedChanges = formState.isDirty;
-
+  const canSave =
+    !formState.isSubmitting &&
+    !deleteNutritionLogMutation.isPending &&
+    formState.isDirty;
+  const canDelete =
+    !deleteNutritionLogMutation.isPending && !formState.isSubmitting;
+    
   return (
     <>
       <Stack.Screen
@@ -248,17 +188,21 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
             <Pressable
               className="p-2 items-center flex-row gap-2"
               disabled={
-                isSaving ||
-                isDeleting ||
+                formState.isSubmitting ||
+                deleteNutritionLogMutation.isPending ||
                 createNutritionLogPresetMutation.isPending
               }
               onPress={handleCreateNutritionLogPreset}
             >
-              <MaterialCommunityIcons
-                name="tune"
-                size={24}
-                color={theme.foreground}
-              />
+              {createNutritionLogPresetMutation.isPending ? (
+                <ActivityIndicator color={theme.foreground} />
+              ) : (
+                <MaterialCommunityIcons
+                  name="tune"
+                  size={24}
+                  color={theme.foreground}
+                />
+              )}
 
               <ThemedText>Create Preset</ThemedText>
             </Pressable>
@@ -286,10 +230,9 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
                   <Pressable
                     onPress={pickImage}
                     className={cn(
-                      "flex-1 items-center justify-center overflow-hidden rounded-2xl border",
-                      field.value !== null
-                        ? "border-transparent"
-                        : "border-dashed border-border bg-muted",
+                      "flex-1 items-center justify-center overflow-hidden rounded-2xl",
+                      field.value === null &&
+                        "border border-dashed border-border bg-muted",
                     )}
                   >
                     {field.value !== null ? (
@@ -442,11 +385,11 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
             onPress={handleSubmit(onSubmit)}
             className={cn(
               "items-center rounded-xl bg-primary p-4 active:opacity-80",
-              (isSaving || !hasUnsavedChanges || isDeleting) && "opacity-50",
+              !canSave && "opacity-50",
             )}
-            disabled={isSaving || !hasUnsavedChanges || isDeleting}
+            disabled={!canSave}
           >
-            {isSaving ? (
+            {formState.isSubmitting ? (
               <ActivityIndicator color={theme.primaryForeground} />
             ) : (
               <ThemedText className="font-semibold text-primary-foreground">
@@ -459,12 +402,12 @@ function NutritionLogForm({ nutritionLog }: { nutritionLog: NutritionLog }) {
           <Pressable
             className={cn(
               "p-4 rounded-xl bg-muted items-center active:opacity-80",
-              (isDeleting || isSaving) && "opacity-50",
+              !canDelete && "opacity-50",
             )}
-            disabled={isDeleting || isSaving}
+            disabled={!canDelete}
             onPress={handleDelete}
           >
-            {isDeleting ? (
+            {deleteNutritionLogMutation.isPending ? (
               <ActivityIndicator color={theme.destructive} />
             ) : (
               <View className="flex-row gap-1 items-center">

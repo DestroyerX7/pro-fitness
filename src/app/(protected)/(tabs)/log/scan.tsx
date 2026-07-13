@@ -2,6 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { queryKeys } from "@/constants/query-keys";
+import { useImagePicker } from "@/hooks/useImagePicker";
 import useTheme from "@/hooks/useTheme";
 import { createNutritionLog, uploadToCloudinary } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
@@ -18,13 +19,11 @@ import {
   useCameraPermissions,
 } from "expo-camera";
 import * as Haptics from "expo-haptics";
-import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -55,8 +54,6 @@ export default function Scan() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const isLoadingRef = useRef(false);
-
-  const [logging, setLogging] = useState(false);
 
   const { control, handleSubmit, setValue, formState, reset } =
     useForm<ScanFormValues>({
@@ -120,68 +117,13 @@ export default function Scan() {
     }
   };
 
-  const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option.", [
-      {
-        text: "Take Photo",
-        onPress: () => openCamera(),
-      },
-      {
-        text: "Choose from Library",
-        onPress: () => openLibrary(),
-      },
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-    ]);
-  };
-
-  const openCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Camera access is needed to take a photo.",
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
-  };
-
-  const openLibrary = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Photo library access is needed to select an image.",
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
-  };
+  const { pickImage } = useImagePicker((uri) =>
+    setValue("imageUri", uri, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    }),
+  );
 
   const onSubmit = async ({
     name,
@@ -191,8 +133,6 @@ export default function Scan() {
     imageUri,
   }: ScanFormValues) => {
     try {
-      setLogging(true);
-
       const caloriesPerServingNum = Number(caloriesPerServing);
       const numServingsNum = Number(numServings);
       const calories = Math.ceil(caloriesPerServingNum * numServingsNum);
@@ -223,14 +163,12 @@ export default function Scan() {
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Something went wrong",
+        text1: "Couldn't log calories",
         text2: error instanceof Error ? error.message : "Please try again.",
         topOffset: insets.top + 16,
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setLogging(false);
     }
   };
 
@@ -542,12 +480,12 @@ export default function Scan() {
         <Pressable
           className={cn(
             "bg-primary p-4 rounded-xl active:opacity-80",
-            logging && "opacity-50",
+            formState.isSubmitting && "opacity-50",
           )}
           onPress={handleSubmit(onSubmit)}
-          disabled={logging}
+          disabled={formState.isSubmitting}
         >
-          {logging ? (
+          {formState.isSubmitting ? (
             <ActivityIndicator color={theme.primaryForeground} />
           ) : (
             <ThemedText className="text-primary-foreground text-center font-semibold">

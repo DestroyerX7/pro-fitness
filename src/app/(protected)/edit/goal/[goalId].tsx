@@ -87,28 +87,31 @@ function GoalForm({ goal }: { goal: Goal }) {
     Haptics.selectionAsync();
   };
 
-  const onSubmit = async (data: GoalFormValues) => {
-    if (
-      goal.name === data.name &&
-      goal.description === data.description &&
-      goal.completed === data.completed &&
-      goal.hidden === data.hidden
-    ) {
+  const onSubmit = async ({
+    name,
+    description,
+    completed,
+    hidden,
+  }: GoalFormValues) => {
+    if (!formState.isDirty) {
       return;
     }
 
     updateGoalMutation.mutate({
-      name: data.name,
-      description: data.description,
-      completed: data.completed,
-      hidden: data.hidden,
+      name,
+      description,
+      completed,
+      hidden,
       goalId: goal.id,
     });
   };
 
-  const isSaving = formState.isSubmitting || updateGoalMutation.isPending;
-  const isDeleting = deleteGoalMutation.isPending;
-  const hasUnsavedChanges = formState.isDirty;
+  const canSave =
+    !updateGoalMutation.isPending &&
+    !deleteGoalMutation.isPending &&
+    formState.isDirty;
+  const canDelete =
+    !updateGoalMutation.isPending && !deleteGoalMutation.isPending;
 
   return (
     <>
@@ -123,15 +126,17 @@ function GoalForm({ goal }: { goal: Goal }) {
                   onPress={() => field.onChange(!field.value)}
                   onBlur={field.onBlur}
                   className="p-2 items-center flex-row gap-2"
-                  disabled={isSaving || isDeleting}
+                  disabled={
+                    updateGoalMutation.isPending || deleteGoalMutation.isPending
+                  }
                 >
                   <MaterialCommunityIcons
-                    name={field.value ? "eye" : "eye-off"}
+                    name={field.value ? "eye-off" : "eye"}
                     size={24}
                     color={theme.foreground}
                   />
 
-                  <ThemedText>{field.value ? "Show" : "Hide"}</ThemedText>
+                  <ThemedText>{field.value ? "Hidden" : "Visable"}</ThemedText>
                 </Pressable>
               )}
             />
@@ -262,12 +267,12 @@ function GoalForm({ goal }: { goal: Goal }) {
             onPress={handleSubmit(onSubmit)}
             className={cn(
               "items-center rounded-xl bg-primary p-4 active:opacity-80",
-              (isSaving || !hasUnsavedChanges || isDeleting) && "opacity-50",
+              !canSave && "opacity-50",
             )}
-            disabled={isSaving || !hasUnsavedChanges || isDeleting}
+            disabled={!canSave}
           >
             <ThemedText className="font-semibold text-primary-foreground">
-              {isSaving ? (
+              {updateGoalMutation.isPending ? (
                 <ActivityIndicator color={theme.primaryForeground} />
               ) : (
                 "Save"
@@ -279,12 +284,12 @@ function GoalForm({ goal }: { goal: Goal }) {
           <Pressable
             className={cn(
               "p-4 rounded-xl bg-muted items-center active:opacity-80",
-              (isDeleting || isSaving) && "opacity-50",
+              !canDelete && "opacity-50",
             )}
-            disabled={isDeleting || isSaving}
+            disabled={!canDelete}
             onPress={handleDelete}
           >
-            {isDeleting ? (
+            {deleteGoalMutation.isPending ? (
               <ActivityIndicator color={theme.destructive} />
             ) : (
               <View className="flex-row gap-1 items-center">

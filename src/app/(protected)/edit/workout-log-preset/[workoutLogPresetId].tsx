@@ -52,7 +52,7 @@ function WorkoutLogPresetForm({
 
   const theme = useTheme();
 
-  const updateWorkoutLogMutation = useMutation({
+  const updateWorkoutLogPresetMutation = useMutation({
     mutationFn: updateWorkoutLogPreset,
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -111,7 +111,7 @@ function WorkoutLogPresetForm({
       return;
     }
 
-    updateWorkoutLogMutation.mutate({
+    updateWorkoutLogPresetMutation.mutate({
       name,
       durationMinutes: Number(durationMinutes),
       icon,
@@ -119,9 +119,13 @@ function WorkoutLogPresetForm({
     });
   };
 
-  const isSaving = formState.isSubmitting || updateWorkoutLogMutation.isPending;
-  const isDeleting = deleteWorkoutLogPresetMutation.isPending;
-  const hasUnsavedChanges = formState.isDirty;
+  const canSave =
+    !updateWorkoutLogPresetMutation.isPending &&
+    !deleteWorkoutLogPresetMutation.isPending &&
+    formState.isDirty;
+  const canDelete =
+    !updateWorkoutLogPresetMutation.isPending &&
+    !deleteWorkoutLogPresetMutation.isPending;
 
   return (
     <KeyboardAvoidingView
@@ -261,11 +265,11 @@ function WorkoutLogPresetForm({
           onPress={handleSubmit(onSubmit)}
           className={cn(
             "items-center rounded-xl bg-primary p-4 active:opacity-80",
-            (isSaving || !hasUnsavedChanges || isDeleting) && "opacity-50",
+            !canSave && "opacity-50",
           )}
-          disabled={isSaving || !hasUnsavedChanges || isDeleting}
+          disabled={!canSave}
         >
-          {isSaving ? (
+          {updateWorkoutLogPresetMutation.isPending ? (
             <ActivityIndicator color={theme.primaryForeground} />
           ) : (
             <ThemedText className="font-semibold text-primary-foreground">
@@ -278,12 +282,12 @@ function WorkoutLogPresetForm({
         <Pressable
           className={cn(
             "p-4 rounded-xl bg-muted items-center active:opacity-80",
-            (isDeleting || isSaving) && "opacity-50",
+            !canDelete && "opacity-50",
           )}
-          disabled={isDeleting || isSaving}
+          disabled={!canDelete}
           onPress={handleDelete}
         >
-          {isDeleting ? (
+          {deleteWorkoutLogPresetMutation.isPending ? (
             <ActivityIndicator color={theme.destructive} />
           ) : (
             <View className="flex-row gap-1 items-center">

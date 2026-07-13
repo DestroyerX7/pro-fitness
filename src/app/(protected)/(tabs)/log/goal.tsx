@@ -9,7 +9,6 @@ import { GoalFormValues, goalSchema } from "@/lib/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -37,8 +36,6 @@ export default function Goal() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
 
-  const [creatingGoal, setCreatingGoal] = useState(false);
-
   const createGoalMutation = useMutation({
     mutationFn: createGoal,
     onSuccess: () =>
@@ -47,8 +44,6 @@ export default function Goal() {
 
   const onSubmit = async (data: GoalFormValues) => {
     try {
-      setCreatingGoal(true);
-
       await createGoalMutation.mutateAsync({
         userId: user.id,
         name: data.name,
@@ -66,14 +61,12 @@ export default function Goal() {
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Something went wrong",
+        text1: "Couldn't create goal",
         text2: error instanceof Error ? error.message : "Please try again.",
         topOffset: insets.top + 16,
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setCreatingGoal(false);
     }
   };
 
@@ -151,11 +144,11 @@ export default function Goal() {
           onPress={handleSubmit(onSubmit)}
           className={cn(
             "bg-primary p-4 rounded-xl active:opacity-80",
-            creatingGoal && "opacity-50",
+            formState.isSubmitting && "opacity-50",
           )}
-          disabled={creatingGoal}
+          disabled={formState.isSubmitting}
         >
-          {creatingGoal ? (
+          {formState.isSubmitting ? (
             <ActivityIndicator color={theme.primaryForeground} />
           ) : (
             <ThemedText className="text-primary-foreground text-center font-semibold">

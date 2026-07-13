@@ -2,6 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { queryKeys } from "@/constants/query-keys";
+import { useImagePicker } from "@/hooks/useImagePicker";
 import useTheme from "@/hooks/useTheme";
 import {
   NutritionLogPreset,
@@ -20,7 +21,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -79,77 +79,13 @@ function NutritionLogPresetForm({
     },
   });
 
-  const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option.", [
-      {
-        text: "Take Photo",
-        onPress: () => openCamera(),
-      },
-      {
-        text: "Choose from Library",
-        onPress: () => openLibrary(),
-      },
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-    ]);
-  };
-
-  const openCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Camera access is needed to take a photo.",
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, {
+  const { pickImage } = useImagePicker((uri) =>
+    setValue("imageUri", uri, {
       shouldValidate: true,
       shouldDirty: true,
       shouldTouch: true,
-    });
-  };
-
-  const openLibrary = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Photo library access is needed to select an image.",
-      );
-
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, {
-      shouldValidate: true,
-      shouldDirty: true,
-      shouldTouch: true,
-    });
-  };
+    }),
+  );
 
   const handleDelete = async () => {
     Alert.alert(
@@ -204,9 +140,12 @@ function NutritionLogPresetForm({
     }
   };
 
-  const isSaving = formState.isSubmitting;
-  const isDeleting = deleteNutritionLogPresetMutation.isPending;
-  const hasUnsavedChanges = formState.isDirty;
+  const canSave =
+    !formState.isSubmitting &&
+    !deleteNutritionLogPresetMutation.isPending &&
+    formState.isDirty;
+  const canDelete =
+    !deleteNutritionLogPresetMutation.isPending && !formState.isSubmitting;
 
   return (
     <KeyboardAvoidingView
@@ -229,10 +168,9 @@ function NutritionLogPresetForm({
                 <Pressable
                   onPress={pickImage}
                   className={cn(
-                    "flex-1 items-center justify-center overflow-hidden rounded-2xl border",
-                    field.value !== null
-                      ? "border-transparent"
-                      : "border-dashed border-border bg-muted",
+                    "flex-1 items-center justify-center overflow-hidden rounded-2xl",
+                    field.value === null &&
+                      "border border-dashed border-border bg-muted",
                   )}
                 >
                   {field.value !== null ? (
@@ -366,11 +304,11 @@ function NutritionLogPresetForm({
           onPress={handleSubmit(onSubmit)}
           className={cn(
             "items-center rounded-xl bg-primary p-4 active:opacity-80",
-            (isSaving || !hasUnsavedChanges || isDeleting) && "opacity-50",
+            !canSave && "opacity-50",
           )}
-          disabled={isSaving || !hasUnsavedChanges || isDeleting}
+          disabled={!canSave}
         >
-          {isSaving ? (
+          {formState.isSubmitting ? (
             <ActivityIndicator color={theme.primaryForeground} />
           ) : (
             <ThemedText className="font-semibold text-primary-foreground">
@@ -383,12 +321,12 @@ function NutritionLogPresetForm({
         <Pressable
           className={cn(
             "p-4 rounded-xl bg-muted items-center active:opacity-80",
-            (isDeleting || isSaving) && "opacity-50",
+            !canDelete && "opacity-50",
           )}
-          disabled={isDeleting || isSaving}
+          disabled={!canDelete}
           onPress={handleDelete}
         >
-          {isDeleting ? (
+          {deleteNutritionLogPresetMutation.isPending ? (
             <ActivityIndicator color={theme.destructive} />
           ) : (
             <View className="flex-row gap-1 items-center">

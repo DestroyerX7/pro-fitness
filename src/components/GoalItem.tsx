@@ -48,10 +48,12 @@ export default function GoalItem({
       </View>
 
       <View className="gap-1 flex-1">
-        <ThemedText className={"text-lg font-bold"}>{name}</ThemedText>
+        <ThemedText className={"text-lg font-bold line-clamp-3"}>
+          {name}
+        </ThemedText>
 
         {description !== null && (
-          <ThemedText className="text-muted-foreground flex-wrap">
+          <ThemedText className="text-muted-foreground flex-wrap line-clamp-3">
             {description}
           </ThemedText>
         )}

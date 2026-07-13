@@ -2,6 +2,7 @@ import { useAuthenticatedAuth } from "@/components/AuthenticatedAuthProvider";
 import ThemedText from "@/components/ThemedText";
 import ThemedTextInput from "@/components/ThemedTextInput";
 import { queryKeys } from "@/constants/query-keys";
+import { useImagePicker } from "@/hooks/useImagePicker";
 import useTheme from "@/hooks/useTheme";
 import { createNutritionLog, uploadToCloudinary } from "@/lib/api";
 import { toSqlTimestamp } from "@/lib/dates";
@@ -12,12 +13,9 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -43,8 +41,6 @@ export default function Nutrition() {
       },
     });
 
-  const [logging, setLogging] = useState(false);
-
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -56,68 +52,13 @@ export default function Nutrition() {
       }),
   });
 
-  const pickImage = async () => {
-    Alert.alert("Select Image", "Choose an option.", [
-      {
-        text: "Take Photo",
-        onPress: () => openCamera(),
-      },
-      {
-        text: "Choose from Library",
-        onPress: () => openLibrary(),
-      },
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-    ]);
-  };
-
-  const openCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Camera access is needed to take a photo.",
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
-  };
-
-  const openLibrary = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "Photo library access is needed to select an image.",
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    setValue("imageUri", result.assets[0].uri, { shouldValidate: true });
-  };
+  const { pickImage } = useImagePicker((uri) =>
+    setValue("imageUri", uri, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    }),
+  );
 
   const onSubmit = async ({
     name,
@@ -126,8 +67,6 @@ export default function Nutrition() {
     consumedAt,
   }: NutritionLogFormValues) => {
     try {
-      setLogging(true);
-
       const imageUrl =
         imageUri !== null ? await uploadToCloudinary(imageUri) : null;
 
@@ -150,14 +89,12 @@ export default function Nutrition() {
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Something went wrong",
+        text1: "Couldn't log calories",
         text2: error instanceof Error ? error.message : "Please try again.",
         topOffset: insets.top + 16,
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setLogging(false);
     }
   };
 
@@ -182,10 +119,9 @@ export default function Nutrition() {
                 <Pressable
                   onPress={pickImage}
                   className={cn(
-                    "flex-1 items-center justify-center overflow-hidden rounded-2xl border",
-                    field.value !== null
-                      ? "border-transparent"
-                      : "border-dashed border-border bg-muted",
+                    "flex-1 items-center justify-center overflow-hidden rounded-2xl",
+                    field.value === null &&
+                      "border border-dashed border-border bg-muted",
                   )}
                 >
                   {field.value !== null ? (
@@ -340,11 +276,11 @@ export default function Nutrition() {
           onPress={handleSubmit(onSubmit)}
           className={cn(
             "items-center rounded-xl bg-primary p-4 active:opacity-80",
-            logging && "opacity-50",
+            formState.isSubmitting && "opacity-50",
           )}
-          disabled={logging}
+          disabled={formState.isSubmitting}
         >
-          {logging ? (
+          {formState.isSubmitting ? (
             <ActivityIndicator color={theme.primaryForeground} />
           ) : (
             <ThemedText className="font-semibold text-primary-foreground">
