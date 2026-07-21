@@ -3,6 +3,7 @@ import ThemedTextInput from "@/components/ThemedTextInput";
 import useTheme from "@/hooks/useTheme";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/nativewind";
+import { SignUpFormValues, signUpSchema } from "@/lib/zodSchema";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -18,21 +19,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { z } from "zod";
-
-const signUpSchema = z
-  .object({
-    name: z.string().min(1, "Name is required"),
-    email: z.email("Enter a valid email"),
-    password: z.string().min(8, "At least 8 characters"),
-    confirmPassword: z.string().min(1, "Confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type SignUpForm = z.infer<typeof signUpSchema>;
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,12 +31,16 @@ export default function SignUp() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const { control, handleSubmit, formState } = useForm<SignUpForm>({
+  const { control, handleSubmit, formState } = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
-  const signUpWithEmail = async ({ name, email, password }: SignUpForm) => {
+  const signUpWithEmail = async ({
+    name,
+    email,
+    password,
+  }: SignUpFormValues) => {
     try {
       setFormError(null);
       setLoading("email");
@@ -329,7 +319,7 @@ export default function SignUp() {
 
           <Pressable
             className={cn(
-              "p-4 bg-primary rounded-xl items-center justify-center",
+              "p-4 bg-primary rounded-xl items-center justify-center active:opacity-80",
               loading !== null && "opacity-50",
             )}
             onPress={handleSubmit(signUpWithEmail)}
@@ -357,7 +347,7 @@ export default function SignUp() {
         <View className="gap-4">
           <Pressable
             className={cn(
-              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2",
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2 active:opacity-80",
               loading !== null && loading !== "google" && "opacity-50",
             )}
             onPress={signUpWithGoogle}
@@ -381,7 +371,7 @@ export default function SignUp() {
 
           <Pressable
             className={cn(
-              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2",
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2 active:opacity-80",
               loading !== null && loading !== "apple" && "opacity-50",
             )}
             onPress={signUpWithApple}

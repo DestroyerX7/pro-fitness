@@ -224,7 +224,7 @@ export default function Login() {
 
           <Pressable
             className={cn(
-              "p-4 bg-primary rounded-xl items-center justify-center",
+              "p-4 bg-primary rounded-xl items-center justify-center active:opacity-80",
               loading !== null && "opacity-50",
             )}
             onPress={handleSubmit(loginWithEmail)}
@@ -253,7 +253,7 @@ export default function Login() {
         <View className="gap-4">
           <Pressable
             className={cn(
-              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2",
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2 active:opacity-80",
               loading !== null && loading !== "google" && "opacity-50",
             )}
             onPress={loginWithGoogle}
@@ -278,7 +278,7 @@ export default function Login() {
 
           <Pressable
             className={cn(
-              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2",
+              "p-4 bg-background rounded-xl border border-border flex-row items-center justify-center gap-2 active:opacity-80",
               loading !== null && loading !== "apple" && "opacity-50",
             )}
             onPress={loginWithApple}

@@ -3,10 +3,12 @@ import ThemedText from "@/components/ThemedText";
 import useTheme from "@/hooks/useTheme";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/nativewind";
-import { useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const optLength = 6;
 
 export default function VerifyEmail() {
   const [otp, setOtp] = useState("");
@@ -18,25 +20,37 @@ export default function VerifyEmail() {
   const insets = useSafeAreaInsets();
 
   const verify = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { error: otpError } = await authClient.emailOtp.verifyEmail({
-      email,
-      otp,
-    });
+      const { error } = await authClient.emailOtp.verifyEmail({
+        email,
+        otp,
+      });
 
-    if (otpError !== null) {
-      setError(otpError.message ?? "Couldn't verify email.");
+      if (error !== null) {
+        setError(error.message ?? "Couldn't verify email.");
+      }
+    } catch {
+      setError("Couldn't verify email.");
+    } finally {
       setLoading(false);
-      return;
     }
   };
 
   const resendOtp = async () => {
-    await authClient.emailOtp.sendVerificationOtp({
-      email,
-      type: "email-verification",
-    });
+    try {
+      const { error } = await authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: "email-verification",
+      });
+
+      if (error !== null) {
+        setError(error.message ?? "Couldn't resend code.");
+      }
+    } catch {
+      setError("Couldn't resend code.");
+    }
   };
 
   return (
@@ -46,7 +60,9 @@ export default function VerifyEmail() {
         paddingTop: insets.top + 16,
         paddingBottom: insets.bottom + 16,
         paddingHorizontal: 16,
+        justifyContent: "center",
       }}
+      showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
       <View className="gap-1 mb-8">
@@ -72,9 +88,9 @@ export default function VerifyEmail() {
           onPress={verify}
           className={cn(
             "p-4 bg-primary rounded-xl active:opacity-80",
-            loading && "opacity-50",
+            (otp.length !== optLength || loading) && "opacity-50",
           )}
-          disabled={loading}
+          disabled={otp.length !== optLength || loading}
         >
           {loading ? (
             <ActivityIndicator color={theme.primaryForeground} />
@@ -88,10 +104,16 @@ export default function VerifyEmail() {
         <View className="flex-row justify-center items-center gap-1">
           <ThemedText>Didn&apos;t recieve a OTP?</ThemedText>
 
-          <Pressable onPress={resendOtp}>
+          <Pressable onPress={resendOtp} className="active:opacity-80">
             <ThemedText className="text-primary font-medium">Resend</ThemedText>
           </Pressable>
         </View>
+
+        <Link href="/(auth)/sign-up">
+          <ThemedText className="text-muted-foreground text-center">
+            ← Back to sign up
+          </ThemedText>
+        </Link>
       </View>
     </ScrollView>
   );

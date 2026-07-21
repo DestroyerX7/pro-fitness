@@ -211,14 +211,21 @@ export default function Scan() {
             </Pressable>
           </>
         ) : (
-          <Pressable
-            className="p-4 bg-primary rounded-xl active:opacity-80"
-            onPress={requestPermission}
-          >
-            <ThemedText className="text-primary-foreground font-semibold">
-              Grant Permission
+          <>
+            <ThemedText className="text-sm text-muted-foreground text-center">
+              We use your camera to scan product barcodes. Tap Continue to allow
+              camera access on the next screen.
             </ThemedText>
-          </Pressable>
+
+            <Pressable
+              className="p-4 bg-primary rounded-xl active:opacity-80"
+              onPress={requestPermission}
+            >
+              <ThemedText className="text-primary-foreground font-semibold">
+                Continue
+              </ThemedText>
+            </Pressable>
+          </>
         )}
       </View>
     );

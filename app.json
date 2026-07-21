@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pro Fitness",
     "slug": "pro-fitness",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "profitness",
@@ -53,7 +53,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Pro Fitness to access your camera to take pictures and scan barcodes"
+          "cameraPermission": "Allow Pro Fitness to access your camera to take pictures and scan product barcodes"
         }
       ],
       "expo-font",

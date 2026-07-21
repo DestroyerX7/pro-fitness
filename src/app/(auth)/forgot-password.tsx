@@ -12,7 +12,7 @@ import {
 } from "@/lib/zodSchema";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, router } from "expo-router";
+import { Link } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -196,7 +196,13 @@ function EnterOtp({
 
   const resendOtp = async () => {
     try {
-      await authClient.emailOtp.requestPasswordReset({ email });
+      const { error } = await authClient.emailOtp.requestPasswordReset({
+        email,
+      });
+
+      if (error !== null) {
+        setError(error.message ?? "Couldn't resend code.");
+      }
     } catch {
       setError("Couldn't resend code.");
     }
@@ -253,7 +259,7 @@ function EnterOtp({
         <View className="flex-row justify-center items-center gap-1">
           <ThemedText>Didn&apos;t recieve a OTP?</ThemedText>
 
-          <Pressable onPress={resendOtp}>
+          <Pressable onPress={resendOtp} className="active:opacity-80">
             <ThemedText className="text-primary font-medium">Resend</ThemedText>
           </Pressable>
         </View>
@@ -307,6 +313,7 @@ function ResetPassword({
         setFormError(
           error.message ?? "Something went wrong. Please try again.",
         );
+
         return;
       }
 
@@ -528,14 +535,13 @@ export default function ForgotPasswordFlow() {
           </ThemedText>
         </View>
 
-        <Pressable
-          onPress={() => router.push("/(auth)")}
-          className="p-4 bg-primary rounded-xl items-center justify-center"
-        >
-          <ThemedText className="text-primary-foreground font-semibold">
-            Login
-          </ThemedText>
-        </Pressable>
+        <Link href="/(auth)" asChild>
+          <Pressable className="p-4 bg-primary rounded-xl items-center justify-center active:opacity-80">
+            <ThemedText className="text-primary-foreground font-semibold">
+              Login
+            </ThemedText>
+          </Pressable>
+        </Link>
       </ScrollView>
     </KeyboardAvoidingView>
   );

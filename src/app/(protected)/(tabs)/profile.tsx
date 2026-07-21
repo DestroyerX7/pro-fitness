@@ -81,10 +81,7 @@ export default function Profile() {
         <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
       }
     >
-      <Pressable
-        onPress={() => router.push("/(protected)/edit/profile")}
-        className="flex-row gap-4 items-center"
-      >
+      <View className="flex-row gap-4 items-center">
         <Pressable onPress={pickImage}>
           {user.image !== null ? (
             <Image
@@ -100,14 +97,25 @@ export default function Profile() {
           )}
         </Pressable>
 
-        <View>
-          <ThemedText className="text-4xl font-bold">{user.name}</ThemedText>
+        <Pressable
+          onPress={() => router.push("/(protected)/edit/profile")}
+          className="flex-1 flex-row items-center justify-between"
+        >
+          <View className="flex-1">
+            <ThemedText className="text-4xl font-bold">{user.name}</ThemedText>
 
-          <ThemedText className="text-muted-foreground">
-            {user.email}
-          </ThemedText>
-        </View>
-      </Pressable>
+            <ThemedText className="text-muted-foreground">
+              {user.email}
+            </ThemedText>
+          </View>
+
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={32}
+            color={theme.mutedForeground}
+          />
+        </Pressable>
+      </View>
 
       <Card className="gap-4">
         <ThemedText className="text-2xl font-bold">Profile Info</ThemedText>
