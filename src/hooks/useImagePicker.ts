@@ -16,7 +16,6 @@ export function useImagePicker(onImageSelected: (uri: string) => void) {
 
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
-      quality: 1,
     });
 
     if (result.canceled) {
@@ -40,7 +39,6 @@ export function useImagePicker(onImageSelected: (uri: string) => void) {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
-      quality: 1,
     });
 
     if (result.canceled) {

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pro Fitness",
     "slug": "pro-fitness",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "profitness",
@@ -53,7 +53,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Pro Fitness to access your camera to take pictures and scan product barcodes"
+          "cameraPermission": "Pro Fitness uses your camera so you can take photos for calorie logs, scan product barcodes, and update your profile picture."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Pro Fitness uses your photo library so you can attach images to calorie logs and update your profile picture."
         }
       ],
       "expo-font",

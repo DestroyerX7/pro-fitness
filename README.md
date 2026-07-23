@@ -1,6 +1,6 @@
 # Pro Fitness
 
-A cross-platform fitness app built with Expo that helps you track your calories, log workout durations, and set personal health goals.
+A cross-platform fitness app built with Expo that helps you track your calories, log workouts, and set personal health goals.
 
 ## Features
 
@@ -117,7 +117,7 @@ eas build --platform ios --profile preview
 eas build --platform ios --profile production
 ```
 
-### Submit production Build (iOS)
+### Submit Production Build (iOS)
 
 ```bash
 eas submit --platform ios

@@ -197,8 +197,8 @@ export default function Scan() {
         {status !== null && status.canAskAgain === false ? (
           <>
             <ThemedText className="text-sm text-muted-foreground text-center">
-              You've previously denied camera access. Enable it in Settings to
-              continue.
+              You&apos;ve previously denied camera access. Enable it in Settings
+              to continue.
             </ThemedText>
 
             <Pressable
@@ -213,7 +213,7 @@ export default function Scan() {
         ) : (
           <>
             <ThemedText className="text-sm text-muted-foreground text-center">
-              We use your camera to scan product barcodes. Tap Continue to allow
+              Use your camera to scan product barcodes. Tap Continue to allow
               camera access on the next screen.
             </ThemedText>
 
